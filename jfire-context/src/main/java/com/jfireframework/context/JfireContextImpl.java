@@ -38,6 +38,7 @@ import com.jfireframework.context.bean.impl.OuterEntityBean;
 import com.jfireframework.context.bean.load.LoadBy;
 import com.jfireframework.context.config.BeanInfo;
 import com.jfireframework.context.config.ContextConfig;
+import com.jfireframework.context.config.Profile;
 
 public class JfireContextImpl implements JfireContext
 {
@@ -50,6 +51,8 @@ public class JfireContextImpl implements JfireContext
     private ClassLoader           classLoader = JfireContextImpl.class.getClassLoader();
     private BeanUtil              beanUtil    = new BeanUtil();
     private Map<String, String>   properties  = new HashMap<String, String>();
+    private Profile[]             profiles    = new Profile[0];
+    private String                activeProfile;
     
     public JfireContextImpl()
     {
@@ -98,8 +101,10 @@ public class JfireContextImpl implements JfireContext
             /** 将配置文件的内容，以json方式读取，并且得到json对象 */
             ContextConfig contextConfig = JsonTool.read(ContextConfig.class, config);
             addPackageNames(contextConfig.getPackageNames());
-            readProperties(contextConfig.getProperties());
             handleBeanInfos(contextConfig.getBeans());
+            readProperties(contextConfig.getProperties());
+            profiles = contextConfig.getProfiles();
+            activeProfile = contextConfig.getActiveProfile();
         }
         catch (ClassNotFoundException e)
         {
@@ -221,6 +226,15 @@ public class JfireContextImpl implements JfireContext
     public void initContext()
     {
         addSingletonEntity(JfireContext.class.getName(), this);
+        if (StringUtil.isNotBlank(activeProfile))
+        {
+            if (activeProfile.startsWith("${"))
+            {
+                String key = activeProfile.substring(2, activeProfile.length() - 1);
+                activeProfile = properties.get(key);
+            }
+            activeProfile(activeProfile);
+        }
         init = true;
         replaceValueFromPropertiesToBeancfg();
         beanUtil.buildBean(classNames);
@@ -535,5 +549,22 @@ public class JfireContextImpl implements JfireContext
                 this.properties.put((String) entry.getKey(), (String) entry.getValue());
             }
         }
+    }
+    
+    @Override
+    public void activeProfile(String name)
+    {
+        Verify.False(init, "只能在初始化之前激活配置");
+        for (Profile each : profiles)
+        {
+            if (each.getName().equals(name))
+            {
+                addPackageNames(each.getPackageNames());
+                addBeanInfo(each.getBeans());
+                readProperties(each.getProperties());
+                return;
+            }
+        }
+        throw new UnSupportException("未发现名称为:" + name + "的配置");
     }
 }

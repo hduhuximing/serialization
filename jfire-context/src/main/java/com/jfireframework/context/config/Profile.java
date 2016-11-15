@@ -1,31 +1,20 @@
 package com.jfireframework.context.config;
 
-public class ContextConfig
+public class Profile
 {
+    private String     name;
     private String[]   packageNames = new String[0];
     private BeanInfo[] beans        = new BeanInfo[0];
     private String[]   properties   = new String[0];
-    private Profile[]  profiles     = new Profile[0];
-    private String     activeProfile;
     
-    public String getActiveProfile()
+    public String getName()
     {
-        return activeProfile;
+        return name;
     }
     
-    public void setActiveProfile(String activeProfile)
+    public void setName(String name)
     {
-        this.activeProfile = activeProfile;
-    }
-    
-    public String[] getProperties()
-    {
-        return properties;
-    }
-    
-    public void setProperties(String[] properties)
-    {
-        this.properties = properties;
+        this.name = name;
     }
     
     public String[] getPackageNames()
@@ -48,14 +37,14 @@ public class ContextConfig
         this.beans = beans;
     }
     
-    public Profile[] getProfiles()
+    public String[] getProperties()
     {
-        return profiles;
+        return properties;
     }
     
-    public void setProfiles(Profile[] profiles)
+    public void setProperties(String[] properties)
     {
-        this.profiles = profiles;
+        this.properties = properties;
     }
     
 }

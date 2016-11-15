@@ -6,7 +6,7 @@ public class BeanInfo
 {
     private String                  beanName;
     private String                  className;
-    private boolean                 prototype;
+    private boolean                 prototype    = false;
     private HashMap<String, String> params       = new HashMap<String, String>();
     private HashMap<String, String> dependencies = new HashMap<String, String>();
     private String                  postConstructMethod;

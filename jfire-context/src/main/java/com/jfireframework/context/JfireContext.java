@@ -128,4 +128,11 @@ public interface JfireContext
     public void addSingletonEntity(String beanName, Object entity);
     
     public void setClassLoader(ClassLoader classLoader);
+    
+    /**
+     * 激活某一个配置
+     * 
+     * @param name
+     */
+    public void activeProfile(String name);
 }
