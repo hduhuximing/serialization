@@ -1,5 +1,6 @@
 package com.jfireframework.context.bean.field.param;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -23,6 +24,7 @@ public abstract class AbstractParamField implements ParamField
         offset = unsafe.objectFieldOffset(field);
     }
     
+    @Override
     public void setParam(Object entity)
     {
         unsafe.putObject(entity, offset, value);
@@ -79,6 +81,10 @@ public abstract class AbstractParamField implements ParamField
         {
             return new ClassField(field, value, classLoader);
         }
+        else if (fieldType == File.class)
+        {
+            return new FileField(field, value);
+        }
         else
         {
             throw new RuntimeException(StringUtil.format("属性类型{}还未支持，请联系框架作者eric@jfire.com", fieldType));
@@ -95,6 +101,7 @@ public abstract class AbstractParamField implements ParamField
             this.value = Boolean.parseBoolean(value);
         }
         
+        @Override
         public void setParam(Object entity)
         {
             unsafe.putBoolean(entity, offset, value);
@@ -111,6 +118,7 @@ public abstract class AbstractParamField implements ParamField
             this.value = Float.parseFloat(value);
         }
         
+        @Override
         public void setParam(Object entity)
         {
             unsafe.putFloat(entity, offset, value);
@@ -155,6 +163,7 @@ public abstract class AbstractParamField implements ParamField
             this.value = Integer.parseInt(value);
         }
         
+        @Override
         public void setParam(Object entity)
         {
             unsafe.putInt(entity, offset, value);
@@ -171,6 +180,7 @@ public abstract class AbstractParamField implements ParamField
             this.value = Long.parseLong(value);
         }
         
+        @Override
         public void setParam(Object entity)
         {
             unsafe.putLong(entity, offset, value);
@@ -316,4 +326,14 @@ public abstract class AbstractParamField implements ParamField
         
     }
     
+    static class FileField extends AbstractParamField
+    {
+        
+        public FileField(Field field, String value)
+        {
+            super(field, value);
+            this.value = new File(value);
+        }
+        
+    }
 }
