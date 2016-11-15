@@ -32,7 +32,7 @@ public class DispathServletHelper
         this.servletContext = servletContext;
         staticResourceDispatcher = getStaticResourceDispatcher();
         this.config = config;
-        encode = config.getWString("encode") == null ? "UTF8" : config.getWString("encode");
+        encode = config.getWString("encode") == null ? "utf-8" : config.getWString("encode");
         devMode = config.contains("devMode") ? config.getBoolean("devMode") : false;
         if (devMode)
         {

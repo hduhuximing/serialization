@@ -73,7 +73,7 @@ public class Action
                     contentType = ContentType.HTML;
                     break;
                 case String:
-                    contentType = ContentType.JSON;
+                    contentType = ContentType.STRING;
                     break;
                 case Jsp:
                     contentType = ContentType.HTML;
