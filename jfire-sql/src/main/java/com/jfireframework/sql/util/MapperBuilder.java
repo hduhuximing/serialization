@@ -45,11 +45,9 @@ public class MapperBuilder
     private ClassPool         classPool = ClassPool.getDefault();
     private final MetaContext metaContext;
     private TransferContext   transferContext;
-    private final boolean     resultFieldCache;
     
-    public MapperBuilder(MetaContext metaContext, TransferContext transferContext, boolean resultFieldCache)
+    public MapperBuilder(MetaContext metaContext, TransferContext transferContext)
     {
-        this.resultFieldCache = resultFieldCache;
         this.transferContext = transferContext;
         this.metaContext = metaContext;
         ClassPool.doPruning = true;
@@ -125,9 +123,7 @@ public class MapperBuilder
         boolean isList = (List.class.isAssignableFrom(method.getReturnType()) ? true : false);
         if (isList)
         {
-            Verify.True(
-                    ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0].getClass().equals(Class.class), "方法{}.{}返回类型是泛型，不允许，请指定具体的类型", method.getDeclaringClass(), method.getName()
-            );
+            Verify.True(((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0].getClass().equals(Class.class), "方法{}.{}返回类型是泛型，不允许，请指定具体的类型", method.getDeclaringClass(), method.getName());
             Type returnParamType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
             // 确认方法放回不是List<T>的形式
             Verify.False(returnParamType instanceof WildcardType, "接口的返回类型不能是泛型，请检查{}.{}", method.getDeclaringClass().getName(), method.getName());
@@ -147,7 +143,7 @@ public class MapperBuilder
             if (isList)
             {
                 Type returnParamType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                transferContext.add((Class<?>) returnParamType, resultFieldCache);
+                transferContext.add((Class<?>) returnParamType);
                 methodBody.append("if(list.size()==0){");
                 if (isPage)
                 {
@@ -175,7 +171,7 @@ public class MapperBuilder
             else
             {
                 Class<?> returnType = method.getReturnType();
-                transferContext.add(returnType, resultFieldCache);
+                transferContext.add(returnType);
                 methodBody.append("if(list.size()==0){");
                 methodBody.append("return ($r)session.query(").append(returnType.getName()).append(".class,sql")//
                         .append(",emptyParams);}\n");
@@ -191,7 +187,7 @@ public class MapperBuilder
             if (isList)
             {
                 Type returnParamType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                transferContext.add((Class<?>) returnParamType, resultFieldCache);
+                transferContext.add((Class<?>) returnParamType);
                 if (isPage)
                 {
                     methodBody.append("return ($r)session.queryList(").append(((Class<?>) returnParamType).getName()).append(".class,\"")//
@@ -206,7 +202,7 @@ public class MapperBuilder
             else
             {
                 Class<?> returnType = method.getReturnType();
-                transferContext.add(returnType, resultFieldCache);
+                transferContext.add(returnType);
                 methodBody.append("return ($r)session.query(").append(returnType.getName()).append(".class,\"")//
                         .append(sqlContext.getSql()).append("\",");
             }

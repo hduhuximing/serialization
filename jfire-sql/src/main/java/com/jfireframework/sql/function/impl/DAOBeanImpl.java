@@ -18,7 +18,7 @@ import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.sql.annotation.FindBy;
 import com.jfireframework.sql.annotation.TableEntity;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.extra.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.function.Dao;
 import com.jfireframework.sql.function.LockMode;
@@ -57,7 +57,7 @@ public class DAOBeanImpl<T> implements Dao<T>
     {
         this.preInterceptors = preInterceptors;
         this.entityClass = (Class<T>) metaData.getEntityClass();
-        NameStrategy nameStrategy = metaData.getNameStrategy();
+        ColNameStrategy nameStrategy = metaData.getColNameStrategy();
         tableName = entityClass.getAnnotation(TableEntity.class).name();
         MapField[] allMapFields = buildMapfields(metaData.getFieldInfos(), nameStrategy);
         for (MapField mapField : allMapFields)
@@ -129,12 +129,12 @@ public class DAOBeanImpl<T> implements Dao<T>
         
     }
     
-    private MapField[] buildMapfields(FieldInfo[] infos, NameStrategy nameStrategy)
+    private MapField[] buildMapfields(FieldInfo[] infos, ColNameStrategy colNameStrategy)
     {
         List<MapField> list = new ArrayList<MapField>(infos.length);
         for (FieldInfo each : infos)
         {
-            list.add(MapFieldBuilder.buildMapField(each.getField(), nameStrategy));
+            list.add(MapFieldBuilder.buildMapField(each.getField(), colNameStrategy));
         }
         return list.toArray(new MapField[list.size()]);
     }

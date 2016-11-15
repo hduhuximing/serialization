@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.sql.annotation.Column;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 import sun.misc.Unsafe;
 
@@ -24,7 +24,7 @@ public abstract class AbstractMapField implements MapField
     protected final Field         field;
     protected int                 length;
     
-    public AbstractMapField(Field field, NameStrategy nameStrategy)
+    public AbstractMapField(Field field, ColNameStrategy colNameStrategy)
     {
         offset = unsafe.objectFieldOffset(field);
         this.field = field;
@@ -37,7 +37,7 @@ public abstract class AbstractMapField implements MapField
             }
             else
             {
-                dbColName = nameStrategy.toDbName(field.getName());
+                dbColName = colNameStrategy.toDbName(field.getName());
             }
             loadIgnore = column.loadIgnore();
             saveIgnore = column.saveIgnore();
@@ -48,7 +48,7 @@ public abstract class AbstractMapField implements MapField
             length = -1;
             saveIgnore = false;
             loadIgnore = false;
-            dbColName = nameStrategy.toDbName(field.getName());
+            dbColName = colNameStrategy.toDbName(field.getName());
         }
     }
     

@@ -5,14 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 
 public class TimeField extends AbstractMapField
 {
     
-    public TimeField(Field field, NameStrategy nameStrategy)
+    public TimeField(Field field, ColNameStrategy colNameStrategy)
     {
-        super(field, nameStrategy);
+        super(field, colNameStrategy);
     }
     
     @Override

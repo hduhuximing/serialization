@@ -6,14 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 
 public class DateField extends AbstractMapField
 {
     
-    public DateField(Field field, NameStrategy nameStrategy)
+    public DateField(Field field, ColNameStrategy colNameStrategy)
     {
-        super(field, nameStrategy);
+        super(field, colNameStrategy);
     }
     
     @Override

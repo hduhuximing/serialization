@@ -12,7 +12,7 @@ import com.jfireframework.sql.annotation.Column;
 import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.SqlIgnore;
 import com.jfireframework.sql.annotation.TableEntity;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 
 public class TableMetaData
 {
@@ -21,7 +21,7 @@ public class TableMetaData
     private final FieldInfo           idInfo;
     private final Class<?>            ckass;
     private final Map<String, String> fieldNameMap   = new HashMap<String, String>();
-    private final NameStrategy        nameStrategy;
+    private final ColNameStrategy     colNameStrategy;
     private final Map<String, Field>  staticFieldMap = new HashMap<String, Field>();
     private final Map<String, Field>  enumFieldMap   = new HashMap<String, Field>();
     
@@ -34,7 +34,7 @@ public class TableMetaData
         private final boolean loadIgnore;
         private final boolean saveIgnore;
         
-        public FieldInfo(Field field, NameStrategy nameStrategy)
+        public FieldInfo(Field field, ColNameStrategy colNameStrategy)
         {
             fieldName = field.getName();
             this.field = field;
@@ -47,7 +47,7 @@ public class TableMetaData
                 }
                 else
                 {
-                    dbColName = nameStrategy.toDbName(field.getName());
+                    dbColName = colNameStrategy.toDbName(field.getName());
                 }
                 length = field.getAnnotation(Column.class).length();
                 loadIgnore = column.loadIgnore();
@@ -55,7 +55,7 @@ public class TableMetaData
             }
             else
             {
-                dbColName = nameStrategy.toDbName(field.getName());
+                dbColName = colNameStrategy.toDbName(field.getName());
                 length = -1;
                 loadIgnore = false;
                 saveIgnore = false;
@@ -94,10 +94,10 @@ public class TableMetaData
         
     }
     
-    public TableMetaData(Class<?> ckass, NameStrategy nameStrategy)
+    public TableMetaData(Class<?> ckass, ColNameStrategy nameStrategy)
     {
         this.ckass = ckass;
-        this.nameStrategy = nameStrategy;
+        this.colNameStrategy = nameStrategy;
         TableEntity entity = ckass.getAnnotation(TableEntity.class);
         tableName = entity.name();
         List<FieldInfo> list = new LinkedList<FieldInfo>();
@@ -159,9 +159,9 @@ public class TableMetaData
         }
     }
     
-    public NameStrategy getNameStrategy()
+    public ColNameStrategy getColNameStrategy()
     {
-        return nameStrategy;
+        return colNameStrategy;
     }
     
     public String getTableName()

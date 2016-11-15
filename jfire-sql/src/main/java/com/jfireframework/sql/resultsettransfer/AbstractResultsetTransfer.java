@@ -11,10 +11,10 @@ import java.util.Map;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
+import com.jfireframework.sql.annotation.NameStrategy;
 import com.jfireframework.sql.annotation.SqlIgnore;
-import com.jfireframework.sql.annotation.TableEntity;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.extra.dbstructure.DefaultNameStrategy;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 import com.jfireframework.sql.resultsettransfer.field.MapFieldBuilder;
 
@@ -30,17 +30,11 @@ public abstract class AbstractResultsetTransfer<T> implements ResultSetTransfer<
     public AbstractResultsetTransfer(Class<T> entityClass)
     {
         this.entityClass = entityClass;
-        NameStrategy nameStrategy;
+        ColNameStrategy colNameStrategy;
         try
         {
-            if (entityClass.isAnnotationPresent(TableEntity.class))
-            {
-                nameStrategy = entityClass.getAnnotation(TableEntity.class).nameStrategy().newInstance();
-            }
-            else
-            {
-                nameStrategy = new DefaultNameStrategy();
-            }
+            Class<? extends ColNameStrategy> ckass = (entityClass.isAnnotationPresent(NameStrategy.class) ? entityClass.getAnnotation(NameStrategy.class).value() : DefaultNameStrategy.class);
+            colNameStrategy = ckass.newInstance();
         }
         catch (Exception e)
         {
@@ -49,15 +43,11 @@ public abstract class AbstractResultsetTransfer<T> implements ResultSetTransfer<
         List<MapField> list = new ArrayList<MapField>();
         for (Field each : ReflectUtil.getAllFields(entityClass))
         {
-            if (
-                each.isAnnotationPresent(SqlIgnore.class) || Map.class.isAssignableFrom(each.getType()) || List.class.isAssignableFrom(
-                        each.getType()
-                ) || each.getType().isInterface() || Modifier.isStatic(each.getModifiers())
-            )
+            if (each.isAnnotationPresent(SqlIgnore.class) || Map.class.isAssignableFrom(each.getType()) || List.class.isAssignableFrom(each.getType()) || each.getType().isInterface() || Modifier.isStatic(each.getModifiers()))
             {
                 continue;
             }
-            list.add(MapFieldBuilder.buildMapField(each, nameStrategy));
+            list.add(MapFieldBuilder.buildMapField(each, colNameStrategy));
         }
         mapFields = new HashMap<String, MapField>();
         for (MapField each : list)

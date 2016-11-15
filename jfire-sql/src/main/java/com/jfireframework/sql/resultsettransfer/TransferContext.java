@@ -9,11 +9,11 @@ public class TransferContext
 {
     private IdentityHashMap<Class<?>, ResultSetTransfer<?>> transferMap = new IdentityHashMap<Class<?>, ResultSetTransfer<?>>();
     
-    public void add(Class<?> type, boolean resultFieldCache)
+    public void add(Class<?> type)
     {
         if (transferMap.get(type) == null)
         {
-            transferMap.put(type, build(type, resultFieldCache));
+            transferMap.put(type, build(type));
         }
     }
     
@@ -23,7 +23,7 @@ public class TransferContext
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private ResultSetTransfer<?> build(Class<?> type, boolean resultFieldCache)
+    private ResultSetTransfer<?> build(Class<?> type)
     {
         if (type == Integer.class || type == int.class)
         {
@@ -75,7 +75,7 @@ public class TransferContext
         }
         else
         {
-            return new BeanTransfer(type, resultFieldCache);
+            return new BeanTransfer(type);
         }
     }
 }

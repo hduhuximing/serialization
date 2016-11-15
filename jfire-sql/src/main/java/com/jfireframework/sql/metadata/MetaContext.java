@@ -5,14 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.jfireframework.sql.annotation.NameStrategy;
 import com.jfireframework.sql.annotation.TableEntity;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
+import com.jfireframework.sql.extra.dbstructure.DefaultNameStrategy;
 
 public class MetaContext
 {
-    private final Map<String, TableMetaData>                       entityMap = new HashMap<String, TableMetaData>();
-    private final TableMetaData[]                                  metaDatas;
-    private final Map<Class<? extends NameStrategy>, NameStrategy> map       = new HashMap<Class<? extends NameStrategy>, NameStrategy>();
+    private final Map<String, TableMetaData>                             entityMap = new HashMap<String, TableMetaData>();
+    private final TableMetaData[]                                        metaDatas;
+    private final Map<Class<? extends ColNameStrategy>, ColNameStrategy> map       = new HashMap<Class<? extends ColNameStrategy>, ColNameStrategy>();
     
     public MetaContext(Set<Class<?>> set) throws ClassNotFoundException, InstantiationException, IllegalAccessException
     {
@@ -21,8 +23,8 @@ public class MetaContext
         {
             if (each.isAnnotationPresent(TableEntity.class))
             {
-                Class<? extends NameStrategy> ckass = each.getAnnotation(TableEntity.class).nameStrategy();
-                NameStrategy nameStrategy = map.get(ckass);
+                Class<? extends ColNameStrategy> ckass = (each.isAnnotationPresent(NameStrategy.class) ? each.getAnnotation(NameStrategy.class).value() : DefaultNameStrategy.class);
+                ColNameStrategy nameStrategy = map.get(ckass);
                 if (nameStrategy == null)
                 {
                     nameStrategy = ckass.newInstance();

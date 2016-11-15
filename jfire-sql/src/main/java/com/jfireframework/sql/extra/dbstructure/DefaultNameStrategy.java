@@ -2,7 +2,7 @@ package com.jfireframework.sql.extra.dbstructure;
 
 import com.jfireframework.baseutil.collection.StringCache;
 
-public class DefaultNameStrategy implements NameStrategy
+public class DefaultNameStrategy implements ColNameStrategy
 {
     
     @Override

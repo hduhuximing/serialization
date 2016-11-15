@@ -18,9 +18,7 @@ import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.sql.annotation.Sql;
-import com.jfireframework.sql.extra.dbstructure.DefaultNameStrategy;
 import com.jfireframework.sql.extra.dbstructure.MariaDBStructure;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
 import com.jfireframework.sql.extra.dbstructure.Structure;
 import com.jfireframework.sql.extra.interceptor.SqlInterceptor;
 import com.jfireframework.sql.extra.interceptor.SqlPreInterceptor;
@@ -42,21 +40,19 @@ public class SessionFactoryImpl implements SessionFactory
     @Resource
     @CanBeNull
     protected ClassLoader                       classLoader;
-    protected static ThreadLocal<SqlSession>    sessionLocal     = new ThreadLocal<SqlSession>();
+    protected static ThreadLocal<SqlSession>    sessionLocal    = new ThreadLocal<SqlSession>();
     protected String                            scanPackage;
     // 如果值是create，则会创建表。
-    protected String                            tableMode        = "none";
-    protected IdentityHashMap<Class<?>, Mapper> mappers          = new IdentityHashMap<Class<?>, Mapper>(128);
-    protected IdentityHashMap<Class<?>, Dao<?>> daos             = new IdentityHashMap<Class<?>, Dao<?>>();
-    public static NameStrategy                  nameStrategy     = new DefaultNameStrategy();
+    protected String                            tableMode       = "none";
+    protected IdentityHashMap<Class<?>, Mapper> mappers         = new IdentityHashMap<Class<?>, Mapper>(128);
+    protected IdentityHashMap<Class<?>, Dao<?>> daos            = new IdentityHashMap<Class<?>, Dao<?>>();
     protected MetaContext                       metaContext;
-    protected TransferContext                   transferContext  = new TransferContext();
-    protected boolean                           resultFieldCache = true;
+    protected TransferContext                   transferContext = new TransferContext();
     protected SqlPreInterceptor[]               preInterceptors;
     protected SqlInterceptor[]                  sqlInterceptors;
     protected PageParse                         pageParse;
     protected String                            productName;
-    protected static final Logger               logger           = ConsoleLogFactory.getLogger();
+    protected static final Logger               logger          = ConsoleLogFactory.getLogger();
     
     public SessionFactoryImpl()
     {
@@ -184,7 +180,7 @@ public class SessionFactoryImpl implements SessionFactory
         try
         {
             
-            MapperBuilder mapperBuilder = new MapperBuilder(metaContext, transferContext, resultFieldCache);
+            MapperBuilder mapperBuilder = new MapperBuilder(metaContext, transferContext);
             nextSqlInterface: for (Class<?> each : set)
             {
                 if (each.isInterface())

@@ -5,13 +5,13 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 
 public class SqlDateField extends AbstractMapField
 {
-    public SqlDateField(Field field, NameStrategy nameStrategy)
+    public SqlDateField(Field field, ColNameStrategy colNameStrategy)
     {
-        super(field, nameStrategy);
+        super(field, colNameStrategy);
     }
     
     @Override

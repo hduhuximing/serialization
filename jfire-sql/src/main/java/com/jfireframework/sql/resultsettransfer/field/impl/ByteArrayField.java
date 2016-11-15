@@ -6,14 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 
 public class ByteArrayField extends AbstractMapField
 {
     
-    public ByteArrayField(Field field, NameStrategy nameStrategy)
+    public ByteArrayField(Field field, ColNameStrategy colNameStrategy)
     {
-        super(field, nameStrategy);
+        super(field, colNameStrategy);
     }
     
     @Override

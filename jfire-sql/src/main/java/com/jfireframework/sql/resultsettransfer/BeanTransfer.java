@@ -11,30 +11,21 @@ import com.jfireframework.sql.resultsettransfer.field.MapField;
 public class BeanTransfer<T> extends AbstractResultsetTransfer<T>
 {
     private final ConcurrentHashMap<String, MapField[]> fieldCache = new ConcurrentHashMap<String, MapField[]>();
-    private final boolean                               resultFieldCache;
     
-    public BeanTransfer(Class<T> type, boolean resultFieldCache)
+    public BeanTransfer(Class<T> type)
     {
         super(type);
-        this.resultFieldCache = resultFieldCache;
     }
     
     @Override
     protected T valueOf(ResultSet resultSet, String sql) throws Exception
     {
         MapField[] fields = null;
-        if (resultFieldCache)
-        {
-            fields = fieldCache.get(sql);
-            if (fields == null)
-            {
-                fields = buildFieldsFromMetadata(resultSet.getMetaData());
-                fieldCache.put(sql, fields);
-            }
-        }
-        else
+        fields = fieldCache.get(sql);
+        if (fields == null)
         {
             fields = buildFieldsFromMetadata(resultSet.getMetaData());
+            fieldCache.put(sql, fields);
         }
         T entity = entityClass.newInstance();
         for (MapField each : fields)

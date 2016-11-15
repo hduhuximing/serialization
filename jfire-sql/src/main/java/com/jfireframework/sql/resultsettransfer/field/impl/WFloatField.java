@@ -4,14 +4,14 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 
 public class WFloatField extends AbstractMapField
 {
     
-    public WFloatField(Field field, NameStrategy nameStrategy)
+    public WFloatField(Field field, ColNameStrategy colNameStrategy)
     {
-        super(field, nameStrategy);
+        super(field, colNameStrategy);
     }
     
     @Override

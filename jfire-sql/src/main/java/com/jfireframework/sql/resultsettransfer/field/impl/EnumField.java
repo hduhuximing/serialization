@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.sql.extra.dbstructure.NameStrategy;
+import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.util.enumhandler.AbstractEnumHandler;
 import com.jfireframework.sql.util.enumhandler.EnumHandler;
 
@@ -14,9 +14,9 @@ public class EnumField extends AbstractMapField
     private final EnumHandler<?> enumHandler;
     
     @SuppressWarnings("unchecked")
-    public EnumField(Field field, NameStrategy nameStrategy)
+    public EnumField(Field field, ColNameStrategy colNameStrategy)
     {
-        super(field, nameStrategy);
+        super(field, colNameStrategy);
         Class<?> fieldType = field.getType();
         try
         {
