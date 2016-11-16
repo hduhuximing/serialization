@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * @author 林斌{erci@jfire.cn}
  * 
  */
-@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
+@Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
