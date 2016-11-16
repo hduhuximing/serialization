@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.List;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.sql.resultsettransfer.ResultSetTransfer;
-import com.jfireframework.sql.resultsettransfer.TransferContext;
 
 public class MysqlParse implements PageParse
 {
@@ -35,7 +34,7 @@ public class MysqlParse implements PageParse
     }
     
     @Override
-    public void doQuery(Object[] params, Connection connection, String sql, Class<?> type, TransferContext transferContext, Page page) throws SQLException
+    public void doQuery(Object[] params, Connection connection, String sql, ResultSetTransfer<?> transfer, Page page) throws SQLException
     {
         PreparedStatement pstat = null;
         ResultSet resultSet = null;
@@ -51,7 +50,6 @@ public class MysqlParse implements PageParse
             }
             pstat.setInt(index++, page.getStart());
             pstat.setInt(index, page.getPageSize());
-            ResultSetTransfer<?> transfer = transferContext.get(type);
             resultSet = pstat.executeQuery();
             List<?> list = transfer.transferList(resultSet, querySql);
             page.setData(list);

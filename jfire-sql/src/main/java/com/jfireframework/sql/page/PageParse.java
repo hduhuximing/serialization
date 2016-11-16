@@ -2,9 +2,9 @@ package com.jfireframework.sql.page;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.jfireframework.sql.resultsettransfer.TransferContext;
+import com.jfireframework.sql.resultsettransfer.ResultSetTransfer;
 
 public interface PageParse
 {
-    public void doQuery(Object[] params, Connection connection, String sql, Class<?> type, TransferContext transferContext, Page page) throws SQLException;
+    public void doQuery(Object[] params, Connection connection, String sql, ResultSetTransfer<?> transfer, Page page) throws SQLException;
 }

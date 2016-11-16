@@ -5,14 +5,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 
-public class BeanTransfer<T> extends AbstractResultsetTransfer<T>
+public class FixBeanTransfer<T> extends AbstractResultsetTransfer<T>
 {
-    private final ConcurrentHashMap<String, MapField[]> fieldCache = new ConcurrentHashMap<String, MapField[]>();
+    private volatile MapField[] fields;
     
-    public BeanTransfer(Class<T> type)
+    public FixBeanTransfer(Class<T> type)
     {
         super(type);
     }
@@ -20,12 +19,9 @@ public class BeanTransfer<T> extends AbstractResultsetTransfer<T>
     @Override
     protected T valueOf(ResultSet resultSet, String sql) throws Exception
     {
-        MapField[] fields = null;
-        fields = fieldCache.get(sql);
         if (fields == null)
         {
             fields = buildFieldsFromMetadata(resultSet.getMetaData());
-            fieldCache.put(sql, fields);
         }
         T entity = entityClass.newInstance();
         for (MapField each : fields)

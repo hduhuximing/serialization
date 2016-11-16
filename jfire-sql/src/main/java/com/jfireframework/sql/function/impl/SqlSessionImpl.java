@@ -17,7 +17,6 @@ import com.jfireframework.sql.function.SqlSession;
 import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.page.PageParse;
 import com.jfireframework.sql.resultsettransfer.ResultSetTransfer;
-import com.jfireframework.sql.resultsettransfer.TransferContext;
 
 public class SqlSessionImpl implements SqlSession
 {
@@ -30,9 +29,8 @@ public class SqlSessionImpl implements SqlSession
     private final SqlPreInterceptor[] preInterceptors;
     private final SqlInterceptor[]    sqlInterceptors;
     private final PageParse           pageParse;
-    private final TransferContext     transferContext;
     
-    public SqlSessionImpl(Connection connection, SessionFactory sessionFactory, SqlPreInterceptor[] preInterceptors, SqlInterceptor[] sqlInterceptors, PageParse pageParse, TransferContext transferContext)
+    public SqlSessionImpl(Connection connection, SessionFactory sessionFactory, SqlPreInterceptor[] preInterceptors, SqlInterceptor[] sqlInterceptors, PageParse pageParse)
     {
         logger.trace("打开sqlsession");
         this.connection = connection;
@@ -40,7 +38,6 @@ public class SqlSessionImpl implements SqlSession
         this.preInterceptors = preInterceptors;
         this.sqlInterceptors = sqlInterceptors;
         this.pageParse = pageParse;
-        this.transferContext = transferContext;
     }
     
     @Override
@@ -202,7 +199,7 @@ public class SqlSessionImpl implements SqlSession
     }
     
     @Override
-    public <T> T query(Class<T> type, String sql, Object... params)
+    public <T> T query(ResultSetTransfer<T> transfer, String sql, Object... params)
     {
         for (SqlPreInterceptor each : preInterceptors)
         {
@@ -231,8 +228,6 @@ public class SqlSessionImpl implements SqlSession
                 pstat.setObject(index++, each);
             }
             resultSet = pstat.executeQuery();
-            @SuppressWarnings("unchecked")
-            ResultSetTransfer<T> transfer = (ResultSetTransfer<T>) transferContext.get(type);
             return transfer.transfer(resultSet, sql);
         }
         catch (Exception e)
@@ -260,7 +255,7 @@ public class SqlSessionImpl implements SqlSession
     }
     
     @Override
-    public <T> List<T> queryList(Class<T> type, String sql, Object... params)
+    public <T> List<T> queryList(ResultSetTransfer<T> transfer, String sql, Object... params)
     {
         for (SqlPreInterceptor each : preInterceptors)
         {
@@ -289,8 +284,6 @@ public class SqlSessionImpl implements SqlSession
                 pstat.setObject(index++, each);
             }
             resultSet = pstat.executeQuery();
-            @SuppressWarnings("unchecked")
-            ResultSetTransfer<T> transfer = (ResultSetTransfer<T>) transferContext.get(type);
             return transfer.transferList(resultSet, sql);
         }
         catch (Exception e)
@@ -319,7 +312,7 @@ public class SqlSessionImpl implements SqlSession
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> List<T> queryList(Class<T> type, String sql, Page page, Object... params)
+    public <T> List<T> queryList(ResultSetTransfer<T> transfer, String sql, Page page, Object... params)
     {
         for (SqlPreInterceptor each : preInterceptors)
         {
@@ -339,7 +332,7 @@ public class SqlSessionImpl implements SqlSession
                 sql = context.getSql();
                 params = context.getParams();
             }
-            pageParse.doQuery(params, connection, sql, type, transferContext, page);
+            pageParse.doQuery(params, connection, sql, transfer, page);
             return (List<T>) page.getData();
         }
         catch (SQLException e)

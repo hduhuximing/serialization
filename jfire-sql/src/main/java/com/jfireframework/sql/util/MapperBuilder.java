@@ -27,7 +27,8 @@ import com.jfireframework.sql.metadata.MetaContext;
 import com.jfireframework.sql.metadata.TableMetaData;
 import com.jfireframework.sql.metadata.TableMetaData.FieldInfo;
 import com.jfireframework.sql.page.Page;
-import com.jfireframework.sql.resultsettransfer.TransferContext;
+import com.jfireframework.sql.resultsettransfer.ResultSetTransfer;
+import com.jfireframework.sql.resultsettransfer.TransferHelper;
 import com.jfireframework.sql.util.MapperBuilder.SqlContext.EnumHandlerInfo;
 import com.jfireframework.sql.util.enumhandler.EnumHandler;
 import com.jfireframework.sql.util.enumhandler.EnumStringHandler;
@@ -44,11 +45,10 @@ public class MapperBuilder
     private Logger            logger    = ConsoleLogFactory.getLogger();
     private ClassPool         classPool = ClassPool.getDefault();
     private final MetaContext metaContext;
-    private TransferContext   transferContext;
+    private int               fieldNo   = 1;
     
-    public MapperBuilder(MetaContext metaContext, TransferContext transferContext)
+    public MapperBuilder(MetaContext metaContext)
     {
-        this.transferContext = transferContext;
         this.metaContext = metaContext;
         ClassPool.doPruning = true;
         classPool.importPackage("com.jfireframework.sql");
@@ -96,7 +96,6 @@ public class MapperBuilder
                     if (sql.sql().startsWith("select"))
                     {
                         targetCtClass.addMethod(createQueryMethod(targetCtClass, method, sql.sql(), sql.paramNames().split(",")));
-                        
                     }
                     else
                     {
@@ -143,41 +142,41 @@ public class MapperBuilder
             if (isList)
             {
                 Type returnParamType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                transferContext.add((Class<?>) returnParamType);
+                String fieldName = addResultsetTransferField(weaveClass, TransferHelper.buildInitStr((Class<?>) returnParamType, true));
                 methodBody.append("if(list.size()==0){");
                 if (isPage)
                 {
-                    methodBody.append("return ($r)session.queryList(").append(((Class<?>) returnParamType).getName()).append(".class,")//
-                            .append("sql,$").append(method.getParameterTypes().length).append(",emptyParams);\n}");
+                    methodBody.append("return ($r)session.queryList(").append(fieldName)//
+                            .append(",sql,$").append(method.getParameterTypes().length).append(",emptyParams);\n}");
                 }
                 else
                 {
-                    methodBody.append("return ($r)session.queryList(").append(((Class<?>) returnParamType).getName()).append(".class,")//
-                            .append("sql,emptyParams);\n}");
+                    methodBody.append("return ($r)session.queryList(").append(fieldName)//
+                            .append(",sql,emptyParams);\n}");
                 }
                 methodBody.append("else{");
                 if (isPage)
                 {
-                    methodBody.append("return ($r)session.queryList(").append(((Class<?>) returnParamType).getName()).append(".class,")//
-                            .append("sql,$").append(method.getParameterTypes().length).append(",list.toArray());\n}");
+                    methodBody.append("return ($r)session.queryList(").append(fieldName)//
+                            .append(",sql,$").append(method.getParameterTypes().length).append(",list.toArray());\n}");
                 }
                 else
                 {
-                    methodBody.append("return ($r)session.queryList(").append(((Class<?>) returnParamType).getName()).append(".class,")//
-                            .append("sql,list.toArray());\n}");
+                    methodBody.append("return ($r)session.queryList(").append(fieldName)//
+                            .append(",sql,list.toArray());\n}");
                 }
                 methodBody.append("}");
             }
             else
             {
                 Class<?> returnType = method.getReturnType();
-                transferContext.add(returnType);
+                String fieldName = addResultsetTransferField(weaveClass, TransferHelper.buildInitStr(returnType, true));
                 methodBody.append("if(list.size()==0){");
-                methodBody.append("return ($r)session.query(").append(returnType.getName()).append(".class,sql")//
-                        .append(",emptyParams);}\n");
+                methodBody.append("return ($r)session.query(").append(fieldName)//
+                        .append(",sql,emptyParams);}\n");
                 methodBody.append("else{");
-                methodBody.append("return ($r)session.query(").append(returnType.getName()).append(".class,")//
-                        .append("sql,list.toArray());\n}");
+                methodBody.append("return ($r)session.query(").append(fieldName)//
+                        .append(",sql,list.toArray());\n}");
                 methodBody.append("}");
             }
         }
@@ -187,23 +186,23 @@ public class MapperBuilder
             if (isList)
             {
                 Type returnParamType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                transferContext.add((Class<?>) returnParamType);
+                String fieldName = addResultsetTransferField(weaveClass, TransferHelper.buildInitStr((Class<?>) returnParamType, false));
                 if (isPage)
                 {
-                    methodBody.append("return ($r)session.queryList(").append(((Class<?>) returnParamType).getName()).append(".class,\"")//
+                    methodBody.append("return ($r)session.queryList(").append(fieldName).append(",\"")//
                             .append(sqlContext.getSql()).append("\",$").append(method.getParameterTypes().length).append(",");
                 }
                 else
                 {
-                    methodBody.append("return ($r)session.queryList(").append(((Class<?>) returnParamType).getName()).append(".class,\"")//
+                    methodBody.append("return ($r)session.queryList(").append(fieldName).append(",\"")//
                             .append(sqlContext.getSql()).append("\",");
                 }
             }
             else
             {
                 Class<?> returnType = method.getReturnType();
-                transferContext.add(returnType);
-                methodBody.append("return ($r)session.query(").append(returnType.getName()).append(".class,\"")//
+                String fieldName = addResultsetTransferField(weaveClass, TransferHelper.buildInitStr(returnType, false));
+                methodBody.append("return ($r)session.query(").append(fieldName).append(",\"")//
                         .append(sqlContext.getSql()).append("\",");
             }
             if (sqlContext.getQueryParams().size() == 0)
@@ -234,6 +233,16 @@ public class MapperBuilder
             CtField ctField = new CtField(classPool.get(each.getHandlerType().getName()), each.getName(), ctClass);
             ctClass.addField(ctField, StringUtil.format("new {}({}.class)", each.getHandlerType().getName(), each.getType().getName()));
         }
+    }
+    
+    private String addResultsetTransferField(CtClass targetCc, String initStr) throws CannotCompileException, NotFoundException
+    {
+        String fieldName = "transferField_" + fieldNo;
+        fieldNo++;
+        CtClass transferType = classPool.get(ResultSetTransfer.class.getName());
+        CtField ctField = new CtField(transferType, fieldName, targetCc);
+        targetCc.addField(ctField, initStr);
+        return fieldName;
     }
     
     /**

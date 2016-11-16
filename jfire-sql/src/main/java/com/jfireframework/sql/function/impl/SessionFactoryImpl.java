@@ -30,7 +30,6 @@ import com.jfireframework.sql.metadata.MetaContext;
 import com.jfireframework.sql.metadata.TableMetaData;
 import com.jfireframework.sql.page.MysqlParse;
 import com.jfireframework.sql.page.PageParse;
-import com.jfireframework.sql.resultsettransfer.TransferContext;
 import com.jfireframework.sql.util.MapperBuilder;
 
 public class SessionFactoryImpl implements SessionFactory
@@ -40,19 +39,18 @@ public class SessionFactoryImpl implements SessionFactory
     @Resource
     @CanBeNull
     protected ClassLoader                       classLoader;
-    protected static ThreadLocal<SqlSession>    sessionLocal    = new ThreadLocal<SqlSession>();
+    protected static ThreadLocal<SqlSession>    sessionLocal = new ThreadLocal<SqlSession>();
     protected String                            scanPackage;
     // 如果值是create，则会创建表。
-    protected String                            tableMode       = "none";
-    protected IdentityHashMap<Class<?>, Mapper> mappers         = new IdentityHashMap<Class<?>, Mapper>(128);
-    protected IdentityHashMap<Class<?>, Dao<?>> daos            = new IdentityHashMap<Class<?>, Dao<?>>();
+    protected String                            tableMode    = "none";
+    protected IdentityHashMap<Class<?>, Mapper> mappers      = new IdentityHashMap<Class<?>, Mapper>(128);
+    protected IdentityHashMap<Class<?>, Dao<?>> daos         = new IdentityHashMap<Class<?>, Dao<?>>();
     protected MetaContext                       metaContext;
-    protected TransferContext                   transferContext = new TransferContext();
     protected SqlPreInterceptor[]               preInterceptors;
     protected SqlInterceptor[]                  sqlInterceptors;
     protected PageParse                         pageParse;
     protected String                            productName;
-    protected static final Logger               logger          = ConsoleLogFactory.getLogger();
+    protected static final Logger               logger       = ConsoleLogFactory.getLogger();
     
     public SessionFactoryImpl()
     {
@@ -180,7 +178,7 @@ public class SessionFactoryImpl implements SessionFactory
         try
         {
             
-            MapperBuilder mapperBuilder = new MapperBuilder(metaContext, transferContext);
+            MapperBuilder mapperBuilder = new MapperBuilder(metaContext);
             nextSqlInterface: for (Class<?> each : set)
             {
                 if (each.isInterface())
@@ -260,7 +258,7 @@ public class SessionFactoryImpl implements SessionFactory
     {
         try
         {
-            SqlSession session = new SqlSessionImpl(dataSource.getConnection(), this, preInterceptors, sqlInterceptors, pageParse, transferContext);
+            SqlSession session = new SqlSessionImpl(dataSource.getConnection(), this, preInterceptors, sqlInterceptors, pageParse);
             return session;
         }
         catch (SQLException e)
