@@ -2,56 +2,41 @@ package com.jfireframework.beanvalidation.validator.beanimpl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Pattern;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
-import com.jfireframework.beanvalidation.constraint.AssertFalse;
-import com.jfireframework.beanvalidation.constraint.AssertTrue;
+import com.jfireframework.beanvalidation.ConstraintValidatorFactory;
+import com.jfireframework.beanvalidation.ValidResult;
 import com.jfireframework.beanvalidation.constraint.Constraint;
-import com.jfireframework.beanvalidation.constraint.Length;
-import com.jfireframework.beanvalidation.constraint.Max;
-import com.jfireframework.beanvalidation.constraint.Min;
-import com.jfireframework.beanvalidation.constraint.NotNull;
-import com.jfireframework.beanvalidation.constraint.Null;
-import com.jfireframework.beanvalidation.constraint.Pattern;
-import com.jfireframework.beanvalidation.constraint.Size;
 import com.jfireframework.beanvalidation.validator.BeanValidator;
 import com.jfireframework.beanvalidation.validator.ConstraintValidator;
-import com.jfireframework.beanvalidation.validator.ValidResult;
-import com.jfireframework.beanvalidation.validator.constraintimpl.AssertFalaseValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.AssertTrueValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.LengthValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.MaxValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.MinValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.NotNullValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.NullValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.PatternValidator;
-import com.jfireframework.beanvalidation.validator.constraintimpl.SizeValidator;
 
 @SuppressWarnings("unchecked")
 public class BeanValidatorImpl<T> implements BeanValidator<T>
 {
-    private final Field[]                                                                             fields;
-    private final ConstraintValidator<?, ?>[][]                                                       constraintValidators;
-    private static final Map<Class<? extends Annotation>, Class<? extends ConstraintValidator<?, ?>>> map = new HashMap<Class<? extends Annotation>, Class<? extends ConstraintValidator<?, ?>>>();
-    
+    private final Field[]                                 fields;
+    private final ConstraintValidator<?, ?>[][]           constraintValidators;
+    private static final Set<Class<? extends Annotation>> constraintSet = new HashSet<Class<? extends Annotation>>();
     static
     {
-        map.put(AssertFalse.class, AssertFalaseValidator.class);
-        map.put(AssertTrue.class, AssertTrueValidator.class);
-        map.put(Length.class, LengthValidator.class);
-        map.put(Max.class, MaxValidator.class);
-        map.put(Min.class, MinValidator.class);
-        map.put(NotNull.class, NotNullValidator.class);
-        map.put(Null.class, NullValidator.class);
-        map.put(Pattern.class, PatternValidator.class);
-        map.put(Size.class, SizeValidator.class);
-        
+        constraintSet.add(AssertFalse.class);
+        constraintSet.add(AssertTrue.class);
+        constraintSet.add(Max.class);
+        constraintSet.add(Min.class);
+        constraintSet.add(Null.class);
+        constraintSet.add(NotNull.class);
+        constraintSet.add(Pattern.class);
     }
     
     public BeanValidatorImpl(Class<T> type)
@@ -69,7 +54,7 @@ public class BeanValidatorImpl<T> implements BeanValidator<T>
     
     @SuppressWarnings("rawtypes")
     @Override
-    public boolean validate(T entity, ValidResult result)
+    public boolean isValid(T entity, ValidResult result)
     {
         try
         {
@@ -103,19 +88,19 @@ public class BeanValidatorImpl<T> implements BeanValidator<T>
         try
         {
             List<ConstraintValidator<?, ?>> list = new LinkedList<ConstraintValidator<?, ?>>();
-            for (Entry<Class<? extends Annotation>, Class<? extends ConstraintValidator<?, ?>>> entry : map.entrySet())
+            for (Class<? extends Annotation> each : constraintSet)
             {
-                if (AnnotationUtil.isPresent(entry.getKey(), field))
+                if (AnnotationUtil.isPresent(each, field))
                 {
-                    ConstraintValidator<Annotation, ?> validator = (ConstraintValidator<Annotation, ?>) entry.getValue().newInstance();
-                    validator.initialize(AnnotationUtil.getAnnotation(entry.getKey(), field), field);
+                    Annotation constraint = AnnotationUtil.getAnnotation(each, field);
+                    ConstraintValidator<Annotation, ?> validator = ConstraintValidatorFactory.build(field, constraint);
                     list.add(validator);
                 }
             }
             if (AnnotationUtil.isPresent(Constraint.class, field))
             {
                 Constraint constraint = AnnotationUtil.getAnnotation(Constraint.class, field);
-                Class<? extends ConstraintValidator<?, ?>>[] types = constraint.validatedBy();
+                Class<? extends ConstraintValidator<?, ?>>[] types = constraint.validateBy();
                 for (Class<? extends ConstraintValidator<?, ?>> each : types)
                 {
                     ConstraintValidator<Annotation, ?> validator = (ConstraintValidator<Annotation, ?>) each.newInstance();

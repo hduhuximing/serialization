@@ -9,6 +9,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import com.jfireframework.beanvalidation.ValidResult;
 import com.jfireframework.mvc.annotation.CookieValue;
 import com.jfireframework.mvc.annotation.HeaderValue;
 import com.jfireframework.mvc.binder.impl.ArrayBinder;
@@ -26,6 +27,7 @@ import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
 import com.jfireframework.mvc.binder.impl.SqlDateBinder;
 import com.jfireframework.mvc.binder.impl.StringBinder;
 import com.jfireframework.mvc.binder.impl.UploadBinder;
+import com.jfireframework.mvc.binder.impl.ValidatorResultBinder;
 import com.jfireframework.mvc.binder.impl.WrapperBinder;
 
 public class BinderFactory
@@ -65,6 +67,11 @@ public class BinderFactory
                     || target == Character.class)
             {
                 binders.add(new WrapperBinder(target, prefixName, annotations));
+            }
+            else if (target == ValidResult.class)
+            {
+                binders.add(new ValidatorResultBinder(prefixName));
+                continue nextBinder;
             }
             else if (target == String.class)
             {

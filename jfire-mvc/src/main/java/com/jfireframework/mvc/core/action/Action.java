@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
+import com.jfireframework.beanvalidation.validator.BeanValidator;
 import com.jfireframework.mvc.binder.DataBinder;
 import com.jfireframework.mvc.config.ContentType;
 import com.jfireframework.mvc.config.RequestMethod;
@@ -44,6 +45,8 @@ public class Action
     private final HeaderRule          headerRule;
     private final boolean             hasCookie;
     private final boolean             hasHeader;
+    private final BeanValidator<?>[]  validators;
+    private final int[]               validatorIndexs;
     
     public Action(ActionInfo info)
     {
@@ -99,6 +102,8 @@ public class Action
             contentType = info.getContentType();
         }
         interceptors = info.getInterceptors();
+        validators = info.getValidators();
+        validatorIndexs = info.getValidatorIndex();
     }
     
     public void render(HttpServletRequest request, HttpServletResponse response)
@@ -231,6 +236,16 @@ public class Action
     public boolean hasHeader()
     {
         return hasHeader;
+    }
+    
+    public BeanValidator<?>[] getValidators()
+    {
+        return validators;
+    }
+    
+    public int[] getValidatorIndexs()
+    {
+        return validatorIndexs;
     }
     
 }

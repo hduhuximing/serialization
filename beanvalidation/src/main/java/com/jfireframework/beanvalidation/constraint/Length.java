@@ -1,18 +1,16 @@
 package com.jfireframework.beanvalidation.constraint;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
+@Target({ FIELD })
+@Retention(RUNTIME)
 /**
- * 被注释的字符串的大小必须在指定的范围内
+ * 注解的字符串长度不能超过value
  * 
- * @author linbin
+ * @author 林斌
  *
  */
 public @interface Length

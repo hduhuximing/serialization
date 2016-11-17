@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
@@ -14,6 +15,9 @@ import com.jfireframework.baseutil.order.AescComparator;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.uniqueid.SummerId;
 import com.jfireframework.baseutil.uniqueid.Uid;
+import com.jfireframework.beanvalidation.BeanValidatorFactory;
+import com.jfireframework.beanvalidation.ValidResult;
+import com.jfireframework.beanvalidation.validator.BeanValidator;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
@@ -74,6 +78,103 @@ public class ActionFactory
         {
             actionInfo.setToken(uid.generate());
         }
+        actionInfo.setRequestUrl(getRequestUrl(requestMapping, actionInfo, requestPath, method));
+        try
+        {
+            // 使用原始方法的名称和参数类型数组,在类型中获取真实的方法。这一步主要是防止action类本身被增强后，却仍然调用未增强的方法。
+            Method realMethod = bean.getType().getMethod(method.getName(), method.getParameterTypes());
+            actionInfo.setMethodAccessor(ReflectUtil.fastMethod(realMethod));
+        }
+        catch (Exception e)
+        {
+            throw new JustThrowException(e);
+        }
+        actionInfo.setInterceptors(getInterceptors(jfireContext, actionInfo));
+        setValidator(method, actionInfo);
+        return new Action(actionInfo);
+    }
+    
+    private static void setValidator(Method method, ActionInfo info)
+    {
+        List<BeanValidator<?>> list = new LinkedList<BeanValidator<?>>();
+        List<Integer> indexs = new LinkedList<Integer>();
+        Class<?>[] types = method.getParameterTypes();
+        for (int i = 0; i < types.length; i++)
+        {
+            if (types[i] == ValidResult.class)
+            {
+                if (i == 0 || types[i - 1] == ValidResult.class)
+                {
+                    throw new UnsupportedOperationException(StringUtil.format("验证结果对象之前必须有一个可以验证的对象，请检查{}.{}", method.getDeclaringClass().getName(), method.getName()));
+                }
+                indexs.add(i);
+                list.add(BeanValidatorFactory.build(types[i - 1]));
+            }
+        }
+        info.setValidators(list.toArray(new BeanValidator[list.size()]));
+        int[] validatorIndexs = new int[indexs.size()];
+        for (int i = 0; i < validatorIndexs.length; i++)
+        {
+            validatorIndexs[i] = indexs.get(i);
+        }
+        info.setValidatorIndex(validatorIndexs);
+    }
+    
+    private static ActionInterceptor[] getInterceptors(JfireContext jfireContext, ActionInfo info)
+    {
+        Bean[] beans = jfireContext.getBeanByInterface(ActionInterceptor.class);
+        List<ActionInterceptor> interceptors = new ArrayList<ActionInterceptor>();
+        next: for (Bean each : beans)
+        {
+            ActionInterceptor interceptor = (ActionInterceptor) each.getInstance();
+            String excludePath = interceptor.excludePath();
+            if (excludePath != null)
+            {
+                if ("*".equals(excludePath))
+                {
+                    continue next;
+                }
+                else
+                {
+                    for (String singleExRule : excludePath.split(";"))
+                    {
+                        if (isInterceptored(info.getRequestUrl(), singleExRule))
+                        {
+                            continue next;
+                        }
+                    }
+                }
+            }
+            String includePath = interceptor.includePath();
+            if ("*".equals(includePath))
+            {
+                interceptors.add(interceptor);
+                continue next;
+            }
+            else
+            {
+                for (String singleInRule : includePath.split(";"))
+                {
+                    if (isInterceptored(info.getRequestUrl(), singleInRule))
+                    {
+                        interceptors.add(interceptor);
+                        continue next;
+                    }
+                }
+            }
+            String token = interceptor.tokenRule();
+            if (token != null && info.getToken().equals(token))
+            {
+                interceptors.add(interceptor);
+            }
+            
+        }
+        Collections.sort(interceptors, AESC_COMPARATOR);
+        return interceptors.toArray(new ActionInterceptor[interceptors.size()]);
+    }
+    
+    private static String getRequestUrl(RequestMapping requestMapping, ActionInfo actionInfo, String requestPath, Method method)
+    {
         if (requestMapping.value().equals("/"))
         {
             ;
@@ -99,13 +200,11 @@ public class ActionFactory
                 {
                     for (DataBinder each : actionInfo.getDataBinders())
                     {
-                        if (
-                            each instanceof HttpSessionBinder //
-                                    || each instanceof HttpServletRequestBinder //
-                                    || each instanceof HttpServletResponseBinder //
-                                    || each instanceof CookieBinder //
-                                    || each instanceof HeaderBinder
-                        )
+                        if (each instanceof HttpSessionBinder //
+                                || each instanceof HttpServletRequestBinder //
+                                || each instanceof HttpServletResponseBinder //
+                                || each instanceof CookieBinder //
+                                || each instanceof HeaderBinder)
                         {
                             continue;
                         }
@@ -119,67 +218,7 @@ public class ActionFactory
                 requestPath += (StringUtil.isNotBlank(requestMapping.value()) ? requestMapping.value() : "/" + method.getName());
             }
         }
-        actionInfo.setRequestUrl(requestPath);
-        try
-        {
-            // 使用原始方法的名称和参数类型数组,在类型中获取真实的方法。这一步主要是防止action类本身被增强后，却仍然调用未增强的方法。
-            Method realMethod = bean.getType().getMethod(method.getName(), method.getParameterTypes());
-            actionInfo.setMethodAccessor(ReflectUtil.fastMethod(realMethod));
-        }
-        catch (Exception e)
-        {
-            throw new JustThrowException(e);
-        }
-        Bean[] beans = jfireContext.getBeanByInterface(ActionInterceptor.class);
-        List<ActionInterceptor> interceptors = new ArrayList<ActionInterceptor>();
-        next: for (Bean each : beans)
-        {
-            ActionInterceptor interceptor = (ActionInterceptor) each.getInstance();
-            String excludePath = interceptor.excludePath();
-            if (excludePath != null)
-            {
-                if ("*".equals(excludePath))
-                {
-                    continue next;
-                }
-                else
-                {
-                    for (String singleExRule : excludePath.split(";"))
-                    {
-                        if (isInterceptored(requestPath, singleExRule))
-                        {
-                            continue next;
-                        }
-                    }
-                }
-            }
-            String includePath = interceptor.includePath();
-            if ("*".equals(includePath))
-            {
-                interceptors.add(interceptor);
-                continue next;
-            }
-            else
-            {
-                for (String singleInRule : includePath.split(";"))
-                {
-                    if (isInterceptored(requestPath, singleInRule))
-                    {
-                        interceptors.add(interceptor);
-                        continue next;
-                    }
-                }
-            }
-            String token = interceptor.tokenRule();
-            if (token != null && actionInfo.getToken().equals(token))
-            {
-                interceptors.add(interceptor);
-            }
-            
-        }
-        Collections.sort(interceptors, AESC_COMPARATOR);
-        actionInfo.setInterceptors(interceptors.toArray(new ActionInterceptor[interceptors.size()]));
-        return new Action(actionInfo);
+        return requestPath;
     }
     
     private static boolean isInterceptored(String requestPath, String rule)

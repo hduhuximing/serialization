@@ -1,7 +1,7 @@
 package com.jfireframework.beanvalidation;
 
+import javax.validation.constraints.Max;
 import com.jfireframework.beanvalidation.constraint.Length;
-import com.jfireframework.beanvalidation.constraint.Max;
 
 public class Data
 {

@@ -1,6 +1,7 @@
 package com.jfireframework.mvc.core.action;
 
 import java.lang.reflect.Method;
+import com.jfireframework.beanvalidation.validator.BeanValidator;
 import com.jfireframework.mvc.binder.DataBinder;
 import com.jfireframework.mvc.config.RequestMethod;
 import com.jfireframework.mvc.config.ResultType;
@@ -30,6 +31,28 @@ public class ActionInfo
     private HeaderRule          headerRule;
     private boolean             hasCookie;
     private boolean             hasHeaders;
+    private BeanValidator<?>[]  validators;
+    private int[]               validatorIndex;
+    
+    public int[] getValidatorIndex()
+    {
+        return validatorIndex;
+    }
+    
+    public void setValidatorIndex(int[] validatorIndex)
+    {
+        this.validatorIndex = validatorIndex;
+    }
+    
+    public BeanValidator<?>[] getValidators()
+    {
+        return validators;
+    }
+    
+    public void setValidators(BeanValidator<?>[] validators)
+    {
+        this.validators = validators;
+    }
     
     public boolean isHasCookie()
     {

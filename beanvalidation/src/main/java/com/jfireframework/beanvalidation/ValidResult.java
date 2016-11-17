@@ -1,4 +1,4 @@
-package com.jfireframework.beanvalidation.validator;
+package com.jfireframework.beanvalidation;
 
 public class ValidResult
 {

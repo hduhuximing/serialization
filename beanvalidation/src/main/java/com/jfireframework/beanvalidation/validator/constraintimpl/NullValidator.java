@@ -1,7 +1,7 @@
 package com.jfireframework.beanvalidation.validator.constraintimpl;
 
 import java.lang.reflect.Field;
-import com.jfireframework.beanvalidation.constraint.Null;
+import javax.validation.constraints.Null;
 import com.jfireframework.beanvalidation.validator.ConstraintValidator;
 
 public class NullValidator implements ConstraintValidator<Null, Object>
