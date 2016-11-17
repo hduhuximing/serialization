@@ -2,26 +2,25 @@ package com.jfireframework.beanvalidation.validator.constraintimpl;
 
 import java.lang.reflect.Field;
 import javax.validation.constraints.AssertFalse;
-import com.jfireframework.beanvalidation.validator.ConstraintValidator;
+import com.jfireframework.beanvalidation.ValidResult;
 
-public class AssertFalaseValidator implements ConstraintValidator<AssertFalse, Boolean>
+public class AssertFalaseValidator extends AbstractConstraintValidator<AssertFalse, Boolean>
 {
-    
-    @Override
-    public String message()
-    {
-        return "必须为false";
-    }
+    private String msg;
     
     @Override
     public void initialize(AssertFalse c, Field field)
     {
-        
+        msg = getMessage(c.message());
     }
     
     @Override
-    public boolean isValid(Boolean value)
+    public boolean isValid(Boolean value, ValidResult result)
     {
+        if (value == true)
+        {
+            result.setMessage(msg);
+        }
         return !value;
     }
     
