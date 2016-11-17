@@ -99,11 +99,13 @@ public class ActionFactory
                 {
                     for (DataBinder each : actionInfo.getDataBinders())
                     {
-                        if (each instanceof HttpSessionBinder //
-                                || each instanceof HttpServletRequestBinder //
-                                || each instanceof HttpServletResponseBinder //
-                                || each instanceof CookieBinder //
-                                || each instanceof HeaderBinder)
+                        if (
+                            each instanceof HttpSessionBinder //
+                                    || each instanceof HttpServletRequestBinder //
+                                    || each instanceof HttpServletResponseBinder //
+                                    || each instanceof CookieBinder //
+                                    || each instanceof HeaderBinder
+                        )
                         {
                             continue;
                         }
@@ -133,17 +135,35 @@ public class ActionFactory
         next: for (Bean each : beans)
         {
             ActionInterceptor interceptor = (ActionInterceptor) each.getInstance();
-            String rule = interceptor.pathRule();
-            if ("*".equals(rule))
+            String excludePath = interceptor.excludePath();
+            if (excludePath != null)
+            {
+                if ("*".equals(excludePath))
+                {
+                    break;
+                }
+                else
+                {
+                    for (String singleExRule : excludePath.split(";"))
+                    {
+                        if (isInterceptored(requestPath, singleExRule))
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            String includePath = interceptor.includePath();
+            if ("*".equals(includePath))
             {
                 interceptors.add(interceptor);
                 continue next;
             }
             else
             {
-                for (String singleRule : rule.split(";"))
+                for (String singleInRule : includePath.split(";"))
                 {
-                    if (isInterceptored(requestPath, singleRule))
+                    if (isInterceptored(requestPath, singleInRule))
                     {
                         interceptors.add(interceptor);
                         continue next;

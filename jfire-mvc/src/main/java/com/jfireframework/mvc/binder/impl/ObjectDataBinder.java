@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
@@ -65,7 +66,14 @@ public class ObjectDataBinder implements DataBinder
                     {
                         entity = ckass.newInstance();
                     }
-                    each.setValue(request, response, node, entity);
+                    try
+                    {
+                        each.setValue(request, response, node, entity);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new JustThrowException(StringUtil.format("参数:{}绑定出现异常", each.getName()), e);
+                    }
                 }
             }
             return entity;

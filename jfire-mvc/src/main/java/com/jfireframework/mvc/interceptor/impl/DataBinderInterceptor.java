@@ -4,6 +4,8 @@ import java.util.Map.Entry;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.jfireframework.baseutil.StringUtil;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.binder.DataBinder;
 import com.jfireframework.mvc.binder.node.TreeValueNode;
 import com.jfireframework.mvc.core.action.Action;
@@ -60,19 +62,32 @@ public class DataBinderInterceptor implements ActionInterceptor
         Object[] param = new Object[length];
         for (int i = 0; i < length; i++)
         {
-            param[i] = dataBinders[i].bind(request, node, response);
+            try
+            {
+                param[i] = dataBinders[i].bind(request, node, response);
+            }
+            catch (Exception e)
+            {
+                throw new JustThrowException(StringUtil.format("参数：{}绑定出现异常", dataBinders[i].getParamName()), e);
+            }
         }
         return param;
     }
     
     @Override
-    public String pathRule()
+    public String includePath()
     {
         return "*";
     }
     
     @Override
     public String tokenRule()
+    {
+        return null;
+    }
+    
+    @Override
+    public String excludePath()
     {
         return null;
     }

@@ -146,13 +146,19 @@ public class UploadInterceptor implements ActionInterceptor
     }
     
     @Override
-    public String pathRule()
+    public String includePath()
     {
         return "*";
     }
     
     @Override
     public String tokenRule()
+    {
+        return null;
+    }
+    
+    @Override
+    public String excludePath()
     {
         return null;
     }
