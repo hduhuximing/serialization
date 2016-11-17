@@ -6,9 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import javax.annotation.Resource;
 import org.junit.Test;
+import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
-import com.jfireframework.context.aliasanno.AnnotationUtil;
 
 @Testalis3(t = "sada", s = false)
 public class AliasTest

@@ -1,4 +1,4 @@
-package com.jfireframework.context.aliasanno;
+package com.jfireframework.baseutil.aliasanno;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;

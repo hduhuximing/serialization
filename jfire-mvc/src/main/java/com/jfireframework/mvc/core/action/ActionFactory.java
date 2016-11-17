@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.jfireframework.baseutil.StringUtil;
+import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.order.AescComparator;
@@ -14,7 +15,6 @@ import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.uniqueid.SummerId;
 import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.context.JfireContext;
-import com.jfireframework.context.aliasanno.AnnotationUtil;
 import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.mvc.annotation.RequestMapping;
@@ -140,7 +140,7 @@ public class ActionFactory
             {
                 if ("*".equals(excludePath))
                 {
-                    break;
+                    continue next;
                 }
                 else
                 {
@@ -148,7 +148,7 @@ public class ActionFactory
                     {
                         if (isInterceptored(requestPath, singleExRule))
                         {
-                            break;
+                            continue next;
                         }
                     }
                 }

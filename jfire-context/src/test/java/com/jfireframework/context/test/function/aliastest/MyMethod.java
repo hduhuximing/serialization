@@ -4,7 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.jfireframework.context.aliasanno.AliasFor;
+import com.jfireframework.baseutil.aliasanno.AliasFor;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

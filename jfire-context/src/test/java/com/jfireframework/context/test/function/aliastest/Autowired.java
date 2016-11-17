@@ -3,7 +3,7 @@ package com.jfireframework.context.test.function.aliastest;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import javax.annotation.Resource;
-import com.jfireframework.context.aliasanno.AliasFor;
+import com.jfireframework.baseutil.aliasanno.AliasFor;
 
 @Resource
 @Retention(RetentionPolicy.RUNTIME)

@@ -6,11 +6,11 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import com.jfireframework.baseutil.StringUtil;
+import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.verify.Verify;
 import com.jfireframework.context.ContextInitFinish;
-import com.jfireframework.context.aliasanno.AnnotationUtil;
 import com.jfireframework.context.bean.field.dependency.DependencyField;
 import com.jfireframework.context.bean.field.param.ParamField;
 

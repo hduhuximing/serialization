@@ -2,7 +2,7 @@ package com.jfireframework.context.bean.impl;
 
 import java.util.Map;
 import javax.annotation.Resource;
-import com.jfireframework.context.aliasanno.AnnotationUtil;
+import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.context.bean.load.BeanLoadFactory;
 
