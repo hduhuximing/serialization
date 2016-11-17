@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  */
 public @interface Size
 {
-    public int max();
+    public long max();
     
-    public int min();
+    public long min();
 }

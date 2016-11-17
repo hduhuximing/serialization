@@ -17,5 +17,5 @@ import java.lang.annotation.Target;
  */
 public @interface Min
 {
-    public int value();
+    public long value();
 }

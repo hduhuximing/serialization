@@ -5,11 +5,12 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import com.jfireframework.beanvalidation.validator.ConstraintValidator;
 
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Constraint
 {
-    public Class<?>[] validatedBy();
+    public Class<? extends ConstraintValidator<?, ?>>[] validatedBy();
 }

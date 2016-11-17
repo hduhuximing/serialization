@@ -17,5 +17,5 @@ import java.lang.annotation.Target;
  */
 public @interface Max
 {
-    public int value();
+    public long value();
 }
