@@ -15,12 +15,13 @@ public class PipeLineTest
         eventBus.addHandler(new TwoHandler());
         eventBus.addHandler(new ThreeHandler());
         eventBus.start();
-        PipeLine pipeLine = eventBus.pipeLine();
+        Pipeline pipeLine = eventBus.pipeline();
         pipeLine.add("one", PipeLineEvent.one);
         pipeLine.add("two", PipeLineEvent.two);
         pipeLine.add("three", PipeLineEvent.three);
         pipeLine.start();
         pipeLine.await();
+        System.out.println("结束");
     }
     
     @Test
@@ -32,7 +33,7 @@ public class PipeLineTest
         eventBus.addHandler(new ThreeHandler());
         eventBus.addHandler(new FoutHandler());
         eventBus.start();
-        PipeLine pipeLine = eventBus.pipeLine();
+        Pipeline pipeLine = eventBus.pipeline();
         pipeLine.add("one", PipeLineEvent.one);
         pipeLine.add("two", PipeLineEvent.two);
         pipeLine.add("four", PipeLineEvent.four);

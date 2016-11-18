@@ -22,8 +22,9 @@ import com.jfireframework.eventbus.executor.TypeRowKeySerialHandlerExecutor;
 import com.jfireframework.eventbus.executor.TypeSerialHandlerExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 import com.jfireframework.eventbus.handler.HandlerCombination;
-import com.jfireframework.eventbus.pipeline.PipeLine;
-import com.jfireframework.eventbus.pipeline.PipeLineImpl;
+import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.impl.PipelineImpl;
+import com.jfireframework.eventbus.util.EventHelper;
 
 public abstract class AbstractEventBus implements EventBus
 {
@@ -106,10 +107,7 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event)
     {
-        if (((EventConfig) event).parallelLevel() == ParallelLevel.ROWKEY_SERIAL || ((EventConfig) event).parallelLevel() == ParallelLevel.TYPE_ROWKEY_SERIAL)
-        {
-            throw new IllegalArgumentException("该方法不能接受并行度为：ROWKEY_SERIAL或TYPE_ROWKEY_SERIAL的事件");
-        }
+        EventHelper.checkParallelLevel(event);
         EventConfig config = (EventConfig) event;
         if (config.parallelLevel() == ParallelLevel.RW_EVENT_READ)
         {
@@ -136,10 +134,7 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey)
     {
-        if (((EventConfig) event).parallelLevel() != ParallelLevel.ROWKEY_SERIAL && ((EventConfig) event).parallelLevel() != ParallelLevel.TYPE_ROWKEY_SERIAL)
-        {
-            throw new IllegalArgumentException("该方法只能接受并行度为：ROWKEY_SERIAL或TYPE_ROWKEY_SERIAL的事件");
-        }
+        EventHelper.checkParallelLevel(event, rowkey);
         EventContext<T> eventContext = new RowEventContextImpl(data, event, combinationMap.get(event).combination(), executorMap.get(event), this, rowkey);
         post(eventContext);
         return eventContext;
@@ -155,10 +150,7 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey)
     {
-        if (((EventConfig) event).parallelLevel() != ParallelLevel.ROWKEY_SERIAL && ((EventConfig) event).parallelLevel() != ParallelLevel.TYPE_ROWKEY_SERIAL)
-        {
-            throw new IllegalArgumentException("该方法只能接受并行度为：ROWKEY_SERIAL或TYPE_ROWKEY_SERIAL的事件");
-        }
+        EventHelper.checkParallelLevel(event, rowkey);
         EventContext<T> eventContext = new RowEventContextImpl(data, event, combinationMap.get(event).combination(), executorMap.get(event), this, rowkey);
         eventContext.executor().handle(eventContext, this);
         eventContext.await();
@@ -169,10 +161,7 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event)
     {
-        if (((EventConfig) event).parallelLevel() == ParallelLevel.ROWKEY_SERIAL || ((EventConfig) event).parallelLevel() == ParallelLevel.TYPE_ROWKEY_SERIAL)
-        {
-            throw new IllegalArgumentException("该方法不能接受并行度为：ROWKEY_SERIAL或TYPE_ROWKEY_SERIAL的事件");
-        }
+        EventHelper.checkParallelLevel(event);
         EventContext<T> eventContext = new NormalEventContext(data, event, combinationMap.get(event).combination(), executorMap.get(event), this);
         eventContext.executor().handle(eventContext, this);
         eventContext.await();
@@ -180,9 +169,9 @@ public abstract class AbstractEventBus implements EventBus
     }
     
     @Override
-    public PipeLine pipeLine()
+    public Pipeline pipeline()
     {
-        PipeLine pipeLine = new PipeLineImpl(combinationMap, executorMap, this);
-        return pipeLine;
+        return new PipelineImpl(combinationMap, executorMap, this);
     }
+    
 }
