@@ -228,12 +228,7 @@ public class JfireContextImpl implements JfireContext
         addSingletonEntity(JfireContext.class.getName(), this);
         if (StringUtil.isNotBlank(activeProfile))
         {
-            if (activeProfile.startsWith("${"))
-            {
-                String key = activeProfile.substring(2, activeProfile.length() - 1);
-                activeProfile = properties.get(key);
-            }
-            activeProfile(activeProfile);
+            activeProfile(getActiveProfile(activeProfile));
         }
         init = true;
         replaceValueFromPropertiesToBeancfg();
@@ -302,6 +297,30 @@ public class JfireContextImpl implements JfireContext
                 throw new JustThrowException(e);
             }
         }
+    }
+    
+    private String getActiveProfile(String activeProfile)
+    {
+        if (activeProfile.startsWith("${"))
+        {
+            if (activeProfile.contains("||"))
+            {
+                String[] part = activeProfile.split("\\|\\|");
+                activeProfile = part[0];
+                String key = activeProfile.substring(2, activeProfile.length() - 1);
+                activeProfile = properties.get(key);
+                if (activeProfile == null)
+                {
+                    activeProfile = part[1];
+                }
+            }
+            else
+            {
+                String key = activeProfile.substring(2, activeProfile.length() - 1);
+                activeProfile = properties.get(key);
+            }
+        }
+        return activeProfile;
     }
     
     private void replaceValueFromPropertiesToBeancfg()
