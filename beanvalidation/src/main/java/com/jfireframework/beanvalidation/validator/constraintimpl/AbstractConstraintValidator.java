@@ -8,6 +8,7 @@ import com.jfireframework.beanvalidation.validator.ConstraintValidator;
 
 public abstract class AbstractConstraintValidator<C extends Annotation, V> implements ConstraintValidator<C, V>
 {
+    protected String                  message;
     protected static final Properties properties;
     static
     {
@@ -48,5 +49,11 @@ public abstract class AbstractConstraintValidator<C extends Annotation, V> imple
         {
             return value;
         }
+    }
+    
+    @Override
+    public String message()
+    {
+        return message;
     }
 }

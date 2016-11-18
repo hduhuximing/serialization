@@ -4,22 +4,16 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import javax.validation.constraints.Max;
-import com.jfireframework.beanvalidation.validator.ConstraintValidator;
 
-public class MaxValidator implements ConstraintValidator<Max, Number>
+public class MaxValidator extends AbstractConstraintValidator<Max, Number>
 {
     private long max;
-    
-    @Override
-    public String message()
-    {
-        return "数值的最大不能超过" + max;
-    }
     
     @Override
     public void initialize(Max c, Field field)
     {
         max = c.value();
+        message = getMessage(c.message());
     }
     
     @Override

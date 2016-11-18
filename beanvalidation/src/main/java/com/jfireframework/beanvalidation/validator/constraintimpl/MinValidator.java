@@ -4,22 +4,16 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import javax.validation.constraints.Min;
-import com.jfireframework.beanvalidation.validator.ConstraintValidator;
 
-public class MinValidator implements ConstraintValidator<Min, Number>
+public class MinValidator extends AbstractConstraintValidator<Min, Number>
 {
     private long min;
-    
-    @Override
-    public String message()
-    {
-        return "数值的最小值不能低于" + min;
-    }
     
     @Override
     public void initialize(Min c, Field field)
     {
         min = c.value();
+        message = getMessage(c.message());
     }
     
     @Override
