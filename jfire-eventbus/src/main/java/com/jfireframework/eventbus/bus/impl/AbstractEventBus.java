@@ -22,6 +22,8 @@ import com.jfireframework.eventbus.executor.TypeRowKeySerialHandlerExecutor;
 import com.jfireframework.eventbus.executor.TypeSerialHandlerExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 import com.jfireframework.eventbus.handler.HandlerCombination;
+import com.jfireframework.eventbus.pipeline.PipeLine;
+import com.jfireframework.eventbus.pipeline.PipeLineImpl;
 
 public abstract class AbstractEventBus implements EventBus
 {
@@ -175,5 +177,12 @@ public abstract class AbstractEventBus implements EventBus
         eventContext.executor().handle(eventContext, this);
         eventContext.await();
         return eventContext;
+    }
+    
+    @Override
+    public PipeLine pipeLine()
+    {
+        PipeLine pipeLine = new PipeLineImpl(combinationMap, executorMap, this);
+        return pipeLine;
     }
 }
