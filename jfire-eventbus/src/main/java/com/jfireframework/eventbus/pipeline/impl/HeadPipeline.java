@@ -10,7 +10,7 @@ public class HeadPipeline extends AbstractPipeline
     
     public HeadPipeline(EventBus eventBus, IdentityHashMap<Enum<? extends EventConfig>, EventExecutor> executorMap)
     {
-        super(eventBus, null, null, null, null, executorMap);
+        super(eventBus, executorMap, null, null, null, null);
     }
     
     @Override

@@ -14,6 +14,7 @@ import com.jfireframework.eventbus.eventcontext.impl.ReadWriteEventContextImpl;
 import com.jfireframework.eventbus.eventcontext.impl.RowEventContextImpl;
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.pipeline.Conversion;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public abstract class AbstractPipeline implements Pipeline
@@ -28,37 +29,37 @@ public abstract class AbstractPipeline implements Pipeline
     protected CompletedHandler<Object>                                          completedHandler;
     protected final Object                                                      eventData;
     protected final Enum<? extends EventConfig>                                 event;
-    protected final EventHandler<?>                                             handler;
+    protected final EventHandler<?>                                             eventHandler;
     protected final Object                                                      rowKey;
     public static final Object                                                  USE_UPSTREAM_RESULT = new Object();
     protected Object                                                            result;
     
-    public AbstractPipeline(EventBus eventBus, Pipeline pre, Enum<? extends EventConfig> event, EventHandler<?> handler, Object rowKey, IdentityHashMap<Enum<? extends EventConfig>, EventExecutor> executorMap)
+    public AbstractPipeline(EventBus eventBus, IdentityHashMap<Enum<? extends EventConfig>, EventExecutor> executorMap, Pipeline pre, Enum<? extends EventConfig> event, EventHandler<?> handler, Object rowKey)
     {
         eventData = USE_UPSTREAM_RESULT;
         this.executorMap = executorMap;
         this.eventBus = eventBus;
         this.pre = pre;
         this.event = event;
-        this.handler = handler;
+        this.eventHandler = handler;
         this.rowKey = rowKey;
     }
     
-    public AbstractPipeline(EventBus eventBus, Pipeline pre, Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler, Object rowKey, IdentityHashMap<Enum<? extends EventConfig>, EventExecutor> executorMap)
+    public AbstractPipeline(EventBus eventBus, IdentityHashMap<Enum<? extends EventConfig>, EventExecutor> executorMap, Pipeline pre, Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler, Object rowKey)
     {
         this.executorMap = executorMap;
         this.eventBus = eventBus;
         this.pre = pre;
         this.eventData = eventData;
         this.event = event;
-        this.handler = handler;
+        this.eventHandler = handler;
         this.rowKey = rowKey;
     }
     
     @Override
     public Pipeline add(Object eventData, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        Pipeline pipeline = new WorkPipeline(eventBus, this, eventData, event, handler, rowkey, executorMap);
+        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, eventData, event, handler, rowkey);
         completedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
@@ -66,7 +67,7 @@ public abstract class AbstractPipeline implements Pipeline
     @Override
     public Pipeline add(Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        Pipeline pipeline = new WorkPipeline(eventBus, this, eventData, event, handler, null, executorMap);
+        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, eventData, event, handler, null);
         completedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
@@ -74,7 +75,7 @@ public abstract class AbstractPipeline implements Pipeline
     @Override
     public Pipeline add(Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        Pipeline pipeline = new WorkPipeline(eventBus, this, event, handler, rowkey, executorMap);
+        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, event, handler, rowkey);
         completedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
@@ -82,7 +83,14 @@ public abstract class AbstractPipeline implements Pipeline
     @Override
     public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        Pipeline pipeline = new WorkPipeline(eventBus, this, event, handler, null, executorMap);
+        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, event, handler, null);
+        completedHandler = new CallNextPipeline(pipeline);
+        return pipeline;
+    }
+    
+    public Pipeline conversion(Conversion<?> conversion)
+    {
+        Pipeline pipeline = new ConversionPipeline(eventBus, executorMap, this, conversion);
         completedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
@@ -154,20 +162,20 @@ public abstract class AbstractPipeline implements Pipeline
             EventConfig config = (EventConfig) event;
             if (config.parallelLevel() == ParallelLevel.RW_EVENT_READ)
             {
-                return new ReadWriteEventContextProxy(ReadWriteEventContext.READ, eventData, event, handler, executorMap.get(event), eventBus);
+                return new ReadWriteEventContextProxy(ReadWriteEventContext.READ, eventData, event, eventHandler, executorMap.get(event), eventBus);
             }
             else if (config.parallelLevel() == ParallelLevel.RW_EVENT_WRITE)
             {
-                return new ReadWriteEventContextProxy(ReadWriteEventContext.WRITE, eventData, event, handler, executorMap.get(event), eventBus);
+                return new ReadWriteEventContextProxy(ReadWriteEventContext.WRITE, eventData, event, eventHandler, executorMap.get(event), eventBus);
             }
             else
             {
-                return new NormalEventContextProxy(eventData, event, handler, executorMap.get(event), eventBus);
+                return new NormalEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus);
             }
         }
         else
         {
-            return new RowEventContextProxy(eventData, event, handler, executorMap.get(event), eventBus, rowKey);
+            return new RowEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus, rowKey);
         }
     }
     

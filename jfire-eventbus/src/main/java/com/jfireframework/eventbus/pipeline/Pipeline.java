@@ -14,6 +14,8 @@ public interface Pipeline
     
     public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler);
     
+    public Pipeline conversion(Conversion<?> conversion);
+    
     /**
      * 开始本节点的逻辑任务。并且传入一个上游的结果参数
      * 
