@@ -6,10 +6,10 @@ import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.RowEventContext;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.EventHelper;
 import sun.misc.Unsafe;
 
-public class TypeRowKeySerialHandlerExecutor implements EventHandlerExecutor
+public class TypeRowKeySerialHandlerExecutor implements EventExecutor
 {
     private final ConcurrentHashMap<Object, RowBucket> map = new ConcurrentHashMap<Object, RowBucket>();
     
@@ -58,7 +58,7 @@ public class TypeRowKeySerialHandlerExecutor implements EventHandlerExecutor
                 rowBucket.eventQueue.offer(rowEventContext);
                 while ((rowEventContext = rowBucket.eventQueue.poll()) != null)
                 {
-                    _handle(rowEventContext, eventBus);
+                    EventHelper.handle(rowEventContext, eventBus);
                 }
                 map.remove(rowKey);
                 rowBucket.status = RowBucket.END_OF_WORK;
@@ -104,26 +104,5 @@ public class TypeRowKeySerialHandlerExecutor implements EventHandlerExecutor
             }
         } while (true);
     }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void _handle(RowEventContext<?> eventContext, EventBus eventBus)
-    {
-        try
-        {
-            Object trans = eventContext.getEventData();
-            for (EventHandler each : eventContext.combinationHandlers())
-            {
-                trans = each.handle(trans, eventBus);
-            }
-            eventContext.setResult(trans);
-        }
-        catch (Throwable e)
-        {
-            eventContext.setThrowable(e);
-        }
-        finally
-        {
-            eventContext.signal();
-        }
-    }
+   
 }

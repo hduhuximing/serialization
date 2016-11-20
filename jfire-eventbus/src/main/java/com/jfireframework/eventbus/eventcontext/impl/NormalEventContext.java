@@ -5,14 +5,14 @@ import java.util.concurrent.locks.LockSupport;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.eventcontext.EventContext;
-import com.jfireframework.eventbus.executor.EventHandlerExecutor;
+import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 
 public class NormalEventContext<T> implements EventContext<T>
 {
     protected final EventBus                    eventBus;
-    protected final EventHandlerExecutor        executor;
-    protected final EventHandler<?, ?>[]        combination;
+    protected final EventExecutor               executor;
+    protected final EventHandler<?>             handler;
     protected final Object                      eventData;
     protected final Enum<? extends EventConfig> event;
     protected volatile boolean                  finished = false;
@@ -21,11 +21,11 @@ public class NormalEventContext<T> implements EventContext<T>
     protected Throwable                         e;
     protected T                                 result;
     
-    public NormalEventContext(Object eventData, Enum<? extends EventConfig> event, EventHandler<?, ?>[] combination, EventHandlerExecutor executor, EventBus eventBus)
+    public NormalEventContext(Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler, EventExecutor executor, EventBus eventBus)
     {
         this.eventData = eventData;
         this.event = event;
-        this.combination = combination;
+        this.handler = handler;
         this.executor = executor;
         this.eventBus = eventBus;
     }
@@ -53,9 +53,11 @@ public class NormalEventContext<T> implements EventContext<T>
         return e;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public void signal()
+    public void signal(Object result)
     {
+        this.result = (T) result;
         finished = true;
         if (await)
         {
@@ -105,13 +107,6 @@ public class NormalEventContext<T> implements EventContext<T>
         return event;
     }
     
-    @SuppressWarnings("unchecked")
-    @Override
-    public void setResult(Object result)
-    {
-        this.result = (T) result;
-    }
-    
     @Override
     public T getResult()
     {
@@ -124,15 +119,9 @@ public class NormalEventContext<T> implements EventContext<T>
     }
     
     @Override
-    public EventHandlerExecutor executor()
+    public EventExecutor executor()
     {
         return executor;
-    }
-    
-    @Override
-    public EventHandler<?, ?>[] combinationHandlers()
-    {
-        return combination;
     }
     
     @Override
@@ -151,5 +140,11 @@ public class NormalEventContext<T> implements EventContext<T>
         {
             throw new InterruptedException();
         }
+    }
+    
+    @Override
+    public EventHandler<?> eventHandler()
+    {
+        return handler;
     }
 }

@@ -6,7 +6,7 @@ import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventworker.EventWorker;
-import com.jfireframework.eventbus.executor.EventHandlerExecutor;
+import com.jfireframework.eventbus.executor.EventExecutor;
 
 /**
  * 主要用于计算任务的worker。该worker不关心当前的worker数量
@@ -39,7 +39,7 @@ public class CalculateWorker implements EventWorker
                 LOGGER.debug("事件线程:{}退出对事件的获取", ownerThread);
                 break;
             }
-            EventHandlerExecutor executor = eventContext.executor();
+            EventExecutor executor = eventContext.executor();
             executor.handle(eventContext, eventBus);
         }
     }

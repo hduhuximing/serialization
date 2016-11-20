@@ -7,10 +7,10 @@ import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.ReadWriteEventContext;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.EventHelper;
 import sun.misc.Unsafe;
 
-public class ReadWriteExecutor implements EventHandlerExecutor
+public class ReadWriteExecutor implements EventExecutor
 {
     static final int SHARED_SHIFT   = 1;
     static final int SHARED_UNIT    = (1 << SHARED_SHIFT);
@@ -133,7 +133,7 @@ public class ReadWriteExecutor implements EventHandlerExecutor
             }
             else
             {
-                _handle(readWriteEventContext, eventBus);
+                EventHelper.handle(readWriteEventContext, eventBus);
                 int now = readWriteLock.releaseReadLock();
                 if (readLocks(now) == 0 && queueLocks(now))
                 {
@@ -270,7 +270,7 @@ public class ReadWriteExecutor implements EventHandlerExecutor
         {
             if (readWriteLock.lockRead(pred))
             {
-                _handle(readWriteEventContext, eventBus);
+                EventHelper.handle(readWriteEventContext, eventBus);
                 int now = readWriteLock.releaseReadLock();
                 if (readLocks(now) == 0 && queueLocks(now))
                 {
@@ -303,7 +303,7 @@ public class ReadWriteExecutor implements EventHandlerExecutor
             }
             else if (readWriteLock.lockRead(now))
             {
-                _handle(readWriteEventContext, eventBus);
+                EventHelper.handle(readWriteEventContext, eventBus);
                 invoked = true;
                 break;
             }
@@ -385,7 +385,7 @@ public class ReadWriteExecutor implements EventHandlerExecutor
             if (pollEvent.mode() == ReadWriteEventContext.WRITE)
             {
                 pollEvent = queue.poll();
-                _handle(pollEvent, eventBus);
+                EventHelper.handle(pollEvent, eventBus);
             }
             else
             {
@@ -454,29 +454,6 @@ public class ReadWriteExecutor implements EventHandlerExecutor
                     }
                 }
             }
-        }
-    }
-    
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void _handle(EventContext<?> eventContext, EventBus eventBus)
-    {
-        try
-        {
-            EventHandler<?, ?>[] handlers = eventContext.combinationHandlers();
-            Object trans = eventContext.getEventData();
-            for (EventHandler each : handlers)
-            {
-                trans = each.handle(trans, eventBus);
-            }
-            eventContext.setResult(trans);
-        }
-        catch (Throwable e)
-        {
-            eventContext.setThrowable(e);
-        }
-        finally
-        {
-            eventContext.signal();
         }
     }
     

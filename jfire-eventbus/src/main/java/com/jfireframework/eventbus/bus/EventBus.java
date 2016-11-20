@@ -7,13 +7,11 @@ import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public interface EventBus
 {
-    public void addHandler(EventHandler<?, ?> eventHandler);
+    public void register(Class<? extends Enum<? extends EventConfig>>... ckasses);
     
     public void addWorker();
     
     public void reduceWorker();
-    
-    public void start();
     
     public void stop();
     
@@ -21,11 +19,11 @@ public interface EventBus
     
     public Pipeline pipeline();
     
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey);
+    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler);
     
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event);
+    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler);
     
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey);
+    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler);
     
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event);
+    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler);
 }
