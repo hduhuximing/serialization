@@ -1,8 +1,6 @@
 package com.jfireframework.context.event.impl;
 
-import java.util.LinkedList;
-import java.util.List;
-import javax.annotation.Resource;
+import java.util.Set;
 import com.jfireframework.context.event.EventPoster;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.EventConfig;
@@ -11,31 +9,30 @@ import com.jfireframework.eventbus.handler.EventHandler;
 
 public abstract class AbstractEventPoster implements EventPoster
 {
-    @Resource
-    protected List<EventHandler<?, ?>> handlers = new LinkedList<EventHandler<?, ?>>();
-    protected EventBus                 eventBus;
+    protected Set<Class<? extends Enum<? extends EventConfig>>> events;
+    protected EventBus                                          eventBus;
     
     @Override
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey)
+    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        return eventBus.post(data, event, rowkey);
+        return eventBus.post(data, event, rowkey, handler);
     }
     
     @Override
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event)
+    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        return eventBus.post(data, event);
+        return eventBus.post(data, event, handler);
     }
     
     @Override
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey)
+    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        return eventBus.syncPost(data, event, rowkey);
+        return eventBus.syncPost(data, event, rowkey, handler);
     }
     
     @Override
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event)
+    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        return eventBus.syncPost(data, event);
+        return eventBus.syncPost(data, event, handler);
     }
 }

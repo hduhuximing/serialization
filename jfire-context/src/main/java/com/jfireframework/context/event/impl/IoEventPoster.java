@@ -2,7 +2,6 @@ package com.jfireframework.context.event.impl;
 
 import javax.annotation.PostConstruct;
 import com.jfireframework.eventbus.bus.impl.IoEventBus;
-import com.jfireframework.eventbus.handler.EventHandler;
 
 public class IoEventPoster extends AbstractEventPoster
 {
@@ -10,14 +9,14 @@ public class IoEventPoster extends AbstractEventPoster
     private int  maxWorker  = 100;
     private long waittime   = 60 * 1000;
     
+    @SuppressWarnings("unchecked")
     @PostConstruct
     public void init()
     {
         eventBus = new IoEventBus(coreWorker, maxWorker, waittime);
-        for (EventHandler<?, ?> each : handlers)
+        if (events != null)
         {
-            eventBus.addHandler(each);
+            eventBus.register(events.toArray(new Class[events.size()]));
         }
-        eventBus.start();
     }
 }

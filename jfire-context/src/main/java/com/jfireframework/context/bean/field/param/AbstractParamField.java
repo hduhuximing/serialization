@@ -12,7 +12,6 @@ import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import sun.misc.Unsafe;
 
-@SuppressWarnings("restriction")
 public abstract class AbstractParamField implements ParamField
 {
     protected long   offset;
@@ -194,6 +193,10 @@ public abstract class AbstractParamField implements ParamField
         {
             super(field, value);
             Type type = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+            if (type instanceof ParameterizedType)
+            {
+                type = ((ParameterizedType) type).getRawType();
+            }
             if (type instanceof Class<?>)
             {
                 if (type == String.class)
@@ -241,9 +244,26 @@ public abstract class AbstractParamField implements ParamField
                     }
                     this.value = set;
                 }
+                else if (type == Class.class)
+                {
+                    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                    Set<Class<?>> set = new HashSet<Class<?>>();
+                    for (String each : value.split(","))
+                    {
+                        try
+                        {
+                            set.add(classLoader.loadClass(each));
+                        }
+                        catch (ClassNotFoundException e)
+                        {
+                            throw new JustThrowException(e);
+                        }
+                    }
+                    this.value = set;
+                }
                 else
                 {
-                    throw new UnSupportException("目前Set注入只支持String,Integer,Long,Float,Double");
+                    throw new UnSupportException("目前Set注入只支持String,Integer,Long,Float,Double,Class");
                 }
             }
             else

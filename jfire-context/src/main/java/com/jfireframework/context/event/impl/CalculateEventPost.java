@@ -2,20 +2,19 @@ package com.jfireframework.context.event.impl;
 
 import javax.annotation.PostConstruct;
 import com.jfireframework.eventbus.bus.impl.CalculateEventBus;
-import com.jfireframework.eventbus.handler.EventHandler;
 
 public class CalculateEventPost extends AbstractEventPoster
 {
     private int coreWorker = Runtime.getRuntime().availableProcessors();
     
+    @SuppressWarnings("unchecked")
     @PostConstruct
     public void init()
     {
         eventBus = new CalculateEventBus(coreWorker);
-        for (EventHandler<?, ?> each : handlers)
+        if (events != null)
         {
-            eventBus.addHandler(each);
+            eventBus.register(events.toArray(new Class[events.size()]));
         }
-        eventBus.start();
     }
 }
