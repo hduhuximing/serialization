@@ -3,6 +3,7 @@ package com.jfireframework.eventbus.pipeline;
 import com.jfireframework.eventbus.completedhandler.CompletedHandler;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.pipeline.conversion.Conversion;
 
 public interface Pipeline
 {
@@ -30,13 +31,18 @@ public interface Pipeline
      */
     public void onCompleted(Object result);
     
-    public void completedHanlder(CompletedHandler<?> completedHandler);
+    public void setCompletedHanlder(CompletedHandler<?> completedHandler);
     
     /**
      * 管道开始投递
      */
     public void start();
     
+    /**
+     * 本节点发生异常后调用
+     * 
+     * @param e
+     */
     public void onError(Throwable e);
     
     public Object getResult();

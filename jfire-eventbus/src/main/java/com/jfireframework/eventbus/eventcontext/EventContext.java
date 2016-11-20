@@ -26,7 +26,7 @@ public interface EventContext<T>
     public void await();
     
     /**
-     * 本事件处理过程中发生了异常，设置异常数据
+     * 事件发生过程中发生了异常。记录异常并且让事件完成
      * 
      * @param e
      */
@@ -57,7 +57,7 @@ public interface EventContext<T>
      * 
      * 完成该事件，并且（如果有）唤醒等待该事件完成的线程
      */
-    public void signal(Object result);
+    public void setResult(Object result);
     
     /**
      * 等待该事件的完成，最多等待指定的毫秒数

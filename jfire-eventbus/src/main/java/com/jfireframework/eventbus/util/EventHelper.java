@@ -33,14 +33,11 @@ public class EventHelper
             Object data = eventContext.getEventData();
             EventHandler handler = eventContext.eventHandler();
             result = handler.handle(data, eventBus);
+            eventContext.setResult(result);
         }
         catch (Throwable e)
         {
             eventContext.setThrowable(e);
-        }
-        finally
-        {
-            eventContext.signal(result);
         }
     }
     

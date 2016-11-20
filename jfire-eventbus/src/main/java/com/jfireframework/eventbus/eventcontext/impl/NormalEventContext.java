@@ -45,6 +45,7 @@ public class NormalEventContext<T> implements EventContext<T>
     public void setThrowable(Throwable e)
     {
         this.e = e;
+        signal();
     }
     
     @Override
@@ -55,9 +56,13 @@ public class NormalEventContext<T> implements EventContext<T>
     
     @SuppressWarnings("unchecked")
     @Override
-    public void signal(Object result)
+    public void setResult(Object result)
     {
         this.result = (T) result;
+    }
+    
+    protected void signal()
+    {
         finished = true;
         if (await)
         {
@@ -147,4 +152,5 @@ public class NormalEventContext<T> implements EventContext<T>
     {
         return handler;
     }
+    
 }

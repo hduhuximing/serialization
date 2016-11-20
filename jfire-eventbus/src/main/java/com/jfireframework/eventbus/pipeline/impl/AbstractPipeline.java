@@ -14,11 +14,12 @@ import com.jfireframework.eventbus.eventcontext.impl.ReadWriteEventContextImpl;
 import com.jfireframework.eventbus.eventcontext.impl.RowEventContextImpl;
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
-import com.jfireframework.eventbus.pipeline.Conversion;
 import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.conversion.Conversion;
 
 public abstract class AbstractPipeline implements Pipeline
 {
+    
     protected final IdentityHashMap<Enum<? extends EventConfig>, EventExecutor> executorMap;
     protected final EventBus                                                    eventBus;
     protected final Pipeline                                                    pre;
@@ -26,7 +27,7 @@ public abstract class AbstractPipeline implements Pipeline
     protected volatile boolean                                                  finished            = false;
     protected volatile boolean                                                  await               = false;
     protected Throwable                                                         e;
-    protected CompletedHandler<Object>                                          completedHandler;
+    protected CompletedHandler<Object>                                          pipelineCompletedHandler;
     protected final Object                                                      eventData;
     protected final Enum<? extends EventConfig>                                 event;
     protected final EventHandler<?>                                             eventHandler;
@@ -60,7 +61,7 @@ public abstract class AbstractPipeline implements Pipeline
     public Pipeline add(Object eventData, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
         Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, eventData, event, handler, rowkey);
-        completedHandler = new CallNextPipeline(pipeline);
+        pipelineCompletedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
     
@@ -68,7 +69,7 @@ public abstract class AbstractPipeline implements Pipeline
     public Pipeline add(Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
         Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, eventData, event, handler, null);
-        completedHandler = new CallNextPipeline(pipeline);
+        pipelineCompletedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
     
@@ -76,7 +77,7 @@ public abstract class AbstractPipeline implements Pipeline
     public Pipeline add(Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
         Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, event, handler, rowkey);
-        completedHandler = new CallNextPipeline(pipeline);
+        pipelineCompletedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
     
@@ -84,14 +85,14 @@ public abstract class AbstractPipeline implements Pipeline
     public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
         Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, event, handler, null);
-        completedHandler = new CallNextPipeline(pipeline);
+        pipelineCompletedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
     
     public Pipeline conversion(Conversion<?> conversion)
     {
         Pipeline pipeline = new ConversionPipeline(eventBus, executorMap, this, conversion);
-        completedHandler = new CallNextPipeline(pipeline);
+        pipelineCompletedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
     
@@ -99,18 +100,11 @@ public abstract class AbstractPipeline implements Pipeline
     public void onCompleted(Object result)
     {
         this.result = result;
-        if (completedHandler != null)
-        {
-            try
-            {
-                completedHandler.onCompleted(result);
-            }
-            finally
-            {
-                ;
-            }
-        }
         signal();
+        if (pipelineCompletedHandler != null)
+        {
+            pipelineCompletedHandler.onCompleted(result);
+        }
     }
     
     @Override
@@ -149,9 +143,9 @@ public abstract class AbstractPipeline implements Pipeline
     
     @SuppressWarnings("unchecked")
     @Override
-    public void completedHanlder(CompletedHandler<?> completedHandler)
+    public void setCompletedHanlder(CompletedHandler<?> completedHandler)
     {
-        this.completedHandler = (CompletedHandler<Object>) completedHandler;
+        this.pipelineCompletedHandler = (CompletedHandler<Object>) completedHandler;
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -182,6 +176,11 @@ public abstract class AbstractPipeline implements Pipeline
     public void onError(Throwable e)
     {
         this.e = e;
+        signal();
+        if (pipelineCompletedHandler != null)
+        {
+            pipelineCompletedHandler.onError(e);
+        }
     }
     
     public Object getResult()
@@ -202,9 +201,10 @@ public abstract class AbstractPipeline implements Pipeline
             super(mode, eventData, event, handler, executor, eventBus);
         }
         
-        public void signal(Object result)
+        @Override
+        public void setResult(Object result)
         {
-            super.signal(result);
+            super.setResult(result);
             onCompleted(result);
         }
         
@@ -223,9 +223,10 @@ public abstract class AbstractPipeline implements Pipeline
             super(eventData, event, handler, executor, eventBus, rowkey);
         }
         
-        public void signal(Object result)
+        @Override
+        public void setResult(Object result)
         {
-            super.signal(result);
+            super.setResult(result);
             onCompleted(result);
         }
         
@@ -244,9 +245,10 @@ public abstract class AbstractPipeline implements Pipeline
             super(eventData, event, handler, executor, eventBus);
         }
         
-        public void signal(Object result)
+        @Override
+        public void setResult(Object result)
         {
-            super.signal(result);
+            super.setResult(result);
             onCompleted(result);
         }
         

@@ -1,12 +1,16 @@
 package com.jfireframework.eventbus.pipeline;
 
-import javax.naming.InsufficientResourcesException;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.locks.LockSupport;
+import org.junit.Assert;
 import org.junit.Test;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.bus.impl.CalculateEventBus;
-import com.jfireframework.eventbus.completedhandler.CompletedHandler;
 import com.jfireframework.eventbus.handler.EventHandler;
-import com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod;
+import com.jfireframework.eventbus.pipeline.conversion.FromArray;
+import com.jfireframework.eventbus.pipeline.conversion.MapConversion;
+import com.jfireframework.eventbus.pipeline.conversion.NumberReduceConversion;
 
 public class PipeLineTest
 {
@@ -81,14 +85,12 @@ public class PipeLineTest
                 System.out.println(data + "字符");
                 return data;
             }
-        }).conversion(new Conversion<String>() {
+        }).conversion(new MapConversion<String>() {
             
             @Override
-            public void conversie(String data, CompletedHandler<Object> handler, Pipeline pipeline)
+            protected Object conversie(String str)
             {
-                Integer i = Integer.valueOf(data);
-                handler.onCompleted(i);
-                pipeline.onCompleted(i);
+                return Integer.valueOf(str);
             }
         }).add(PipeLineEvent.one, new EventHandler<Integer>() {
             
@@ -101,5 +103,50 @@ public class PipeLineTest
         });
         pipeline.start();
         pipeline.await();
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test4()
+    {
+        EventBus eventBus = new CalculateEventBus();
+        eventBus.register(PipeLineEvent.class);
+        Pipeline pipeline = eventBus.pipeline()//
+                .add(PipeLineEvent.one, new EventHandler<Void>() {
+                    
+                    @Override
+                    public Object handle(Void data, EventBus eventBus)
+                    {
+                        return new String[] { "1", "2" };
+                    }
+                })// 投递一个字符串数组
+                .conversion(new FromArray<String[]>())// 从数组遍历，每一个数组元素作为下一个环节的数据提供
+                .conversion(new MapConversion<String>() {
+                    
+                    @Override
+                    protected Object conversie(String data)
+                    {
+                        return Integer.valueOf(data);
+                    }
+                })// 将收到的字符串数据转化为数字提供给下一个处理器
+                .conversion(new NumberReduceConversion<Integer>(2))// 将收到的Integer类型数据存储在并发的Queue中，如果被调用两次后，将Queue中的数据传递下一个处理器
+                .add(PipeLineEvent.one, new EventHandler<Queue<Integer>>() {
+                    
+                    @Override
+                    public Object handle(Queue<Integer> data, EventBus eventBus)
+                    {
+                        int sum = 0;
+                        for (Integer each : data)
+                        {
+                            sum += each;
+                        }
+                        System.out.println(sum);
+                        return sum;
+                    }
+                });// 使用上一个环节提供的数据，也就是Queue，进行逻辑处理
+        pipeline.start();
+        pipeline.await();
+        Assert.assertEquals(3, pipeline.getResult());
+        LockSupport.parkNanos(100000000);
     }
 }

@@ -18,4 +18,10 @@ public class CallNextPipeline implements CompletedHandler<Object>
         pipeline.work(result);
     }
     
+    @Override
+    public void onError(Throwable e)
+    {
+        pipeline.onError(e);
+    }
+    
 }
