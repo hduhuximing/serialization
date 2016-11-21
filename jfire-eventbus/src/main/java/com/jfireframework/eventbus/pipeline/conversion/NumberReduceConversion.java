@@ -15,12 +15,20 @@ public class NumberReduceConversion<E> implements Conversion<E>
     }
     
     @Override
-    public void conversie(E data, Pipeline pipeline)
+    public boolean conversie(E data, Pipeline pipeline)
     {
-        queue.offer(data);
+        if (data != null)
+        {
+            queue.offer(data);
+        }
         if (count.decrementAndGet() == 0)
         {
             pipeline.onCompleted(queue);
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
     

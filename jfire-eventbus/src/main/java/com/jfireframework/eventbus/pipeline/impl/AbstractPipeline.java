@@ -6,7 +6,6 @@ import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.completedhandler.CompletedHandler;
 import com.jfireframework.eventbus.completedhandler.impl.CallNextPipeline;
 import com.jfireframework.eventbus.event.EventConfig;
-import com.jfireframework.eventbus.event.ParallelLevel;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.ReadWriteEventContext;
 import com.jfireframework.eventbus.eventcontext.impl.NormalEventContext;
@@ -24,15 +23,14 @@ public abstract class AbstractPipeline implements Pipeline
     protected final EventBus                                                    eventBus;
     protected final Pipeline                                                    pre;
     protected Thread                                                            owner;
-    protected volatile boolean                                                  finished            = false;
-    protected volatile boolean                                                  await               = false;
+    protected volatile boolean                                                  finished = false;
+    protected volatile boolean                                                  await    = false;
     protected Throwable                                                         e;
     protected CompletedHandler<Object>                                          pipelineCompletedHandler;
     protected final Object                                                      eventData;
     protected final Enum<? extends EventConfig>                                 event;
     protected final EventHandler<?>                                             eventHandler;
     protected final Object                                                      rowKey;
-    public static final Object                                                  USE_UPSTREAM_RESULT = new Object();
     protected Object                                                            result;
     
     public AbstractPipeline(EventBus eventBus, IdentityHashMap<Enum<? extends EventConfig>, EventExecutor> executorMap, Pipeline pre, Enum<? extends EventConfig> event, EventHandler<?> handler, Object rowKey)
@@ -58,7 +56,7 @@ public abstract class AbstractPipeline implements Pipeline
     }
     
     @Override
-    public Pipeline add(Object eventData, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
+    public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowkey)
     {
         Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, eventData, event, handler, rowkey);
         pipelineCompletedHandler = new CallNextPipeline(pipeline);
@@ -66,17 +64,9 @@ public abstract class AbstractPipeline implements Pipeline
     }
     
     @Override
-    public Pipeline add(Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler)
+    public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData)
     {
-        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, eventData, event, handler, null);
-        pipelineCompletedHandler = new CallNextPipeline(pipeline);
-        return pipeline;
-    }
-    
-    @Override
-    public Pipeline add(Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
-    {
-        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, event, handler, rowkey);
+        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, eventData, event, handler, USE_UPSTREAM_RESULT);
         pipelineCompletedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
@@ -84,11 +74,12 @@ public abstract class AbstractPipeline implements Pipeline
     @Override
     public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, event, handler, null);
+        Pipeline pipeline = new WorkPipeline(eventBus, executorMap, this, USE_UPSTREAM_RESULT, event, handler, USE_UPSTREAM_RESULT);
         pipelineCompletedHandler = new CallNextPipeline(pipeline);
         return pipeline;
     }
     
+    @Override
     public Pipeline conversion(Conversion<?> conversion)
     {
         Pipeline pipeline = new ConversionPipeline(eventBus, executorMap, this, conversion);
@@ -132,7 +123,8 @@ public abstract class AbstractPipeline implements Pipeline
         }
     }
     
-    protected void signal()
+    @Override
+    public void signal()
     {
         finished = true;
         if (await)
@@ -149,30 +141,91 @@ public abstract class AbstractPipeline implements Pipeline
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected EventContext<?> build(Object eventData)
+    protected EventContext<?> build(Object upStreamResult)
     {
-        if (rowKey == null)
+        if (this.eventData == USE_UPSTREAM_RESULT)
         {
-            EventConfig config = (EventConfig) event;
-            if (config.parallelLevel() == ParallelLevel.RW_EVENT_READ)
+            switch (((EventConfig) event).parallelLevel())
             {
-                return new ReadWriteEventContextProxy(ReadWriteEventContext.READ, eventData, event, eventHandler, executorMap.get(event), eventBus);
-            }
-            else if (config.parallelLevel() == ParallelLevel.RW_EVENT_WRITE)
-            {
-                return new ReadWriteEventContextProxy(ReadWriteEventContext.WRITE, eventData, event, eventHandler, executorMap.get(event), eventBus);
-            }
-            else
-            {
-                return new NormalEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus);
+                case PAEALLEL:
+                    return new NormalEventContextProxy(upStreamResult, event, eventHandler, executorMap.get(event), eventBus);
+                case EVENT_SERIAL:
+                    return new NormalEventContextProxy(upStreamResult, event, eventHandler, executorMap.get(event), eventBus);
+                case ROWKEY_SERIAL:
+                    if (rowKey == USE_UPSTREAM_RESULT)
+                    {
+                        return new RowEventContextProxy(upStreamResult, event, eventHandler, executorMap.get(event), eventBus, upStreamResult);
+                    }
+                    else
+                    {
+                        return new RowEventContextProxy(upStreamResult, event, eventHandler, executorMap.get(event), eventBus, rowKey);
+                    }
+                case RW_EVENT_READ:
+                    return new ReadWriteEventContextProxy(ReadWriteEventContext.READ, upStreamResult, event, eventHandler, executorMap.get(event), eventBus);
+                case RW_EVENT_WRITE:
+                    return new ReadWriteEventContextProxy(ReadWriteEventContext.WRITE, upStreamResult, event, eventHandler, executorMap.get(event), eventBus);
+                case TYPE_ROWKEY_SERIAL:
+                    if (rowKey == USE_UPSTREAM_RESULT)
+                    {
+                        return new RowEventContextProxy(upStreamResult, event, eventHandler, executorMap.get(event), eventBus, upStreamResult);
+                    }
+                    else
+                    {
+                        return new RowEventContextProxy(upStreamResult, event, eventHandler, executorMap.get(event), eventBus, rowKey);
+                    }
+                case TYPE_SERIAL:
+                    return new NormalEventContextProxy(upStreamResult, event, eventHandler, executorMap.get(upStreamResult), eventBus);
+                default:
+                    throw new NullPointerException();
             }
         }
         else
         {
-            return new RowEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus, rowKey);
+            switch (((EventConfig) event).parallelLevel())
+            {
+                case PAEALLEL:
+                    return new NormalEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus);
+                case EVENT_SERIAL:
+                    return new NormalEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus);
+                case ROWKEY_SERIAL:
+                    if (rowKey == USE_UPSTREAM_RESULT)
+                    {
+                        return new RowEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus, upStreamResult);
+                    }
+                    else
+                    {
+                        return new RowEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus, rowKey);
+                    }
+                case RW_EVENT_READ:
+                    return new ReadWriteEventContextProxy(ReadWriteEventContext.READ, eventData, event, eventHandler, executorMap.get(event), eventBus);
+                case RW_EVENT_WRITE:
+                    return new ReadWriteEventContextProxy(ReadWriteEventContext.WRITE, eventData, event, eventHandler, executorMap.get(event), eventBus);
+                case TYPE_ROWKEY_SERIAL:
+                    if (rowKey == USE_UPSTREAM_RESULT)
+                    {
+                        return new RowEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus, upStreamResult);
+                    }
+                    else
+                    {
+                        return new RowEventContextProxy(eventData, event, eventHandler, executorMap.get(event), eventBus, rowKey);
+                    }
+                case TYPE_SERIAL:
+                    return new NormalEventContextProxy(eventData, event, eventHandler, executorMap.get(upStreamResult), eventBus);
+                default:
+                    throw new NullPointerException();
+            }
         }
     }
     
+    @Override
+    public Pipeline addAll(PipelineData... datas)
+    {
+        Pipeline pipeline = new DistributivePipeline(eventBus, executorMap, this, datas);
+        pipelineCompletedHandler = new CallNextPipeline(pipeline);
+        return pipeline;
+    }
+    
+    @Override
     public void onError(Throwable e)
     {
         this.e = e;
@@ -183,11 +236,13 @@ public abstract class AbstractPipeline implements Pipeline
         }
     }
     
+    @Override
     public Object getResult()
     {
         return result;
     }
     
+    @Override
     public Throwable getThrowable()
     {
         return e;
@@ -208,6 +263,7 @@ public abstract class AbstractPipeline implements Pipeline
             onCompleted(result);
         }
         
+        @Override
         public void setThrowable(Throwable e)
         {
             super.setThrowable(e);
@@ -230,6 +286,7 @@ public abstract class AbstractPipeline implements Pipeline
             onCompleted(result);
         }
         
+        @Override
         public void setThrowable(Throwable e)
         {
             super.setThrowable(e);
@@ -252,6 +309,7 @@ public abstract class AbstractPipeline implements Pipeline
             onCompleted(result);
         }
         
+        @Override
         public void setThrowable(Throwable e)
         {
             super.setThrowable(e);

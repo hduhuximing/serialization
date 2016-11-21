@@ -7,6 +7,7 @@ import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public abstract class AbstractEventPoster implements EventPoster
 {
@@ -57,5 +58,11 @@ public abstract class AbstractEventPoster implements EventPoster
     public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
         return eventBus.syncPost(data, event, handler);
+    }
+    
+    @Override
+    public Pipeline pipeline()
+    {
+        return eventBus.pipeline();
     }
 }

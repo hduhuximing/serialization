@@ -6,7 +6,7 @@ public class FromArray<E> implements Conversion<E>
 {
     
     @Override
-    public void conversie(E data, Pipeline pipeline)
+    public boolean conversie(E data, Pipeline pipeline)
     {
         if (data instanceof int[])
         {
@@ -71,6 +71,7 @@ public class FromArray<E> implements Conversion<E>
                 pipeline.onCompleted(each);
             }
         }
+        return true;
     }
     
 }

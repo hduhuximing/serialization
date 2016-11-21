@@ -4,5 +4,12 @@ import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public interface Conversion<E>
 {
-    public void conversie(E data, Pipeline pipeline);
+    /**
+     * 转化是否完成
+     * 
+     * @param data
+     * @param pipeline
+     * @return
+     */
+    public boolean conversie(E data, Pipeline pipeline);
 }

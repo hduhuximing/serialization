@@ -21,11 +21,14 @@ public class ConversionPipeline extends AbstractPipeline
     @Override
     public void work(Object upstreamResult)
     {
-        conversion.conversie(upstreamResult, this);
-        result = upstreamResult;
-        signal();
+        if (conversion.conversie(upstreamResult, this))
+        {
+            this.result = upstreamResult;
+            signal();
+        }
     }
     
+    @Override
     public void onCompleted(Object result)
     {
         if (pipelineCompletedHandler != null)

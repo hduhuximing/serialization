@@ -7,13 +7,71 @@ import com.jfireframework.eventbus.pipeline.conversion.Conversion;
 
 public interface Pipeline
 {
-    public Pipeline add(Object eventData, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler);
     
-    public Pipeline add(Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler);
+    public static final Object USE_UPSTREAM_RESULT = new Object();
     
-    public Pipeline add(Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler);
+    public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowkey);
+    
+    public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData);
     
     public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler);
+    
+    public void signal();
+    
+    public static class PipelineData
+    {
+        final Object                      eventData;
+        final Object                      rowKey;
+        final Enum<? extends EventConfig> event;
+        final EventHandler<?>             handler;
+        
+        public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowKey)
+        {
+            this.eventData = eventData;
+            this.rowKey = rowKey;
+            this.event = event;
+            this.handler = handler;
+        }
+        
+        public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData)
+        {
+            this.eventData = eventData;
+            rowKey = USE_UPSTREAM_RESULT;
+            this.event = event;
+            this.handler = handler;
+        }
+        
+        public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler)
+        {
+            eventData = USE_UPSTREAM_RESULT;
+            rowKey = USE_UPSTREAM_RESULT;
+            this.event = event;
+            this.handler = handler;
+        }
+        
+        public Object getEventData()
+        {
+            return eventData;
+        }
+        
+        public Object getRowKey()
+        {
+            return rowKey;
+        }
+        
+        public Enum<? extends EventConfig> getEvent()
+        {
+            return event;
+        }
+        
+        public EventHandler<?> getHandler()
+        {
+            return handler;
+        }
+        
+    }
+    
+    public Pipeline addAll(PipelineData... events);
     
     public Pipeline conversion(Conversion<?> conversion);
     
