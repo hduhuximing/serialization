@@ -1,6 +1,5 @@
 package com.jfireframework.boot;
 
-import java.io.InputStream;
 import javax.servlet.Filter;
 import javax.servlet.annotation.WebFilter;
 import org.apache.catalina.Context;
@@ -80,12 +79,12 @@ public class BootStarter
         loader.setDelegate(true);
         ctx.setLoader(loader);
         ContextConfig ctxCfg = new ContextConfig() {
-            private InputStream inputStream = BootStarter.class.getClassLoader().getResourceAsStream("web.xml");
             
             @Override
             protected InputSource getGlobalWebXmlSource()
             {
-                return new InputSource(inputStream);
+                // 需要返回null，否则mvc框架会被启动两次。原因不明
+                return null;
             }
         };
         ctx.addLifecycleListener(ctxCfg);
