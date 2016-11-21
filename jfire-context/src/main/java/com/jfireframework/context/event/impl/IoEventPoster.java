@@ -9,14 +9,10 @@ public class IoEventPoster extends AbstractEventPoster
     private int  maxWorker  = 100;
     private long waittime   = 60 * 1000;
     
-    @SuppressWarnings("unchecked")
     @PostConstruct
     public void init()
     {
         eventBus = new IoEventBus(coreWorker, maxWorker, waittime);
-        if (events != null)
-        {
-            eventBus.register(events.toArray(new Class[events.size()]));
-        }
+        register();
     }
 }

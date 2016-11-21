@@ -1,6 +1,7 @@
 package com.jfireframework.context.event.impl;
 
-import java.util.Set;
+import com.jfireframework.baseutil.PackageScan;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.context.event.EventPoster;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.EventConfig;
@@ -9,8 +10,30 @@ import com.jfireframework.eventbus.handler.EventHandler;
 
 public abstract class AbstractEventPoster implements EventPoster
 {
-    protected Set<Class<? extends Enum<? extends EventConfig>>> events;
-    protected EventBus                                          eventBus;
+    protected String   eventPath;
+    protected EventBus eventBus;
+    
+    @SuppressWarnings("unchecked")
+    protected void register()
+    {
+        String[] events = PackageScan.scan(eventPath);
+        for (String each : events)
+        {
+            try
+            {
+                Class<?> ckass = Class.forName(each);
+                if (Enum.class.isAssignableFrom(ckass) || EventConfig.class.isAssignableFrom(ckass))
+                {
+                    eventBus.register((Class<? extends Enum<? extends EventConfig>>) ckass);
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new JustThrowException(e);
+            }
+            
+        }
+    }
     
     @Override
     public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)

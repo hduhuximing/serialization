@@ -18,7 +18,7 @@ public class EventTest
         BeanInfo beanInfo = new BeanInfo();
         beanInfo.setBeanName("com.jfireframework.context.event.impl.EventPosterImpl");
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("events", "com.jfireframework.context.test.function.event.SmsEvent");
+        params.put("eventPath", "com.jfireframework.context.test.function.event");
         beanInfo.setParams(params);
         jfireContext.addBeanInfo(beanInfo);
         jfireContext.initContext();

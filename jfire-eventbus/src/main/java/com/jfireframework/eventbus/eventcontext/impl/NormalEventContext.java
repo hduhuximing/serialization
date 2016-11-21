@@ -59,6 +59,7 @@ public class NormalEventContext<T> implements EventContext<T>
     public void setResult(Object result)
     {
         this.result = (T) result;
+        signal();
     }
     
     protected void signal()
