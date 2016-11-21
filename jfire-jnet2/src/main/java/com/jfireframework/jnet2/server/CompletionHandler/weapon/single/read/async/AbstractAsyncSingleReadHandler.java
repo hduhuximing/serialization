@@ -8,11 +8,13 @@ import com.jfireframework.jnet2.common.decodec.DecodeResult;
 import com.jfireframework.jnet2.common.exception.NotFitProtocolException;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.AbstractSingleReadHandler;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.event.Message;
+import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.event.ReciveHandler;
 
 public abstract class AbstractAsyncSingleReadHandler extends AbstractSingleReadHandler implements AsyncReadHandler
 {
     protected final EventBus   eventBus;
-    protected final ByteBuf<?> emptyBuf = DirectByteBuf.allocate(1);
+    protected final ByteBuf<?> emptyBuf      = DirectByteBuf.allocate(1);
+    private ReciveHandler      reciveHandler = new ReciveHandler();
     
     public AbstractAsyncSingleReadHandler(ServerChannel serverChannel, EventBus eventBus)
     {
@@ -42,7 +44,7 @@ public abstract class AbstractAsyncSingleReadHandler extends AbstractSingleReadH
                 internalResult.setChannelInfo(serverChannel);
                 internalResult.setData(intermediateResult);
                 internalResult.setIndex(0);
-                eventBus.post(this, Message.recive);
+                eventBus.post(this, Message.recive, reciveHandler);
                 break;
         }
     }

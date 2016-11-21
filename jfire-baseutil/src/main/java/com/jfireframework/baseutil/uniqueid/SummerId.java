@@ -1,7 +1,6 @@
 package com.jfireframework.baseutil.uniqueid;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.UnSupportException;
 
@@ -9,36 +8,18 @@ public class SummerId implements Uid
 {
     
     private final AtomicInteger count     = new AtomicInteger(0);
-    private final static int    countMask = 0x00ffffff;
+    private final static int    countMask = 0x0000ffff;
     private final byte          workedId;
     
     public SummerId(int workerId)
     {
         if (workerId >= 0 && workerId <= 255)
         {
-            testLimit();
             this.workedId = (byte) (workerId & 0xff);
         }
         else
         {
             throw new UnSupportException("workerid的取值范围为0-255");
-        }
-    }
-    
-    private void testLimit()
-    {
-        AtomicInteger count = new AtomicInteger(0);
-        int i = 0;
-        long base = System.currentTimeMillis();
-        while (i < 16777215)
-        {
-            count.incrementAndGet();
-            i += 1;
-        }
-        long result = System.currentTimeMillis();
-        if (result == base)
-        {
-            throw new UnSupportException("当前服务器可以在一毫秒内产生太多id，超出了算法计算能力，不能使用该算法");
         }
     }
     
@@ -48,6 +29,7 @@ public class SummerId implements Uid
         return StringUtil.toHexString(generateBytes());
     }
     
+    @Override
     public long generateLong()
     {
         byte[] result = generateBytes();
@@ -84,24 +66,24 @@ public class SummerId implements Uid
     /**
      * 使用64个bit进行id生成
      * 第一个bit不使用，默认为0
-     * 2-32bit是为毫秒是时间戳。足够使用30年
-     * 33-40bit是workerid的值
-     * 41-64bit为序号，最大长度为16777215。
-     * 该算法可以在1毫秒内产生16777215个id。
-     * 注意：该算法未进行超时保护。如果机器的能力超过了1毫秒16777215的id，则id会出现重复。但是这个数字已经十分大。基本不太可能。
+     * 2-40bit是为毫秒是时间戳。足够使用17年
+     * 41-48bit是workerid的值
+     * 49-64bit为序号，最大长度为0x0000ffff。
+     * 该算法可以在1毫秒内产生0x0000ffff个id。
+     * 注意：该算法未进行超时保护。如果机器的能力超过了1毫秒0x0000ffff的id，则id会出现重复。但是这个数字已经十分大。基本不太可能。
      */
     @Override
     public byte[] generateBytes()
     {
         byte[] result = new byte[8];
         long time = System.currentTimeMillis() - base;
-        result[0] = (byte) (time >>> 24);
-        result[1] = (byte) (time >>> 16);
-        result[2] = (byte) (time >>> 8);
-        result[3] = (byte) time;
-        result[4] |= workedId;
+        result[0] = (byte) (time >>> 32);
+        result[1] = (byte) (time >>> 24);
+        result[2] = (byte) (time >>> 16);
+        result[3] = (byte) (time >>> 8);
+        result[4] = (byte) time;
+        result[5] = workedId;
         int tmp = count.getAndIncrement() & countMask;
-        result[5] = (byte) (tmp >>> 16);
         result[6] = (byte) (tmp >>> 8);
         result[7] = (byte) (tmp);
         return result;
