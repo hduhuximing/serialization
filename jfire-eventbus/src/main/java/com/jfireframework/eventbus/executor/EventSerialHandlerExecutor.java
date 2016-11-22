@@ -4,16 +4,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.jfireframework.baseutil.concurrent.MPSCQueue;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.eventcontext.EventContext;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.EventHelper;
 
-public class EventSerialHandlerExecutor implements EventHandlerExecutor
+public class EventSerialHandlerExecutor implements EventExecutor
 {
     private static final int                 idle   = 0;
     private static final int                 busy   = 1;
     private AtomicInteger                    state  = new AtomicInteger(idle);
     private final MPSCQueue<EventContext<?>> events = new MPSCQueue<EventContext<?>>();
     
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void handle(EventContext<?> eventContext, EventBus eventBus)
     {
@@ -25,23 +24,7 @@ public class EventSerialHandlerExecutor implements EventHandlerExecutor
             {
                 while ((eventContext = events.poll()) != null)
                 {
-                    try
-                    {
-                        Object trans = eventContext.getEventData();
-                        for (EventHandler each : eventContext.combinationHandlers())
-                        {
-                            trans = each.handle(trans, eventBus);
-                        }
-                        eventContext.setResult(trans);
-                    }
-                    catch (Throwable e)
-                    {
-                        eventContext.setThrowable(e);
-                    }
-                    finally
-                    {
-                        eventContext.signal();
-                    }
+                    EventHelper.handle(eventContext, eventBus);
                 }
                 state.set(idle);
                 if (events.isEmpty())

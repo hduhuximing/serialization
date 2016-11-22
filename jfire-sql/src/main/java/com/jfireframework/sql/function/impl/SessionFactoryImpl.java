@@ -16,6 +16,8 @@ import com.jfireframework.baseutil.PackageScan;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.baseutil.uniqueid.SummerId;
+import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.sql.annotation.Sql;
 import com.jfireframework.sql.extra.dbstructure.MariaDBStructure;
@@ -51,6 +53,8 @@ public class SessionFactoryImpl implements SessionFactory
     protected PageParse                         pageParse;
     protected String                            productName;
     protected static final Logger               logger       = ConsoleLogFactory.getLogger();
+    private int                                 workerid     = 0;
+    private Uid                                 uid;
     
     public SessionFactoryImpl()
     {
@@ -75,6 +79,7 @@ public class SessionFactoryImpl implements SessionFactory
             {
                 classLoader = Thread.currentThread().getContextClassLoader();
             }
+            uid = new SummerId(workerid);
             Set<Class<?>> set = buildClassNameSet(classLoader);
             preInterceptors = findSqlPreInterceptors(set);
             sqlInterceptors = findSqlInterceptor(set);
@@ -329,7 +334,7 @@ public class SessionFactoryImpl implements SessionFactory
             {
                 if (each.getIdInfo() != null)
                 {
-                    daos.put(each.getEntityClass(), new DAOBeanImpl(each, preInterceptors));
+                    daos.put(each.getEntityClass(), new DAOBeanImpl(each, preInterceptors, uid));
                 }
             }
         }

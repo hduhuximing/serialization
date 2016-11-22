@@ -6,7 +6,7 @@ import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventworker.EventWorker;
-import com.jfireframework.eventbus.executor.EventHandlerExecutor;
+import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.util.WorkerCount;
 
 public abstract class IoWorker implements EventWorker
@@ -46,7 +46,7 @@ public abstract class IoWorker implements EventWorker
             {
                 eventBus.addWorker();
             }
-            EventHandlerExecutor executor = event.executor();
+            EventExecutor executor = event.executor();
             executor.handle(event, eventBus);
             idleWorkerCount.addIdle();
         }

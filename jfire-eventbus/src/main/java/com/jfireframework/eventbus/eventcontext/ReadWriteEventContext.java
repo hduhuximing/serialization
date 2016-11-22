@@ -1,8 +1,6 @@
 package com.jfireframework.eventbus.eventcontext;
 
-import com.jfireframework.eventbus.event.EventConfig;
-
-public interface ReadWriteEventContext<T extends Enum<? extends EventConfig>> extends EventContext<T>
+public interface ReadWriteEventContext<T> extends EventContext<T>
 {
     /**
      * 是否直接执行。初始化的时候都是false

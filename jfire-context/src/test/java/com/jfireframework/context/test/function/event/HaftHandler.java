@@ -7,7 +7,7 @@ import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.handler.EventHandler;
 
 @Resource
-public class HaftHandler implements EventHandler<SmsEvent, UserPhone>, ContextInitFinish
+public class HaftHandler implements EventHandler<UserPhone>, ContextInitFinish
 {
     @Resource
     private EventPoster publisher;
@@ -31,13 +31,8 @@ public class HaftHandler implements EventHandler<SmsEvent, UserPhone>, ContextIn
     {
         UserPhone phone = new UserPhone();
         phone.setPhone("1775032");
-        publisher.post(phone, SmsEvent.halt).await();
-    }
-    
-    @Override
-    public SmsEvent interest()
-    {
-        return SmsEvent.halt;
+        publisher.post(phone, SmsEvent.halt, this).await();
+        ;
     }
     
 }

@@ -12,7 +12,7 @@ import com.jfireframework.jnet2.common.channel.ChannelInitListener;
 import com.jfireframework.jnet2.common.channel.impl.ServerChannel;
 import com.jfireframework.jnet2.server.AioServer;
 import com.jfireframework.jnet2.server.CompletionHandler.AcceptHandler;
-import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.event.ReciveHandler;
+import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.event.Message;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.push.AsyncSingleReadWithPushHandlerImpl;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.withoutpush.AsyncSingleReadHandlerImpl;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.sync.push.SyncSingleReadAndPushHandlerImpl;
@@ -30,6 +30,7 @@ public class SingleAcceptHandler implements AcceptHandler
     private final WorkMode      workMode;
     private final EventBus      eventBus;
     
+    @SuppressWarnings("unchecked")
     public SingleAcceptHandler(AioServer aioServer, ServerConfig serverConfig)
     {
         pushMode = serverConfig.getPushMode();
@@ -41,8 +42,7 @@ public class SingleAcceptHandler implements AcceptHandler
         if (workMode == WorkMode.ASYNC)
         {
             eventBus = new CalculateEventBus();
-            eventBus.addHandler(new ReciveHandler());
-            eventBus.start();
+            eventBus.register(Message.class);
         }
         else
         {

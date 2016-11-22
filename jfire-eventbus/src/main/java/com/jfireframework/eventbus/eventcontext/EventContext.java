@@ -1,7 +1,7 @@
 package com.jfireframework.eventbus.eventcontext;
 
 import com.jfireframework.eventbus.event.EventConfig;
-import com.jfireframework.eventbus.executor.EventHandlerExecutor;
+import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 
 public interface EventContext<T>
@@ -11,14 +11,14 @@ public interface EventContext<T>
      * 
      * @return
      */
-    public EventHandlerExecutor executor();
+    public EventExecutor executor();
     
     /**
      * 返回该事件绑定的处理器
      * 
      * @return
      */
-    public EventHandler<?, ?>[] combinationHandlers();
+    public EventHandler<?> eventHandler();
     
     /**
      * 等待直到该事件被处理完成
@@ -26,7 +26,7 @@ public interface EventContext<T>
     public void await();
     
     /**
-     * 本事件处理过程中发生了异常，设置异常数据
+     * 事件发生过程中发生了异常。记录异常并且让事件完成
      * 
      * @param e
      */
@@ -40,13 +40,6 @@ public interface EventContext<T>
     public Throwable getThrowable();
     
     /**
-     * 设置事件处理的结果数据
-     * 
-     * @param trans
-     */
-    public void setResult(Object trans);
-    
-    /**
      * 获取事件处理的结果数据,如果事件没有完成。就阻塞到完成为止
      * 
      * @return
@@ -54,8 +47,7 @@ public interface EventContext<T>
     public T getResult();
     
     /**
-     * 获取事件处理的结果数据。如果事件没有完成，就阻塞到事件完成为止或者超时退出
-     * 如果超时时间到达还没有完成，抛出异常
+     * 获取事件处理的结果数据。如果事件没有完成，就阻塞到事件完成为止或者超时退出 如果超时时间到达还没有完成，抛出异常
      * 
      * @return
      */
@@ -65,7 +57,7 @@ public interface EventContext<T>
      * 
      * 完成该事件，并且（如果有）唤醒等待该事件完成的线程
      */
-    public void signal();
+    public void setResult(Object result);
     
     /**
      * 等待该事件的完成，最多等待指定的毫秒数

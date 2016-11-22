@@ -2,7 +2,6 @@ package com.jfireframework.context.event.impl;
 
 import javax.annotation.PostConstruct;
 import com.jfireframework.eventbus.bus.impl.CalculateEventBus;
-import com.jfireframework.eventbus.handler.EventHandler;
 
 public class CalculateEventPost extends AbstractEventPoster
 {
@@ -12,10 +11,6 @@ public class CalculateEventPost extends AbstractEventPoster
     public void init()
     {
         eventBus = new CalculateEventBus(coreWorker);
-        for (EventHandler<?, ?> each : handlers)
-        {
-            eventBus.addHandler(each);
-        }
-        eventBus.start();
+        register();
     }
 }

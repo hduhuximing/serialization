@@ -1,41 +1,68 @@
 package com.jfireframework.context.event.impl;
 
-import java.util.LinkedList;
-import java.util.List;
-import javax.annotation.Resource;
+import com.jfireframework.baseutil.PackageScan;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.context.event.EventPoster;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public abstract class AbstractEventPoster implements EventPoster
 {
-    @Resource
-    protected List<EventHandler<?, ?>> handlers = new LinkedList<EventHandler<?, ?>>();
-    protected EventBus                 eventBus;
+    protected String   eventPath;
+    protected EventBus eventBus;
     
-    @Override
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey)
+    @SuppressWarnings("unchecked")
+    protected void register()
     {
-        return eventBus.post(data, event, rowkey);
+        String[] events = PackageScan.scan(eventPath);
+        for (String each : events)
+        {
+            try
+            {
+                Class<?> ckass = Class.forName(each);
+                if (Enum.class.isAssignableFrom(ckass) || EventConfig.class.isAssignableFrom(ckass))
+                {
+                    eventBus.register((Class<? extends Enum<? extends EventConfig>>) ckass);
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new JustThrowException(e);
+            }
+            
+        }
     }
     
     @Override
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event)
+    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        return eventBus.post(data, event);
+        return eventBus.post(data, event, rowkey, handler);
     }
     
     @Override
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey)
+    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        return eventBus.syncPost(data, event, rowkey);
+        return eventBus.post(data, event, handler);
     }
     
     @Override
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event)
+    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        return eventBus.syncPost(data, event);
+        return eventBus.syncPost(data, event, rowkey, handler);
+    }
+    
+    @Override
+    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
+    {
+        return eventBus.syncPost(data, event, handler);
+    }
+    
+    @Override
+    public Pipeline pipeline()
+    {
+        return eventBus.pipeline();
     }
 }
