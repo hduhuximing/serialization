@@ -40,7 +40,7 @@ public class DynamicBeanTransfer<T> extends AbstractResultsetTransfer<T>
         List<MapField> resultFields = new LinkedList<MapField>();
         for (int i = 0; i < colCount; i++)
         {
-            MapField mapField = mapFields.get(metaData.getColumnName(i + 1));
+            MapField mapField = mapFields.get(metaData.getColumnName(i + 1).toLowerCase());
             if (mapField != null)
             {
                 resultFields.add(mapField);

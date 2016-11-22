@@ -52,7 +52,7 @@ public abstract class AbstractResultsetTransfer<T> implements ResultSetTransfer<
         mapFields = new HashMap<String, MapField>();
         for (MapField each : list)
         {
-            mapFields.put(each.getColName(), each);
+            mapFields.put(each.getColName().toLowerCase(), each);
         }
     }
     
