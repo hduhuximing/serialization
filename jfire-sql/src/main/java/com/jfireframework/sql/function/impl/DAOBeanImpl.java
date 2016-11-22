@@ -16,7 +16,9 @@ import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.sql.annotation.FindBy;
+import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.extra.interceptor.SqlPreInterceptor;
@@ -46,6 +48,8 @@ public class DAOBeanImpl<T> implements Dao<T>
     private final String              deleteSql;
     private static final Logger       LOGGER       = ConsoleLogFactory.getLogger();
     private final SqlPreInterceptor[] preInterceptors;
+    private final Uid                 uid;
+    private final boolean             useUid;
     
     enum IdType
     {
@@ -53,8 +57,9 @@ public class DAOBeanImpl<T> implements Dao<T>
     }
     
     @SuppressWarnings("unchecked")
-    public DAOBeanImpl(TableMetaData metaData, SqlPreInterceptor[] preInterceptors)
+    public DAOBeanImpl(TableMetaData metaData, SqlPreInterceptor[] preInterceptors, Uid uid)
     {
+        this.uid = uid;
         this.preInterceptors = preInterceptors;
         this.entityClass = (Class<T>) metaData.getEntityClass();
         ColNameStrategy nameStrategy = metaData.getColNameStrategy();
@@ -69,6 +74,7 @@ public class DAOBeanImpl<T> implements Dao<T>
             }
         }
         Field t_idField = metaData.getIdInfo().getField();
+        useUid = t_idField.getAnnotation(Id.class).useUid();
         idType = getIdType(t_idField);
         idField = MapFieldBuilder.buildMapField(t_idField, nameStrategy);
         idOffset = unsafe.objectFieldOffset(t_idField);
@@ -333,6 +339,20 @@ public class DAOBeanImpl<T> implements Dao<T>
         Object idValue = unsafe.getObject(entity, idOffset);
         if (idValue == null)
         {
+            if (useUid)
+            {
+                switch (idType)
+                {
+                    case LONG:
+                        unsafe.putObject(entity, idOffset, Long.valueOf(uid.generateLong()));
+                        break;
+                    case STRING:
+                        unsafe.putObject(entity, idOffset, uid.generateDigits());
+                        break;
+                    default:
+                        throw new IllegalArgumentException();
+                }
+            }
             insert(entity, connection);
         }
         else
@@ -468,28 +488,42 @@ public class DAOBeanImpl<T> implements Dao<T>
         PreparedStatement pStat = null;
         try
         {
-            pStat = connection.prepareStatement(insertInfo.getSql(), Statement.RETURN_GENERATED_KEYS);
-            int index = 1;
-            for (MapField each : insertInfo.getFields())
+            if (useUid == false)
             {
-                each.setStatementValue(pStat, entity, index);
-                index++;
-            }
-            pStat.executeUpdate();
-            ResultSet resultSet = pStat.getGeneratedKeys();
-            if (resultSet.next())
-            {
-                switch (idType)
+                pStat = connection.prepareStatement(insertInfo.getSql(), Statement.RETURN_GENERATED_KEYS);
+                int index = 1;
+                for (MapField each : insertInfo.getFields())
                 {
-                    case INT:
-                        unsafe.putObject(entity, idOffset, resultSet.getInt(1));
-                        break;
-                    case LONG:
-                        unsafe.putObject(entity, idOffset, resultSet.getLong(1));
-                    case STRING:
-                        unsafe.putObject(entity, idOffset, resultSet.getString(1));
-                        break;
+                    each.setStatementValue(pStat, entity, index);
+                    index++;
                 }
+                pStat.executeUpdate();
+                ResultSet resultSet = pStat.getGeneratedKeys();
+                if (resultSet.next())
+                {
+                    switch (idType)
+                    {
+                        case INT:
+                            unsafe.putObject(entity, idOffset, resultSet.getInt(1));
+                            break;
+                        case LONG:
+                            unsafe.putObject(entity, idOffset, resultSet.getLong(1));
+                        case STRING:
+                            unsafe.putObject(entity, idOffset, resultSet.getString(1));
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                pStat = connection.prepareStatement(insertInfo.getSql());
+                int index = 1;
+                for (MapField each : insertInfo.getFields())
+                {
+                    each.setStatementValue(pStat, entity, index);
+                    index++;
+                }
+                pStat.executeUpdate();
             }
         }
         catch (Exception e)
