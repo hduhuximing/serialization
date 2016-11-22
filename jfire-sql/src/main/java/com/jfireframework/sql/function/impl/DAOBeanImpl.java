@@ -339,20 +339,6 @@ public class DAOBeanImpl<T> implements Dao<T>
         Object idValue = unsafe.getObject(entity, idOffset);
         if (idValue == null)
         {
-            if (useUid)
-            {
-                switch (idType)
-                {
-                    case LONG:
-                        unsafe.putObject(entity, idOffset, Long.valueOf(uid.generateLong()));
-                        break;
-                    case STRING:
-                        unsafe.putObject(entity, idOffset, uid.generateDigits());
-                        break;
-                    default:
-                        throw new IllegalArgumentException();
-                }
-            }
             insert(entity, connection);
         }
         else
@@ -449,6 +435,24 @@ public class DAOBeanImpl<T> implements Dao<T>
             for (Object entity : entitys)
             {
                 int index = 1;
+                if (useUid)
+                {
+                    Object idValue = unsafe.getObject(entity, idOffset);
+                    if (idValue == null)
+                    {
+                        switch (idType)
+                        {
+                            case LONG:
+                                unsafe.putObject(entity, idOffset, Long.valueOf(uid.generateLong()));
+                                break;
+                            case STRING:
+                                unsafe.putObject(entity, idOffset, uid.generateDigits());
+                                break;
+                            default:
+                                throw new IllegalArgumentException();
+                        }
+                    }
+                }
                 for (MapField field : insertInfo.getFields())
                 {
                     field.setStatementValue(pStat, entity, index);
@@ -481,6 +485,24 @@ public class DAOBeanImpl<T> implements Dao<T>
     @Override
     public void insert(T entity, Connection connection)
     {
+        if (useUid)
+        {
+            Object idValue = unsafe.getObject(entity, idOffset);
+            if (idValue == null)
+            {
+                switch (idType)
+                {
+                    case LONG:
+                        unsafe.putObject(entity, idOffset, Long.valueOf(uid.generateLong()));
+                        break;
+                    case STRING:
+                        unsafe.putObject(entity, idOffset, uid.generateDigits());
+                        break;
+                    default:
+                        throw new IllegalArgumentException();
+                }
+            }
+        }
         for (SqlPreInterceptor each : preInterceptors)
         {
             each.preIntercept(insertInfo.getSql(), entity);
