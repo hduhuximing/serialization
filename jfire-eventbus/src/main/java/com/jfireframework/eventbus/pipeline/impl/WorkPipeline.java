@@ -33,6 +33,7 @@ public class WorkPipeline extends AbstractPipeline
         {
             eventContext = build(eventData);
         }
+        eventContext.executor().handle(eventContext, eventBus);
         eventBus.post(eventContext);
     }
     

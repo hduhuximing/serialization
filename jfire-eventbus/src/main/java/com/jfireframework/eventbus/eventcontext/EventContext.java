@@ -1,6 +1,5 @@
 package com.jfireframework.eventbus.eventcontext;
 
-import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 
@@ -79,12 +78,5 @@ public interface EventContext<T>
      * @return
      */
     public Object getEventData();
-    
-    /**
-     * 该事件上下文的事件类型
-     * 
-     * @return
-     */
-    public Enum<? extends EventConfig> getEvent();
     
 }

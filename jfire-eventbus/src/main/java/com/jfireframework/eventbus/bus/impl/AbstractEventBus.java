@@ -34,57 +34,64 @@ public abstract class AbstractEventBus implements EventBus
     private final IdentityHashMap<Class<?>, EventExecutor>                      readWriteMap        = new IdentityHashMap<Class<?>, EventExecutor>();
     protected static final Logger                                               LOGGER              = ConsoleLogFactory.getLogger();
     
+    @Override
     @SuppressWarnings("unchecked")
     public void register(Class<? extends Enum<? extends EventConfig>>... ckasses)
     {
         for (Class<? extends Enum<? extends EventConfig>> each : ckasses)
         {
-            for (Enum<?> event : ReflectUtil.getAllEnumInstances(each).values())
+            register(each);
+        }
+    }
+    
+    @Override
+    public void register(Class<? extends Enum<? extends EventConfig>> ckass)
+    {
+        for (Enum<?> event : ReflectUtil.getAllEnumInstances(ckass).values())
+        {
+            EventExecutor executor;
+            switch (((EventConfig) event).parallelLevel())
             {
-                EventExecutor executor;
-                switch (((EventConfig) event).parallelLevel())
-                {
-                    case PAEALLEL:
-                        executor = new ParallelHandlerExecutor();
-                        break;
-                    case ROWKEY_SERIAL:
-                        executor = new RowKeyHandlerExecutor();
-                        break;
-                    case EVENT_SERIAL:
-                        executor = new EventSerialHandlerExecutor();
-                        break;
-                    case TYPE_SERIAL:
-                        executor = typeSerialMap.get(event.getClass());
-                        if (executor == null)
-                        {
-                            executor = new TypeSerialHandlerExecutor();
-                            typeSerialMap.put(event.getClass(), executor);
-                        }
-                        break;
-                    case TYPE_ROWKEY_SERIAL:
-                        executor = typeRowKeySerialMap.get(event.getClass());
-                        if (executor == null)
-                        {
-                            executor = new TypeRowKeySerialHandlerExecutor();
-                            typeRowKeySerialMap.put(event.getClass(), executor);
-                        }
-                        break;
-                    case RW_EVENT_READ:
-                        // 直接走到下面，因为两个的逻辑是一样的
-                        ;
-                    case RW_EVENT_WRITE:
-                        executor = readWriteMap.get(event.getClass());
-                        if (executor == null)
-                        {
-                            executor = new ReadWriteExecutor();
-                            readWriteMap.put(event.getClass(), executor);
-                        }
-                        break;
-                    default:
-                        throw new NullPointerException("事件" + event + "存在异常");
-                }
-                executorMap.put((Enum<? extends EventConfig>) event, executor);
+                case PAEALLEL:
+                    executor = new ParallelHandlerExecutor();
+                    break;
+                case ROWKEY_SERIAL:
+                    executor = new RowKeyHandlerExecutor();
+                    break;
+                case EVENT_SERIAL:
+                    executor = new EventSerialHandlerExecutor();
+                    break;
+                case TYPE_SERIAL:
+                    executor = typeSerialMap.get(event.getClass());
+                    if (executor == null)
+                    {
+                        executor = new TypeSerialHandlerExecutor();
+                        typeSerialMap.put(event.getClass(), executor);
+                    }
+                    break;
+                case TYPE_ROWKEY_SERIAL:
+                    executor = typeRowKeySerialMap.get(event.getClass());
+                    if (executor == null)
+                    {
+                        executor = new TypeRowKeySerialHandlerExecutor();
+                        typeRowKeySerialMap.put(event.getClass(), executor);
+                    }
+                    break;
+                case RW_EVENT_READ:
+                    // 直接走到下面，因为两个的逻辑是一样的
+                    ;
+                case RW_EVENT_WRITE:
+                    executor = readWriteMap.get(event.getClass());
+                    if (executor == null)
+                    {
+                        executor = new ReadWriteExecutor();
+                        readWriteMap.put(event.getClass(), executor);
+                    }
+                    break;
+                default:
+                    throw new NullPointerException("事件" + event + "存在异常");
             }
+            executorMap.put((Enum<? extends EventConfig>) event, executor);
         }
     }
     
@@ -96,19 +103,19 @@ public abstract class AbstractEventBus implements EventBus
         EventConfig config = (EventConfig) event;
         if (config.parallelLevel() == ParallelLevel.RW_EVENT_READ)
         {
-            EventContext<T> eventContext = new ReadWriteEventContextImpl(ReadWriteEventContext.READ, data, event, handler, executorMap.get(event), this);
+            EventContext<T> eventContext = new ReadWriteEventContextImpl(ReadWriteEventContext.READ, data, handler, executorMap.get(event), this);
             post(eventContext);
             return eventContext;
         }
         else if (config.parallelLevel() == ParallelLevel.RW_EVENT_WRITE)
         {
-            EventContext<T> eventContext = new ReadWriteEventContextImpl(ReadWriteEventContext.WRITE, data, event, handler, executorMap.get(event), this);
+            EventContext<T> eventContext = new ReadWriteEventContextImpl(ReadWriteEventContext.WRITE, data, handler, executorMap.get(event), this);
             post(eventContext);
             return eventContext;
         }
         else
         {
-            EventContext<T> eventContext = new NormalEventContext(data, event, handler, executorMap.get(event), this);
+            EventContext<T> eventContext = new NormalEventContext(data, handler, executorMap.get(event), this);
             post(eventContext);
             return eventContext;
         }
@@ -119,7 +126,7 @@ public abstract class AbstractEventBus implements EventBus
     public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
         EventHelper.checkParallelLevel(event, rowkey);
-        EventContext<T> eventContext = new RowEventContextImpl(data, event, handler, executorMap.get(event), this, rowkey);
+        EventContext<T> eventContext = new RowEventContextImpl(data, handler, executorMap.get(event), this, rowkey);
         post(eventContext);
         return eventContext;
     }
@@ -135,7 +142,7 @@ public abstract class AbstractEventBus implements EventBus
     public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
         EventHelper.checkParallelLevel(event, rowkey);
-        EventContext<T> eventContext = new RowEventContextImpl(data, event, handler, executorMap.get(event), this, rowkey);
+        EventContext<T> eventContext = new RowEventContextImpl(data, handler, findExecutor(event), this, rowkey);
         eventContext.executor().handle(eventContext, this);
         eventContext.await();
         return eventContext;
@@ -146,16 +153,27 @@ public abstract class AbstractEventBus implements EventBus
     public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handle)
     {
         EventHelper.checkParallelLevel(event);
-        EventContext<T> eventContext = new NormalEventContext(data, event, handle, executorMap.get(event), this);
+        EventContext<T> eventContext = new NormalEventContext(data, handle, findExecutor(event), this);
         eventContext.executor().handle(eventContext, this);
         eventContext.await();
         return eventContext;
     }
     
     @Override
+    public EventExecutor findExecutor(Enum<? extends EventConfig> event)
+    {
+        EventExecutor executor = executorMap.get(event);
+        if (executor == null)
+        {
+            throw new NullPointerException();
+        }
+        return executor;
+    }
+    
+    @Override
     public Pipeline pipeline()
     {
-        return new HeadPipeline(this, executorMap);
+        return new HeadPipeline(this);
     }
     
 }

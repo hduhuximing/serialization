@@ -1,79 +1,10 @@
 package com.jfireframework.eventbus.pipeline;
 
 import com.jfireframework.eventbus.completedhandler.CompletedHandler;
-import com.jfireframework.eventbus.event.EventConfig;
-import com.jfireframework.eventbus.handler.EventHandler;
-import com.jfireframework.eventbus.pipeline.conversion.Conversion;
 
 public interface Pipeline
 {
-    
     public static final Object USE_UPSTREAM_RESULT = new Object();
-    
-    public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowkey);
-    
-    public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData);
-    
-    public Pipeline add(Enum<? extends EventConfig> event, EventHandler<?> handler);
-    
-    public void signal();
-    
-    public static class PipelineData
-    {
-        final Object                      eventData;
-        final Object                      rowKey;
-        final Enum<? extends EventConfig> event;
-        final EventHandler<?>             handler;
-        
-        public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowKey)
-        {
-            this.eventData = eventData;
-            this.rowKey = rowKey;
-            this.event = event;
-            this.handler = handler;
-        }
-        
-        public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData)
-        {
-            this.eventData = eventData;
-            rowKey = USE_UPSTREAM_RESULT;
-            this.event = event;
-            this.handler = handler;
-        }
-        
-        public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler)
-        {
-            eventData = USE_UPSTREAM_RESULT;
-            rowKey = USE_UPSTREAM_RESULT;
-            this.event = event;
-            this.handler = handler;
-        }
-        
-        public Object getEventData()
-        {
-            return eventData;
-        }
-        
-        public Object getRowKey()
-        {
-            return rowKey;
-        }
-        
-        public Enum<? extends EventConfig> getEvent()
-        {
-            return event;
-        }
-        
-        public EventHandler<?> getHandler()
-        {
-            return handler;
-        }
-        
-    }
-    
-    public Pipeline addAll(PipelineData... events);
-    
-    public Pipeline conversion(Conversion<?> conversion);
     
     /**
      * 开始本节点的逻辑任务。并且传入一个上游的结果参数
@@ -89,13 +20,6 @@ public interface Pipeline
      */
     public void onCompleted(Object result);
     
-    public void setCompletedHanlder(CompletedHandler<?> completedHandler);
-    
-    /**
-     * 管道开始投递
-     */
-    public void start();
-    
     /**
      * 本节点发生异常后调用
      * 
@@ -103,10 +27,63 @@ public interface Pipeline
      */
     public void onError(Throwable e);
     
+    /**
+     * 管道开始投递
+     */
+    public void start();
+    
+    /**
+     * 管道开始投递，并且投递的时候携带一个初始参数
+     * 
+     * @param initParam
+     */
+    public void start(Object initParam);
+    
+    /**
+     * 设置完成触发器
+     * 
+     * @param completedHandler
+     */
+    public void setCompletedHanlder(CompletedHandler<Object> completedHandler);
+    
+    /**
+     * 增加一个pipeline到事件编排末尾
+     * 
+     * @param pipeline
+     * @return
+     */
+    public Pipeline addOperator(final Operator operator);
+    
+    /**
+     * 获取本节点的结果信息
+     * 
+     * @return
+     */
+    @Deprecated
     public Object getResult();
     
+    /**
+     * 获取本节点的异常信息
+     * 
+     * @return
+     */
+    @Deprecated
     public Throwable getThrowable();
     
+    /**
+     * 是否发生过异常
+     * 
+     * @return
+     */
+    @Deprecated
+    public boolean hasError();
+    
+    /**
+     * 等待本节点的任务本完成.需要注意的是，一个节点只有在调用onCompleted或者onError的时候才会被认为是完成。
+     * 在pipeline中的过程节点。未必存在完成这个状态。而有些节点的onCompleted可能被调用不止一次。
+     * 因此使用该方法需要注意节点是否最终会完成
+     */
+    @Deprecated
     public void await();
     
 }
