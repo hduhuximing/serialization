@@ -36,6 +36,10 @@ public class TypeSerialHandlerExecutor implements EventExecutor
                     continue;
                 }
             }
+            else
+            {
+                break;
+            }
         } while (true);
         
     }

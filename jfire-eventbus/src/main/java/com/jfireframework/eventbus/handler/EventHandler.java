@@ -1,7 +1,5 @@
 package com.jfireframework.eventbus.handler;
 
-import com.jfireframework.eventbus.bus.EventBus;
-
 public interface EventHandler<E>
 {
     /**
@@ -9,6 +7,6 @@ public interface EventHandler<E>
      * 
      * @param event
      */
-    public Object handle(E data, EventBus eventBus);
+    public Object handle(E data);
     
 }

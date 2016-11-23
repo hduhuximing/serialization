@@ -1,9 +1,9 @@
 package com.jfireframework.eventbus.pipeline.impl;
 
-import com.jfireframework.baseutil.concurrent.SingleSync;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.completedhandler.CompletedHandler;
 import com.jfireframework.eventbus.completedhandler.impl.CallNextPipeline;
+import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.event.ParallelLevel;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.ReadWriteEventContext;
@@ -17,23 +17,18 @@ import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public abstract class AbstractPipeline implements Pipeline
 {
-    protected final ParallelLevel      level;
-    protected final EventExecutor      executor;
-    protected final EventBus           eventBus;
-    protected SingleSync               sync = new SingleSync();
-    protected Throwable                e;
-    protected CompletedHandler<Object> pipelineCompletedHandler;
-    protected final Object             eventData;
-    protected final EventHandler<?>    eventHandler;
-    protected final Object             rowKey;
-    protected Object                   result;
+    protected CompletedHandler<Object>          pipelineCompletedHandler;
+    protected final EventBus                    eventBus;
+    protected final Object                      eventData;
+    protected final EventHandler<?>             eventHandler;
+    protected final Enum<? extends EventConfig> event;
+    protected final Object                      rowKey;
     
-    public AbstractPipeline(EventBus eventBus, EventExecutor executor, EventHandler<?> handler, ParallelLevel level, Object eventData, Object rowKey)
+    public AbstractPipeline(EventBus eventBus, EventExecutor executor, EventHandler<?> handler, Enum<? extends EventConfig> event, Object eventData, Object rowKey)
     {
         this.eventBus = eventBus;
-        this.executor = executor;
         this.eventHandler = handler;
-        this.level = level;
+        this.event = event;
         this.eventData = eventData;
         this.rowKey = rowKey;
     }

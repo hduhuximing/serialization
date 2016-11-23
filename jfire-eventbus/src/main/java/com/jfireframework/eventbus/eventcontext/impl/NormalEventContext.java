@@ -2,14 +2,12 @@ package com.jfireframework.eventbus.eventcontext.impl;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 
 public class NormalEventContext<T> implements EventContext<T>
 {
-    protected final EventBus        eventBus;
     protected final EventExecutor   executor;
     protected final EventHandler<?> handler;
     protected final Object          eventData;
@@ -19,12 +17,11 @@ public class NormalEventContext<T> implements EventContext<T>
     protected Throwable             e;
     protected T                     result;
     
-    public NormalEventContext(Object eventData, EventHandler<?> handler, EventExecutor executor, EventBus eventBus)
+    public NormalEventContext(Object eventData, EventHandler<?> handler, EventExecutor executor)
     {
         this.eventData = eventData;
         this.handler = handler;
         this.executor = executor;
-        this.eventBus = eventBus;
     }
     
     @Override
@@ -143,6 +140,12 @@ public class NormalEventContext<T> implements EventContext<T>
     public EventHandler<?> eventHandler()
     {
         return handler;
+    }
+    
+    @Override
+    public void run()
+    {
+        executor.handle(this);
     }
     
 }

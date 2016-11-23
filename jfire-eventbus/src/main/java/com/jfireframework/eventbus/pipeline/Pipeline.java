@@ -54,36 +54,4 @@ public interface Pipeline
      */
     public Pipeline addOperator(final Operator operator);
     
-    /**
-     * 获取本节点的结果信息
-     * 
-     * @return
-     */
-    @Deprecated
-    public Object getResult();
-    
-    /**
-     * 获取本节点的异常信息
-     * 
-     * @return
-     */
-    @Deprecated
-    public Throwable getThrowable();
-    
-    /**
-     * 是否发生过异常
-     * 
-     * @return
-     */
-    @Deprecated
-    public boolean hasError();
-    
-    /**
-     * 等待本节点的任务本完成.需要注意的是，一个节点只有在调用onCompleted或者onError的时候才会被认为是完成。
-     * 在pipeline中的过程节点。未必存在完成这个状态。而有些节点的onCompleted可能被调用不止一次。
-     * 因此使用该方法需要注意节点是否最终会完成
-     */
-    @Deprecated
-    public void await();
-    
 }

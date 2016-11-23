@@ -1,8 +1,6 @@
 package com.jfireframework.eventbus.pipeline;
 
-import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.ParallelLevel;
-import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 
@@ -16,7 +14,7 @@ public interface Operator
     
     public Object eventData();
     
-    public void work(EventContext<?> eventContext, EventBus eventBus);
+    public void work(Object data, Pipeline pipeline);
     
     public Object rowKey();
 }

@@ -72,7 +72,7 @@ public class RowKeyHandlerExecutor implements EventExecutor
         }
     }
     
-    private void trySendLeft(RowBucket rowBucket, EventBus eventBus)
+    private void trySendLeft(RowBucket rowBucket)
     {
         EventContext<?> rowEventContext;
         int status = rowBucket.status;

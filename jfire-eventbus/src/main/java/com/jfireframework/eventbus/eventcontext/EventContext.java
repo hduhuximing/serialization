@@ -3,8 +3,9 @@ package com.jfireframework.eventbus.eventcontext;
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
 
-public interface EventContext<T>
+public interface EventContext<T> extends Runnable
 {
+    
     /**
      * 返回该事件绑定执行器
      * 
