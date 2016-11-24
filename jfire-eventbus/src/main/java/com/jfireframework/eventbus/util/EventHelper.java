@@ -3,6 +3,7 @@ package com.jfireframework.eventbus.util;
 import java.util.IdentityHashMap;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.eventbus.event.EventConfig;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.event.ParallelLevel;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.ReadWriteEventContext;
@@ -16,7 +17,6 @@ import com.jfireframework.eventbus.executor.ReadWriteExecutor;
 import com.jfireframework.eventbus.executor.RowKeyHandlerExecutor;
 import com.jfireframework.eventbus.executor.TypeRowKeySerialHandlerExecutor;
 import com.jfireframework.eventbus.executor.TypeSerialHandlerExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
 
 public class EventHelper
 {

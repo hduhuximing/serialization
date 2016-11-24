@@ -1,14 +1,12 @@
 package com.jfireframework.eventbus.pipeline.impl;
 
-import com.jfireframework.eventbus.completedhandler.CompletedHandler;
-import com.jfireframework.eventbus.completedhandler.impl.CallNextPipeline;
 import com.jfireframework.eventbus.pipeline.Operator;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public abstract class AbstractPipeline implements Pipeline
 {
-    protected CompletedHandler<Object> pipelineCompletedHandler;
+    protected Pipeline nextPipeline;
     
     @Override
     public Pipeline add(final Operator operator)
@@ -34,51 +32,34 @@ public abstract class AbstractPipeline implements Pipeline
             }
             
             @Override
-            public void onCompleted(Object result, RunnerMode runnerMode)
-            {
-                operator.onCompleted(result, runnerMode);
-                if (pipelineCompletedHandler != null)
-                {
-                    pipelineCompletedHandler.onCompleted(result, runnerMode);
-                }
-            }
-            
-            @Override
             public void onError(Throwable e, RunnerMode runnerMode)
             {
                 operator.onError(e, runnerMode);
-                if (pipelineCompletedHandler != null)
+                if (nextPipeline != null)
                 {
-                    pipelineCompletedHandler.onError(e, runnerMode);
+                    nextPipeline.onError(e, runnerMode);
                 }
             }
-            
         };
-        pipelineCompletedHandler = new CallNextPipeline(pipeline);
+        nextPipeline = pipeline;
         return pipeline;
     }
     
     @Override
     public void onCompleted(Object result, RunnerMode runnerMode)
     {
-        if (pipelineCompletedHandler != null)
+        if (nextPipeline != null)
         {
-            pipelineCompletedHandler.onCompleted(result, runnerMode);
+            nextPipeline.work(result, runnerMode);
         }
-    }
-    
-    @Override
-    public void setCompletedHanlder(CompletedHandler<Object> completedHandler)
-    {
-        this.pipelineCompletedHandler = completedHandler;
     }
     
     @Override
     public void onError(Throwable e, RunnerMode runnerMode)
     {
-        if (pipelineCompletedHandler != null)
+        if (nextPipeline != null)
         {
-            pipelineCompletedHandler.onError(e, runnerMode);
+            nextPipeline.onError(e, runnerMode);
         }
     }
     

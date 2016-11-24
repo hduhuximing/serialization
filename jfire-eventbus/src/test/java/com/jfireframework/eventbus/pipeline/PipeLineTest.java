@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.bus.impl.ComputationEventBus;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.eventbus.util.RunnerMode;
 import com.jfireframework.eventbus.util.extra.NumberReduceOp;
@@ -112,7 +112,7 @@ public class PipeLineTest
                                     @Override
                                     public Object handle(Integer data, RunnerMode runnerMode)
                                     {
-                                        System.out.println(data);
+                                        System.out.println(data + 1);
                                         return null;
                                     }
                                 }
@@ -120,8 +120,8 @@ public class PipeLineTest
                 ).add(op);
         pipeline.start();
         op.await();
-        op.getE().printStackTrace();
-        System.out.println(op.getE());
+        // op.getE().printStackTrace();
+        // System.out.println(op.getE());
     }
     
     @SuppressWarnings("unchecked")
@@ -131,20 +131,8 @@ public class PipeLineTest
         EventBus eventBus = new ComputationEventBus();
         EventHelper.register(PipeLineEvent.class);
         SingleAwaitOp op = new SingleAwaitOp();
-        Pipeline pipeline = eventBus.pipeline()//
-                .add(
-                        Operators.work(
-                                PipeLineEvent.one, new EventHandler<Void>() {
-                                    
-                                    @Override
-                                    public Object handle(Void data, RunnerMode eventBus)
-                                    {
-                                        return new String[] { "1", "2" };
-                                    }
-                                }
-                        )
-                )// 投递一个字符串数组
-                .add(Operators.from())// 从数组遍历，每一个数组元素作为下一个环节的数据提供
+        Pipeline pipeline = Operators.from(new String[] { "1", "2" }) // 从数组遍历，每一个数组元素作为下一个环节的数据提供
+                .add(Operators.switchMode(eventBus))// 投递一个字符串数组
                 .add(
                         Operators.map(
                                 new MapOp<String>() {

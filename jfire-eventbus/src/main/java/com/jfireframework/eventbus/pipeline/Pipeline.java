@@ -1,6 +1,5 @@
 package com.jfireframework.eventbus.pipeline;
 
-import com.jfireframework.eventbus.completedhandler.CompletedHandler;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public interface Pipeline
@@ -39,13 +38,6 @@ public interface Pipeline
      * @param initParam
      */
     public void start(Object initParam);
-    
-    /**
-     * 设置完成触发器
-     * 
-     * @param completedHandler
-     */
-    public void setCompletedHanlder(CompletedHandler<Object> completedHandler);
     
     /**
      * 增加一个pipeline到事件编排末尾

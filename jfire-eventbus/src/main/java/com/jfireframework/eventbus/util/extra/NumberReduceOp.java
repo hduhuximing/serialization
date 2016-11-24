@@ -9,29 +9,29 @@ import com.jfireframework.eventbus.util.RunnerMode;
 
 public class NumberReduceOp implements Operator
 {
-    private AtomicInteger count;
+    private AtomicInteger total = new AtomicInteger();
+    private final int     count;
     private Queue<Object> queue = new ConcurrentLinkedQueue<Object>();
     
     public NumberReduceOp(int count)
     {
-        this.count = new AtomicInteger(count);
+        this.count = count;
     }
     
     @Override
     public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
     {
+        int left = total.incrementAndGet();
+        if (left < 0)
+        {
+            total.set(0);
+            left = total.incrementAndGet();
+        }
         queue.offer(data);
-        if (count.decrementAndGet() == 0)
+        if (left % count == 0)
         {
             pipeline.onCompleted(queue, runnerMode);
         }
-    }
-    
-    @Override
-    public void onCompleted(Object result, RunnerMode runnerMode)
-    {
-        // TODO Auto-generated method stub
-        
     }
     
     @Override

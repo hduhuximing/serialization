@@ -3,13 +3,14 @@ package com.jfireframework.eventbus.pipeline;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.bus.EventBuses;
 import com.jfireframework.eventbus.event.EventConfig;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.ReadWriteEventContext;
 import com.jfireframework.eventbus.eventcontext.impl.NormalEventContext;
 import com.jfireframework.eventbus.eventcontext.impl.ReadWriteEventContextImpl;
 import com.jfireframework.eventbus.eventcontext.impl.RowEventContextImpl;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.pipeline.impl.AbstractPipeline;
 import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.eventbus.util.RunnerMode;
 import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
@@ -17,6 +18,29 @@ import com.jfireframework.eventbus.util.SwitchRunnerModeEvent;
 
 public class Operators
 {
+    public static Pipeline create()
+    {
+        return new AbstractPipeline() {
+            @Override
+            public void work(Object upstreamResult, RunnerMode runnerMode)
+            {
+                onCompleted(upstreamResult, runnerMode);
+            }
+            
+            @Override
+            public void start()
+            {
+                work(null, null);
+            }
+            
+            @Override
+            public void start(Object initParam)
+            {
+                work(initParam, null);
+            }
+        };
+    }
+    
     public static Operator work(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final Object rowKey)
     {
         Operator operator = new Operator() {
@@ -30,12 +54,6 @@ public class Operators
                 }
                 EventContext<?> eventContext = proxy(pipeline, runnerMode, event, handler, data, rowKey);
                 eventContext.executor().handle(eventContext, runnerMode);
-            }
-            
-            @Override
-            public void onCompleted(Object result, RunnerMode runnerMode)
-            {
-                ;
             }
             
             @Override
@@ -202,12 +220,6 @@ public class Operators
             }
             
             @Override
-            public void onCompleted(Object result, RunnerMode runnerMode)
-            {
-                ;
-            }
-            
-            @Override
             public void onError(Throwable e, RunnerMode runnerMode)
             {
                 ;
@@ -303,18 +315,110 @@ public class Operators
             }
             
             @Override
-            public void onCompleted(Object result, RunnerMode runnerMode)
-            {
-                ;
-            }
-            
-            @Override
             public void onError(Throwable e, RunnerMode runnerMode)
             {
                 ;
             }
+            
         };
         return operator;
+    }
+    
+    public static Pipeline from(final Object src)
+    {
+        return new AbstractPipeline() {
+            @SuppressWarnings("rawtypes")
+            @Override
+            public void work(Object data, RunnerMode runnerMode)
+            {
+                if (nextPipeline != null)
+                {
+                    if (src instanceof int[])
+                    {
+                        for (int i : (int[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof byte[])
+                    {
+                        for (byte i : (byte[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof short[])
+                    {
+                        for (short i : (short[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof long[])
+                    {
+                        for (long i : (long[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof float[])
+                    {
+                        for (float i : (float[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof double[])
+                    {
+                        for (double i : (double[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof boolean[])
+                    {
+                        for (boolean i : (boolean[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof char[])
+                    {
+                        for (char i : (char[]) src)
+                        {
+                            nextPipeline.onCompleted(i, runnerMode);
+                        }
+                    }
+                    else if (src instanceof Iterable)
+                    {
+                        for (Object each : (Iterable) src)
+                        {
+                            nextPipeline.onCompleted(each, runnerMode);
+                        }
+                    }
+                    else
+                    {
+                        for (Object each : (Object[]) src)
+                        {
+                            nextPipeline.onCompleted(each, runnerMode);
+                        }
+                    }
+                }
+            }
+            
+            @Override
+            public void start()
+            {
+                work(null, null);
+            }
+            
+            @Override
+            public void start(Object initParam)
+            {
+                work(initParam, null);
+            }
+        };
+        
     }
     
     public static <E> Operator map(final MapOp<E> mapOp)
@@ -329,16 +433,11 @@ public class Operators
             }
             
             @Override
-            public void onCompleted(Object result, RunnerMode runnerMode)
-            {
-                ;
-            }
-            
-            @Override
             public void onError(Throwable e, RunnerMode runnerMode)
             {
                 ;
             }
+            
         };
         return operator;
     }
@@ -372,16 +471,11 @@ public class Operators
             }
             
             @Override
-            public void onCompleted(Object result, RunnerMode runnerMode)
-            {
-                ;
-            }
-            
-            @Override
             public void onError(Throwable e, RunnerMode runnerMode)
             {
                 ;
             }
+            
         };
         return operator;
     }

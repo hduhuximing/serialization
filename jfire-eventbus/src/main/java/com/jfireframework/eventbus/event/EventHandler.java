@@ -1,4 +1,4 @@
-package com.jfireframework.eventbus.handler;
+package com.jfireframework.eventbus.event;
 
 import com.jfireframework.eventbus.util.RunnerMode;
 

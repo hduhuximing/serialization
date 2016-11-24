@@ -6,10 +6,10 @@ import org.junit.Test;
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.bus.EventBuses;
 import com.jfireframework.eventbus.bus.impl.ComputationEventBus;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.event.ParallelLevel;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
 import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.eventbus.util.RunnerMode;
 

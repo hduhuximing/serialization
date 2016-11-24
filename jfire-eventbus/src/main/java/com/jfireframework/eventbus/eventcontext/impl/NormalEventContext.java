@@ -2,9 +2,9 @@ package com.jfireframework.eventbus.eventcontext.impl;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public class NormalEventContext<T> implements EventContext<T>

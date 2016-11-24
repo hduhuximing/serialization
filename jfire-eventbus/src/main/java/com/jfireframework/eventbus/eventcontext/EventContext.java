@@ -1,7 +1,7 @@
 package com.jfireframework.eventbus.eventcontext;
 
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public interface EventContext<T> extends Runnable

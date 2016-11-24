@@ -15,25 +15,13 @@ public class SingleAwaitOp implements Operator
     public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
     {
         result = data;
+        sync.signal();
         pipeline.onCompleted(result, runnerMode);
     }
     
     public void await()
     {
         sync.await();
-    }
-    
-    @Override
-    public void onCompleted(Object result, RunnerMode runnerMode)
-    {
-        sync.signal();
-    }
-    
-    @Override
-    public void onError(Throwable e, RunnerMode runnerMode)
-    {
-        this.e = e;
-        sync.signal();
     }
     
     public Throwable getE()
@@ -44,5 +32,12 @@ public class SingleAwaitOp implements Operator
     public Object getResult()
     {
         return result;
+    }
+    
+    @Override
+    public void onError(Throwable e, RunnerMode runnerMode)
+    {
+        this.e = e;
+        sync.signal();
     }
 }
