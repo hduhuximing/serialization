@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.jfireframework.baseutil.concurrent.MPSCQueue;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.util.EventHelper;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public class EventSerialHandlerExecutor implements EventExecutor
 {
@@ -13,7 +14,7 @@ public class EventSerialHandlerExecutor implements EventExecutor
     private final MPSCQueue<EventContext<?>> events = new MPSCQueue<EventContext<?>>();
     
     @Override
-    public void handle(EventContext<?> eventContext)
+    public void handle(EventContext<?> eventContext, RunnerMode runnerMode)
     {
         events.offer(eventContext);
         do
@@ -23,7 +24,7 @@ public class EventSerialHandlerExecutor implements EventExecutor
             {
                 while ((eventContext = events.poll()) != null)
                 {
-                    EventHelper.handle(eventContext);
+                    EventHelper.handle(eventContext, runnerMode);
                 }
                 state.set(idle);
                 if (events.isEmpty())

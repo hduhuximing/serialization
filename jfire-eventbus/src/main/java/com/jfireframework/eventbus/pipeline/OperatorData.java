@@ -3,14 +3,14 @@ package com.jfireframework.eventbus.pipeline;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.handler.EventHandler;
 
-public class PipelineData
+public class OperatorData
 {
     private final Object                      eventData;
     private final Object                      rowKey;
     private final Enum<? extends EventConfig> event;
     private final EventHandler<?>             handler;
     
-    public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowKey)
+    public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowKey)
     {
         this.eventData = eventData;
         this.rowKey = rowKey;
@@ -18,14 +18,14 @@ public class PipelineData
         this.handler = handler;
     }
     
-    public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData)
+    public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData)
     {
-        this(event, handler, eventData, USE_UPSTREAM_RESULT);
+        this(event, handler, eventData, Pipeline.USE_UPSTREAM_RESULT);
     }
     
-    public PipelineData(Enum<? extends EventConfig> event, EventHandler<?> handler)
+    public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        this(event, handler, USE_UPSTREAM_RESULT, USE_UPSTREAM_RESULT);
+        this(event, handler, Pipeline.USE_UPSTREAM_RESULT, Pipeline.USE_UPSTREAM_RESULT);
     }
     
     public Object getEventData()

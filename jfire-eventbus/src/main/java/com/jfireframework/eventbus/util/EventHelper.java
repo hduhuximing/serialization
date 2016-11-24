@@ -24,6 +24,10 @@ public class EventHelper
     private static final IdentityHashMap<Class<?>, EventExecutor>  typeSerialMap       = new IdentityHashMap<Class<?>, EventExecutor>();
     private static final IdentityHashMap<Class<?>, EventExecutor>  typeRowKeySerialMap = new IdentityHashMap<Class<?>, EventExecutor>();
     private static final IdentityHashMap<Class<?>, EventExecutor>  readWriteMap        = new IdentityHashMap<Class<?>, EventExecutor>();
+    static
+    {
+        register(SwitchRunnerModeEvent.class);
+    }
     
     public static void register(Class<? extends Enum<? extends EventConfig>>... ckasses)
     {
@@ -110,14 +114,14 @@ public class EventHelper
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static void handle(EventContext<?> eventContext)
+    public static void handle(EventContext<?> eventContext, RunnerMode runnerMode)
     {
         Object result = null;
         try
         {
             Object data = eventContext.getEventData();
             EventHandler handler = eventContext.eventHandler();
-            result = handler.handle(data);
+            result = handler.handle(data, runnerMode);
             eventContext.setResult(result);
         }
         catch (Throwable e)
@@ -127,28 +131,28 @@ public class EventHelper
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static EventContext<?> build(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
+    public static EventContext<?> build(RunnerMode runnerMode, Enum<? extends EventConfig> event, EventHandler<?> handler, Object data)
     {
         EventHelper.checkParallelLevel(event);
         EventConfig config = (EventConfig) event;
         if (config.parallelLevel() == ParallelLevel.RW_EVENT_READ)
         {
-            return new ReadWriteEventContextImpl(ReadWriteEventContext.READ, data, handler, findExecutor(event));
+            return new ReadWriteEventContextImpl(runnerMode, ReadWriteEventContext.READ, data, handler, findExecutor(event));
         }
         else if (config.parallelLevel() == ParallelLevel.RW_EVENT_WRITE)
         {
-            return new ReadWriteEventContextImpl(ReadWriteEventContext.WRITE, data, handler, findExecutor(event));
+            return new ReadWriteEventContextImpl(runnerMode, ReadWriteEventContext.WRITE, data, handler, findExecutor(event));
         }
         else
         {
-            return new NormalEventContext(data, handler, findExecutor(event));
+            return new NormalEventContext(runnerMode, data, handler, findExecutor(event));
         }
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static EventContext<?> build(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
+    public static EventContext<?> build(RunnerMode runnerMode, Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowkey)
     {
         EventHelper.checkParallelLevel(event, rowkey);
-        return new RowEventContextImpl(data, handler, findExecutor(event), rowkey);
+        return new RowEventContextImpl(runnerMode, data, handler, findExecutor(event), rowkey);
     }
 }

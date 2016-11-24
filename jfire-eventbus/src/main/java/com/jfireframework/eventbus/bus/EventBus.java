@@ -8,10 +8,6 @@ import com.jfireframework.eventbus.pipeline.Pipeline;
 public interface EventBus
 {
     
-    public void addWorker();
-    
-    public void reduceWorker();
-    
     public void stop();
     
     public void post(EventContext<?> eventContext);

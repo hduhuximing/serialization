@@ -1,20 +1,12 @@
 package com.jfireframework.eventbus.pipeline;
 
-import com.jfireframework.eventbus.event.ParallelLevel;
-import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public interface Operator
 {
-    public EventHandler<?> handler();
+    public void work(Object data, Pipeline pipeline, RunnerMode runnerMode);
     
-    public ParallelLevel level();
+    public void onCompleted(Object result, RunnerMode runnerMode);
     
-    public EventExecutor executor();
-    
-    public Object eventData();
-    
-    public void work(Object data, Pipeline pipeline);
-    
-    public Object rowKey();
+    public void onError(Throwable e, RunnerMode runnerMode);
 }

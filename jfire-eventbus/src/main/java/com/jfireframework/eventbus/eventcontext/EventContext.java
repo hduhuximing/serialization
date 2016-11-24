@@ -2,9 +2,11 @@ package com.jfireframework.eventbus.eventcontext;
 
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public interface EventContext<T> extends Runnable
 {
+    public RunnerMode runnerMode();
     
     /**
      * 返回该事件绑定执行器

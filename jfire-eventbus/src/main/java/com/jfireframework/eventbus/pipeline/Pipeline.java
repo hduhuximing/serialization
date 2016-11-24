@@ -1,6 +1,7 @@
 package com.jfireframework.eventbus.pipeline;
 
 import com.jfireframework.eventbus.completedhandler.CompletedHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public interface Pipeline
 {
@@ -11,21 +12,21 @@ public interface Pipeline
      * 
      * @param upstreamResult
      */
-    public void work(Object upstreamResult);
+    public void work(Object upstreamResult, RunnerMode runnerMode);
     
     /**
      * 本节点逻辑任务完成后被调用，并且传入本节点的结果对象
      * 
      * @param result
      */
-    public void onCompleted(Object result);
+    public void onCompleted(Object result, RunnerMode runnerMode);
     
     /**
      * 本节点发生异常后调用
      * 
      * @param e
      */
-    public void onError(Throwable e);
+    public void onError(Throwable e, RunnerMode runnerMode);
     
     /**
      * 管道开始投递
@@ -52,6 +53,6 @@ public interface Pipeline
      * @param pipeline
      * @return
      */
-    public Pipeline addOperator(final Operator operator);
+    public Pipeline add(Operator operator);
     
 }

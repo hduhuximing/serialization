@@ -8,6 +8,7 @@ import com.jfireframework.eventbus.bus.EventBuses;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.ReadWriteEventContext;
 import com.jfireframework.eventbus.util.EventHelper;
+import com.jfireframework.eventbus.util.RunnerMode;
 import sun.misc.Unsafe;
 
 public class ReadWriteExecutor implements EventExecutor
@@ -118,25 +119,25 @@ public class ReadWriteExecutor implements EventExecutor
     private final MPSCQueue<ReadWriteEventContext<?>> queue         = new MPSCQueue<ReadWriteEventContext<?>>();
     
     @Override
-    public void handle(EventContext<?> eventContext)
+    public void handle(EventContext<?> eventContext, RunnerMode runnerMode)
     {
         ReadWriteEventContext<?> readWriteEventContext = (ReadWriteEventContext<?>) eventContext;
         if (readWriteEventContext.mode() == ReadWriteEventContext.READ)
         {
             if (readWriteEventContext.immediateInvoke() == false)
             {
-                if (tryFastInvokeRead(readWriteEventContext) == false)
+                if (tryFastInvokeRead(readWriteEventContext, runnerMode) == false)
                 {
-                    fullPathInvokeRead(readWriteEventContext);
+                    fullPathInvokeRead(readWriteEventContext, runnerMode);
                 }
             }
             else
             {
-                EventHelper.handle(readWriteEventContext);
+                EventHelper.handle(readWriteEventContext, runnerMode);
                 int now = readWriteLock.releaseReadLock();
                 if (readLocks(now) == 0 && queueLocks(now))
                 {
-                    handleQueue();
+                    handleQueue(runnerMode);
                 }
                 else
                 {
@@ -154,7 +155,7 @@ public class ReadWriteExecutor implements EventExecutor
                 {
                     if (readLocks(now + 1) == 0)
                     {
-                        handleQueue();
+                        handleQueue(runnerMode);
                     }
                     else
                     {
@@ -171,7 +172,7 @@ public class ReadWriteExecutor implements EventExecutor
                             {
                                 if (readLocks(now + 1) == 0)
                                 {
-                                    handleQueue();
+                                    handleQueue(runnerMode);
                                 }
                                 else
                                 {
@@ -197,7 +198,7 @@ public class ReadWriteExecutor implements EventExecutor
         }
     }
     
-    private boolean tryFastInvokeRead(ReadWriteEventContext<?> readWriteEventContext)
+    private boolean tryFastInvokeRead(ReadWriteEventContext<?> readWriteEventContext, RunnerMode runnerMode)
     {
         int pred = readWriteLock.state;
         if (queueLocks(pred))
@@ -216,7 +217,7 @@ public class ReadWriteExecutor implements EventExecutor
                     {
                         if (readLocks(now + 1) == 0)
                         {
-                            handleQueue();
+                            handleQueue(runnerMode);
                         }
                         else
                         {
@@ -240,7 +241,7 @@ public class ReadWriteExecutor implements EventExecutor
                                 {
                                     if (readLocks(now + 1) == 0)
                                     {
-                                        handleQueue();
+                                        handleQueue(runnerMode);
                                     }
                                     else
                                     {
@@ -269,11 +270,11 @@ public class ReadWriteExecutor implements EventExecutor
         {
             if (readWriteLock.lockRead(pred))
             {
-                EventHelper.handle(readWriteEventContext);
+                EventHelper.handle(readWriteEventContext, runnerMode);
                 int now = readWriteLock.releaseReadLock();
                 if (readLocks(now) == 0 && queueLocks(now))
                 {
-                    handleQueue();
+                    handleQueue(runnerMode);
                 }
                 else
                 {
@@ -288,7 +289,7 @@ public class ReadWriteExecutor implements EventExecutor
         }
     }
     
-    private void fullPathInvokeRead(ReadWriteEventContext<?> readWriteEventContext)
+    private void fullPathInvokeRead(ReadWriteEventContext<?> readWriteEventContext, RunnerMode runnerMode)
     {
         int now;
         boolean invoked = false;
@@ -302,7 +303,7 @@ public class ReadWriteExecutor implements EventExecutor
             }
             else if (readWriteLock.lockRead(now))
             {
-                EventHelper.handle(readWriteEventContext);
+                EventHelper.handle(readWriteEventContext, runnerMode);
                 invoked = true;
                 break;
             }
@@ -316,7 +317,7 @@ public class ReadWriteExecutor implements EventExecutor
             now = readWriteLock.releaseReadLock();
             if (readLocks(now) == 0 && queueLocks(now))
             {
-                handleQueue();
+                handleQueue(runnerMode);
             }
             else
             {
@@ -332,7 +333,7 @@ public class ReadWriteExecutor implements EventExecutor
                 {
                     if (readLocks(now + 1) == 0)
                     {
-                        handleQueue();
+                        handleQueue(runnerMode);
                     }
                     else
                     {
@@ -350,7 +351,7 @@ public class ReadWriteExecutor implements EventExecutor
                             {
                                 if (readLocks(now + 1) == 0)
                                 {
-                                    handleQueue();
+                                    handleQueue(runnerMode);
                                 }
                                 else
                                 {
@@ -376,7 +377,7 @@ public class ReadWriteExecutor implements EventExecutor
         }
     }
     
-    private void handleQueue()
+    private void handleQueue(RunnerMode runnerMode)
     {
         ReadWriteEventContext<?> pollEvent;
         while ((pollEvent = queue.peek()) != null)
@@ -384,7 +385,7 @@ public class ReadWriteExecutor implements EventExecutor
             if (pollEvent.mode() == ReadWriteEventContext.WRITE)
             {
                 pollEvent = queue.poll();
-                EventHelper.handle(pollEvent);
+                EventHelper.handle(pollEvent, runnerMode);
             }
             else
             {
@@ -422,7 +423,7 @@ public class ReadWriteExecutor implements EventExecutor
             int now = readWriteLock.state;
             if (queueLocks(now) == false && readWriteLock.lockQueue(now) && readLocks(now + 1) == 0)
             {
-                handleQueue();
+                handleQueue(runnerMode);
             }
             else
             {
@@ -435,7 +436,7 @@ public class ReadWriteExecutor implements EventExecutor
                         {
                             if (readLocks(now + 1) == 0)
                             {
-                                handleQueue();
+                                handleQueue(runnerMode);
                             }
                             else
                             {

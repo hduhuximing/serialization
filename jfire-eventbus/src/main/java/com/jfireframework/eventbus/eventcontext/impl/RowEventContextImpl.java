@@ -3,14 +3,15 @@ package com.jfireframework.eventbus.eventcontext.impl;
 import com.jfireframework.eventbus.eventcontext.RowEventContext;
 import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public class RowEventContextImpl<T> extends NormalEventContext<T> implements RowEventContext<T>
 {
     private final Object rowkey;
     
-    public RowEventContextImpl(Object eventData, EventHandler<?> handler, EventExecutor executor, Object rowkey)
+    public RowEventContextImpl(RunnerMode runnerMode, Object eventData, EventHandler<?> handler, EventExecutor executor, Object rowkey)
     {
-        super(eventData, handler, executor);
+        super(runnerMode, eventData, handler, executor);
         this.rowkey = rowkey;
         if (rowkey == null)
         {

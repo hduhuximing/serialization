@@ -1,5 +1,7 @@
 package com.jfireframework.eventbus.handler;
 
+import com.jfireframework.eventbus.util.RunnerMode;
+
 public interface EventHandler<E>
 {
     /**
@@ -7,6 +9,6 @@ public interface EventHandler<E>
      * 
      * @param event
      */
-    public Object handle(E data);
+    public Object handle(E data, RunnerMode runnerMode);
     
 }

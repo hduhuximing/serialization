@@ -2,6 +2,7 @@ package com.jfireframework.eventbus.completedhandler.impl;
 
 import com.jfireframework.eventbus.completedhandler.CompletedHandler;
 import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public class CallNextPipeline implements CompletedHandler<Object>
 {
@@ -13,15 +14,15 @@ public class CallNextPipeline implements CompletedHandler<Object>
     }
     
     @Override
-    public void onCompleted(Object result)
+    public void onCompleted(Object result, RunnerMode runnerMode)
     {
-        pipeline.work(result);
+        pipeline.work(result, runnerMode);
     }
     
     @Override
-    public void onError(Throwable e)
+    public void onError(Throwable e, RunnerMode runnerMode)
     {
-        pipeline.onError(e);
+        pipeline.onError(e, runnerMode);
     }
     
 }

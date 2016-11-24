@@ -8,9 +8,12 @@ import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.pipeline.Operators;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.pipeline.impl.HeadPipeline;
 import com.jfireframework.eventbus.util.EventHelper;
+import com.jfireframework.eventbus.util.RunnerMode;
+import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
 
 public abstract class AbstractEventBus implements EventBus
 {
@@ -18,11 +21,17 @@ public abstract class AbstractEventBus implements EventBus
     protected static final Logger              LOGGER     = ConsoleLogFactory.getLogger();
     protected ExecutorService                  pool;
     
+    public AbstractEventBus(ExecutorService pool)
+    {
+        this.pool = pool;
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(data, event, handler);
+        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentEventbus, this);
+        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data);
         post(eventContext);
         return eventContext;
     }
@@ -31,7 +40,8 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(data, event, rowkey, handler);
+        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentEventbus, this);
+        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data, rowkey);
         post(eventContext);
         return eventContext;
     }
@@ -39,7 +49,6 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public void post(EventContext<?> eventContext)
     {
-        // eventQueue.offerAndSignal(eventContext);
         pool.submit(eventContext);
     }
     
@@ -47,8 +56,8 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
     {
-        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(data, event, rowkey, handler);
-        // eventContext.executor().handle(eventContext, this);
+        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentEventbus, this);
+        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data, rowkey);
         eventContext.run();
         eventContext.await();
         return eventContext;
@@ -58,7 +67,8 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(data, event, handler);
+        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentThread, null);
+        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data);
         eventContext.run();
         eventContext.await();
         return eventContext;
@@ -67,7 +77,15 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public Pipeline pipeline()
     {
-        return new HeadPipeline(this);
+        
+        Pipeline pipeline = new HeadPipeline().add(Operators.switchMode(this));
+        return pipeline;
+    }
+    
+    @Override
+    public void stop()
+    {
+        pool.shutdownNow();
     }
     
 }
