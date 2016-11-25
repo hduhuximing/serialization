@@ -1,17 +1,12 @@
 package com.jfireframework.eventbus.bus;
 
 import com.jfireframework.eventbus.event.EventConfig;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.eventcontext.EventContext;
-import com.jfireframework.eventbus.handler.EventHandler;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public interface EventBus
 {
-    public void register(Class<? extends Enum<? extends EventConfig>>... ckasses);
-    
-    public void addWorker();
-    
-    public void reduceWorker();
     
     public void stop();
     

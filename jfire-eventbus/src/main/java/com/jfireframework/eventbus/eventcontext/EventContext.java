@@ -1,11 +1,13 @@
 package com.jfireframework.eventbus.eventcontext;
 
-import com.jfireframework.eventbus.event.EventConfig;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
-public interface EventContext<T>
+public interface EventContext<T> extends Runnable
 {
+    public RunnerMode runnerMode();
+    
     /**
      * 返回该事件绑定执行器
      * 
@@ -79,12 +81,5 @@ public interface EventContext<T>
      * @return
      */
     public Object getEventData();
-    
-    /**
-     * 该事件上下文的事件类型
-     * 
-     * @return
-     */
-    public Enum<? extends EventConfig> getEvent();
     
 }

@@ -2,32 +2,29 @@ package com.jfireframework.eventbus.eventcontext.impl;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import com.jfireframework.eventbus.bus.EventBus;
-import com.jfireframework.eventbus.event.EventConfig;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public class NormalEventContext<T> implements EventContext<T>
 {
-    protected final EventBus                    eventBus;
-    protected final EventExecutor               executor;
-    protected final EventHandler<?>             handler;
-    protected final Object                      eventData;
-    protected final Enum<? extends EventConfig> event;
-    protected volatile boolean                  finished = false;
-    protected Thread                            owner;
-    protected volatile boolean                  await    = false;
-    protected Throwable                         e;
-    protected T                                 result;
+    protected final RunnerMode      runnerMode;
+    protected final EventExecutor   executor;
+    protected final EventHandler<?> handler;
+    protected final Object          eventData;
+    protected volatile boolean      finished = false;
+    protected Thread                owner;
+    protected volatile boolean      await    = false;
+    protected Throwable             e;
+    protected T                     result;
     
-    public NormalEventContext(Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler, EventExecutor executor, EventBus eventBus)
+    public NormalEventContext(RunnerMode runnerMode, Object eventData, EventHandler<?> handler, EventExecutor executor)
     {
+        this.runnerMode = runnerMode;
         this.eventData = eventData;
-        this.event = event;
         this.handler = handler;
         this.executor = executor;
-        this.eventBus = eventBus;
     }
     
     @Override
@@ -108,12 +105,6 @@ public class NormalEventContext<T> implements EventContext<T>
     }
     
     @Override
-    public Enum<? extends EventConfig> getEvent()
-    {
-        return event;
-    }
-    
-    @Override
     public T getResult()
     {
         if (finished)
@@ -152,6 +143,18 @@ public class NormalEventContext<T> implements EventContext<T>
     public EventHandler<?> eventHandler()
     {
         return handler;
+    }
+    
+    @Override
+    public void run()
+    {
+        executor.handle(this, runnerMode);
+    }
+    
+    @Override
+    public RunnerMode runnerMode()
+    {
+        return runnerMode;
     }
     
 }

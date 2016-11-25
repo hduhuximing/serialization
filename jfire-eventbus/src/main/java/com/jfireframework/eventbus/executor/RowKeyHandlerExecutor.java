@@ -4,9 +4,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.jfireframework.baseutil.concurrent.MPSCQueue;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.eventbus.bus.EventBus;
+import com.jfireframework.eventbus.bus.EventBuses;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.eventcontext.RowEventContext;
 import com.jfireframework.eventbus.util.EventHelper;
+import com.jfireframework.eventbus.util.RunnerMode;
 import sun.misc.Unsafe;
 
 public class RowKeyHandlerExecutor implements EventExecutor
@@ -39,7 +41,7 @@ public class RowKeyHandlerExecutor implements EventExecutor
     }
     
     @Override
-    public void handle(EventContext<?> eventContext, EventBus eventBus)
+    public void handle(EventContext<?> eventContext, RunnerMode runnerMode)
     {
         RowEventContext<?> rowEventContext = (RowEventContext<?>) eventContext;
         Object rowKey = rowEventContext.rowkey();
@@ -47,7 +49,7 @@ public class RowKeyHandlerExecutor implements EventExecutor
         if (rowBucket != null)
         {
             rowBucket.eventQueue.offer(rowEventContext);
-            trySendLeft(rowBucket, eventBus);
+            trySendLeft(rowBucket, runnerMode);
         }
         else
         {
@@ -58,21 +60,21 @@ public class RowKeyHandlerExecutor implements EventExecutor
                 rowBucket.eventQueue.offer(rowEventContext);
                 while ((rowEventContext = rowBucket.eventQueue.poll()) != null)
                 {
-                    EventHelper.handle(rowEventContext, eventBus);
+                    EventHelper.handle(rowEventContext, runnerMode);
                 }
                 map.remove(rowKey);
                 rowBucket.status = RowBucket.END_OF_WORK;
-                trySendLeft(rowBucket, eventBus);
+                trySendLeft(rowBucket, runnerMode);
             }
             else
             {
                 pre.eventQueue.offer(rowEventContext);
-                trySendLeft(pre, eventBus);
+                trySendLeft(pre, runnerMode);
             }
         }
     }
     
-    private void trySendLeft(RowBucket rowBucket, EventBus eventBus)
+    private void trySendLeft(RowBucket rowBucket, RunnerMode runnerMode)
     {
         EventContext<?> rowEventContext;
         int status = rowBucket.status;
@@ -83,9 +85,20 @@ public class RowKeyHandlerExecutor implements EventExecutor
         do
         {
             status = rowBucket.status;
-            if ((status == RowBucket.END_OF_WORK && rowBucket.takeControlOfSendingLeft()) //
-                    || (status == RowBucket.END_OF_SENDING && rowBucket.eventQueue.isEmpty() == false && rowBucket.takeControlOfSendingLeft()))
+            if (
+                (status == RowBucket.END_OF_WORK && rowBucket.takeControlOfSendingLeft()) //
+                        || (status == RowBucket.END_OF_SENDING && rowBucket.eventQueue.isEmpty() == false && rowBucket.takeControlOfSendingLeft())
+            )
             {
+                EventBus eventBus;
+                if (runnerMode.getEventBus() != null)
+                {
+                    eventBus = runnerMode.getEventBus();
+                }
+                else
+                {
+                    eventBus = EventBuses.computation();
+                }
                 while ((rowEventContext = rowBucket.eventQueue.poll()) != null)
                 {
                     eventBus.post(rowEventContext);

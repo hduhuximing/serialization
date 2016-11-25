@@ -2,9 +2,9 @@ package com.jfireframework.eventbus.executor;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import com.jfireframework.baseutil.concurrent.MPSCQueue;
-import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.eventcontext.EventContext;
 import com.jfireframework.eventbus.util.EventHelper;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public class TypeSerialHandlerExecutor implements EventExecutor
 {
@@ -14,7 +14,7 @@ public class TypeSerialHandlerExecutor implements EventExecutor
     private final MPSCQueue<EventContext<?>> events = new MPSCQueue<EventContext<?>>();
     
     @Override
-    public void handle(EventContext<?> eventContext, EventBus eventBus)
+    public void handle(EventContext<?> eventContext, RunnerMode runnerMode)
     {
         events.offer(eventContext);
         do
@@ -24,7 +24,7 @@ public class TypeSerialHandlerExecutor implements EventExecutor
             {
                 while ((eventContext = events.poll()) != null)
                 {
-                    EventHelper.handle(eventContext, eventBus);
+                    EventHelper.handle(eventContext, runnerMode);
                 }
                 state.set(idle);
                 if (events.isEmpty())
@@ -35,6 +35,10 @@ public class TypeSerialHandlerExecutor implements EventExecutor
                 {
                     continue;
                 }
+            }
+            else
+            {
+                break;
             }
         } while (true);
         

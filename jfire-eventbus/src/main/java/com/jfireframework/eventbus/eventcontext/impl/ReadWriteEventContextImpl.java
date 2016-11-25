@@ -1,19 +1,18 @@
 package com.jfireframework.eventbus.eventcontext.impl;
 
-import com.jfireframework.eventbus.bus.EventBus;
-import com.jfireframework.eventbus.event.EventConfig;
+import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.eventcontext.ReadWriteEventContext;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 public class ReadWriteEventContextImpl<T> extends NormalEventContext<T> implements ReadWriteEventContext<T>
 {
     private boolean   immediateMode = false;
     private final int mode;
     
-    public ReadWriteEventContextImpl(int mode, Object eventData, Enum<? extends EventConfig> event, EventHandler<?> handler, EventExecutor executor, EventBus eventBus)
+    public ReadWriteEventContextImpl(RunnerMode runnerMode, int mode, Object eventData, EventHandler<?> handler, EventExecutor executor)
     {
-        super(eventData, event, handler, executor, eventBus);
+        super(runnerMode, eventData, handler, executor);
         this.mode = mode;
     }
     
