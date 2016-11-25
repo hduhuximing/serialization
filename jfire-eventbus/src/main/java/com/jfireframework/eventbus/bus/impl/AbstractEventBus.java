@@ -8,8 +8,8 @@ import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.eventcontext.EventContext;
-import com.jfireframework.eventbus.pipeline.Operators;
 import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.impl.DefaultPipeline;
 import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.eventbus.util.RunnerMode;
 import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
@@ -76,7 +76,7 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public Pipeline pipeline()
     {
-        return Operators.create().add(Operators.switchMode(this));
+        return DefaultPipeline.create().switchMode(this);
     }
     
     @Override

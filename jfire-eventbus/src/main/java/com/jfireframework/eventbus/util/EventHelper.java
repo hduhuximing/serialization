@@ -26,7 +26,7 @@ public class EventHelper
     private static final IdentityHashMap<Class<?>, EventExecutor>  readWriteMap        = new IdentityHashMap<Class<?>, EventExecutor>();
     static
     {
-        register(SwitchRunnerModeEvent.class);
+        register(DefaultEvent.class);
     }
     
     public static void register(Class<? extends Enum<? extends EventConfig>>... ckasses)

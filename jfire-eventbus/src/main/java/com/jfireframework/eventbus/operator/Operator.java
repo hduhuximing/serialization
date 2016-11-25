@@ -1,5 +1,6 @@
-package com.jfireframework.eventbus.pipeline;
+package com.jfireframework.eventbus.operator;
 
+import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public interface Operator

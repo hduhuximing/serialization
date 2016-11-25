@@ -1,4 +1,4 @@
-package com.jfireframework.eventbus.pipeline;
+package com.jfireframework.eventbus.pipeline.impl;
 
 import com.jfireframework.eventbus.bus.EventBus;
 import com.jfireframework.eventbus.bus.EventBuses;
@@ -10,64 +10,30 @@ import com.jfireframework.eventbus.eventcontext.impl.NormalEventContext;
 import com.jfireframework.eventbus.eventcontext.impl.ReadWriteEventContextImpl;
 import com.jfireframework.eventbus.eventcontext.impl.RowEventContextImpl;
 import com.jfireframework.eventbus.executor.EventExecutor;
-import com.jfireframework.eventbus.pipeline.impl.AbstractPipeline;
+import com.jfireframework.eventbus.operator.MapOp;
+import com.jfireframework.eventbus.operator.Operator;
+import com.jfireframework.eventbus.operator.OperatorData;
+import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.eventbus.util.RunnerMode;
 import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
-import com.jfireframework.eventbus.util.SwitchRunnerModeEvent;
+import com.jfireframework.eventbus.util.DefaultEvent;
 
-public class Operators
+public class DefaultPipeline extends BasePipeline
 {
-    public static Pipeline create()
+    
+    public DefaultPipeline(Operator operator, Pipeline pred)
     {
-        return new AbstractPipeline() {
-            @Override
-            public void work(Object upstreamResult, RunnerMode runnerMode)
-            {
-                onCompleted(upstreamResult, runnerMode);
-            }
-            
-            @Override
-            public void start()
-            {
-                work(null, null);
-            }
-            
-            @Override
-            public void start(Object initParam)
-            {
-                work(initParam, null);
-            }
-        };
+        super(operator, pred);
     }
     
-    public static Operator work(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final Object rowKey)
+    public static Pipeline create()
     {
-        Operator operator = new Operator() {
-            
-            @Override
-            public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
-            {
-                if (eventData != Pipeline.USE_UPSTREAM_RESULT)
-                {
-                    data = eventData;
-                }
-                EventContext<?> eventContext = proxy(pipeline, runnerMode, event, handler, data, rowKey);
-                eventContext.executor().handle(eventContext, runnerMode);
-            }
-            
-            @Override
-            public void onError(Throwable e, RunnerMode runnerMode)
-            {
-                ;
-            }
-            
-        };
-        return operator;
+        return new HeadPipeline();
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static EventContext<?> proxy(Pipeline pipeline, RunnerMode runnerMode, Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowKey)
+    private EventContext<?> proxy(Pipeline pipeline, RunnerMode runnerMode, Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowKey)
     {
         EventContext<?> eventContext;
         switch (((EventConfig) event).parallelLevel())
@@ -111,16 +77,6 @@ public class Operators
                 throw new NullPointerException();
         }
         return eventContext;
-    }
-    
-    public static Operator work(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData)
-    {
-        return work(event, handler, eventData, Pipeline.USE_UPSTREAM_RESULT);
-    }
-    
-    public static Operator work(final Enum<? extends EventConfig> event, final EventHandler<?> handler)
-    {
-        return work(event, handler, Pipeline.USE_UPSTREAM_RESULT, Pipeline.USE_UPSTREAM_RESULT);
     }
     
     static class ReadWriteEventContextProxy<T> extends ReadWriteEventContextImpl<T>
@@ -198,6 +154,49 @@ public class Operators
         }
     }
     
+    @Override
+    public Pipeline work(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final Object rowKey)
+    {
+        Operator operator = new Operator() {
+            
+            @Override
+            public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+            {
+                if (eventData != Pipeline.USE_UPSTREAM_RESULT)
+                {
+                    data = eventData;
+                }
+                EventContext<?> eventContext = proxy(pipeline, runnerMode, event, handler, data, rowKey);
+                eventContext.executor().handle(eventContext, runnerMode);
+            }
+            
+            @Override
+            public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+        };
+        return add(operator);
+    }
+    
+    @Override
+    public Pipeline work(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData)
+    {
+        return work(event, handler, eventData, Pipeline.USE_UPSTREAM_RESULT);
+    }
+    
+    @Override
+    public Pipeline work(final Enum<? extends EventConfig> event, final EventHandler<?> handler)
+    {
+        return work(event, handler, Pipeline.USE_UPSTREAM_RESULT, Pipeline.USE_UPSTREAM_RESULT);
+    }
+    
+    @Override
+    public Pipeline work(EventHandler<?> handler)
+    {
+        return work(DefaultEvent.JUST_PAEALLEL_EVENT, handler, USE_UPSTREAM_RESULT, USE_UPSTREAM_RESULT);
+    }
+    
     private static final EventHandler<Object> switchHandler = new EventHandler<Object>() {
         
         @Override
@@ -207,7 +206,8 @@ public class Operators
         }
     };
     
-    public static Operator switchMode(final EventBus eventBus)
+    @Override
+    public Pipeline switchMode(final EventBus eventBus)
     {
         final RunnerMode newRunnerMode = new RunnerMode(ThreadMode.currentEventbus, eventBus);
         Operator operator = new Operator() {
@@ -215,7 +215,7 @@ public class Operators
             @Override
             public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
             {
-                EventContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, data, switchHandler, EventHelper.findExecutor(SwitchRunnerModeEvent.SWITCH));
+                EventContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, data, switchHandler, EventHelper.findExecutor(DefaultEvent.SWITCH));
                 eventBus.post(eventContext);
             }
             
@@ -226,15 +226,11 @@ public class Operators
             }
             
         };
-        return operator;
+        return add(operator);
     }
     
-    /**
-     * 上游生成的结果是一个数组或者是迭代器。本节点将数组或者迭代器中的每一个元素都分别推送给下游
-     * 
-     * @return
-     */
-    public static Operator from()
+    @Override
+    public Pipeline from()
     {
         Operator operator = new Operator() {
             
@@ -321,107 +317,92 @@ public class Operators
             }
             
         };
-        return operator;
+        return add(operator);
     }
     
-    public static Pipeline from(final Object src)
+    public static Pipeline from(final Object data)
     {
-        return new AbstractPipeline() {
+        return new HeadPipeline() {
             @SuppressWarnings("rawtypes")
             @Override
-            public void work(Object data, RunnerMode runnerMode)
+            public void work(Object upstreamData, RunnerMode runnerMode)
             {
-                if (nextPipeline != null)
+                if (data instanceof int[])
                 {
-                    if (src instanceof int[])
+                    for (int i : (int[]) data)
                     {
-                        for (int i : (int[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof byte[])
-                    {
-                        for (byte i : (byte[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof short[])
-                    {
-                        for (short i : (short[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof long[])
-                    {
-                        for (long i : (long[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof float[])
-                    {
-                        for (float i : (float[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof double[])
-                    {
-                        for (double i : (double[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof boolean[])
-                    {
-                        for (boolean i : (boolean[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof char[])
-                    {
-                        for (char i : (char[]) src)
-                        {
-                            nextPipeline.onCompleted(i, runnerMode);
-                        }
-                    }
-                    else if (src instanceof Iterable)
-                    {
-                        for (Object each : (Iterable) src)
-                        {
-                            nextPipeline.onCompleted(each, runnerMode);
-                        }
-                    }
-                    else
-                    {
-                        for (Object each : (Object[]) src)
-                        {
-                            nextPipeline.onCompleted(each, runnerMode);
-                        }
+                        onCompleted(i, runnerMode);
                     }
                 }
-            }
-            
-            @Override
-            public void start()
-            {
-                work(null, null);
-            }
-            
-            @Override
-            public void start(Object initParam)
-            {
-                work(initParam, null);
-            }
+                else if (data instanceof byte[])
+                {
+                    for (byte i : (byte[]) data)
+                    {
+                        onCompleted(i, runnerMode);
+                    }
+                }
+                else if (data instanceof short[])
+                {
+                    for (short i : (short[]) data)
+                    {
+                        onCompleted(i, runnerMode);
+                    }
+                }
+                else if (data instanceof long[])
+                {
+                    for (long i : (long[]) data)
+                    {
+                        onCompleted(i, runnerMode);
+                    }
+                }
+                else if (data instanceof float[])
+                {
+                    for (float i : (float[]) data)
+                    {
+                        onCompleted(i, runnerMode);
+                    }
+                }
+                else if (data instanceof double[])
+                {
+                    for (double i : (double[]) data)
+                    {
+                        onCompleted(i, runnerMode);
+                    }
+                }
+                else if (data instanceof boolean[])
+                {
+                    for (boolean i : (boolean[]) data)
+                    {
+                        onCompleted(i, runnerMode);
+                    }
+                }
+                else if (data instanceof char[])
+                {
+                    for (char i : (char[]) data)
+                    {
+                        onCompleted(i, runnerMode);
+                    }
+                }
+                else if (data instanceof Iterable)
+                {
+                    for (Object each : (Iterable) data)
+                    {
+                        onCompleted(each, runnerMode);
+                    }
+                }
+                else
+                {
+                    for (Object each : (Object[]) data)
+                    {
+                        onCompleted(each, runnerMode);
+                    }
+                }
+            };
         };
-        
     }
     
-    public static <E> Operator map(final MapOp<E> mapOp)
+    @Override
+    public <E> Pipeline map(final MapOp<E> mapOp)
     {
         Operator operator = new Operator() {
             
@@ -439,10 +420,11 @@ public class Operators
             }
             
         };
-        return operator;
+        return add(operator);
     }
     
-    public static Operator distribute(final OperatorData... datas)
+    @Override
+    public Pipeline distribute(final OperatorData... datas)
     {
         Operator operator = new Operator() {
             
@@ -477,6 +459,7 @@ public class Operators
             }
             
         };
-        return operator;
+        return add(operator);
     }
+    
 }

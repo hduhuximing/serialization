@@ -1,7 +1,8 @@
-package com.jfireframework.eventbus.pipeline;
+package com.jfireframework.eventbus.operator;
 
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.event.EventHandler;
+import com.jfireframework.eventbus.pipeline.Pipeline;
 
 public class OperatorData
 {

@@ -1,7 +1,7 @@
-package com.jfireframework.eventbus.util.extra;
+package com.jfireframework.eventbus.operator.impl;
 
 import com.jfireframework.baseutil.concurrent.SingleSync;
-import com.jfireframework.eventbus.pipeline.Operator;
+import com.jfireframework.eventbus.operator.Operator;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 

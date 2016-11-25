@@ -3,9 +3,9 @@ package com.jfireframework.eventbus.util;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.event.ParallelLevel;
 
-public enum SwitchRunnerModeEvent implements EventConfig
+public enum DefaultEvent implements EventConfig
 {
-    SWITCH;
+    SWITCH, JUST_PAEALLEL_EVENT;
     
     @Override
     public ParallelLevel parallelLevel()

@@ -1,9 +1,9 @@
-package com.jfireframework.eventbus.util.extra;
+package com.jfireframework.eventbus.operator.impl;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.jfireframework.eventbus.pipeline.Operator;
+import com.jfireframework.eventbus.operator.Operator;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 

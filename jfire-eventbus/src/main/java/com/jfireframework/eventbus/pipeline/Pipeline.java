@@ -1,8 +1,9 @@
 package com.jfireframework.eventbus.pipeline;
 
+import com.jfireframework.eventbus.operator.Operator;
 import com.jfireframework.eventbus.util.RunnerMode;
 
-public interface Pipeline
+public interface Pipeline extends PipelineConnect
 {
     public static final Object USE_UPSTREAM_RESULT = new Object();
     
@@ -41,6 +42,8 @@ public interface Pipeline
     
     /**
      * 增加一个pipeline到事件编排末尾
+     * 
+     * @param <T>
      * 
      * @param pipeline
      * @return

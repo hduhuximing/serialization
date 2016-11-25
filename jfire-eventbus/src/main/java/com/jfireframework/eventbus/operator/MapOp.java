@@ -1,4 +1,4 @@
-package com.jfireframework.eventbus.pipeline;
+package com.jfireframework.eventbus.operator;
 
 public interface MapOp<E>
 {
