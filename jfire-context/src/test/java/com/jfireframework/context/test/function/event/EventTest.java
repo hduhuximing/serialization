@@ -5,7 +5,7 @@ import org.junit.Test;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 import com.jfireframework.context.config.BeanInfo;
-import com.jfireframework.context.event.impl.IoEventPoster;
+import com.jfireframework.context.event.EventRegisterHelper;
 
 public class EventTest
 {
@@ -14,9 +14,9 @@ public class EventTest
     {
         JfireContext jfireContext = new JfireContextImpl();
         jfireContext.addBean(HaftHandler.class);
-        jfireContext.addBean("com.jfireframework.context.event.impl.EventPosterImpl", false, IoEventPoster.class);
+        jfireContext.addBean("eventregisterhelper", false, EventRegisterHelper.class);
         BeanInfo beanInfo = new BeanInfo();
-        beanInfo.setBeanName("com.jfireframework.context.event.impl.EventPosterImpl");
+        beanInfo.setBeanName("eventregisterhelper");
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("eventPath", "com.jfireframework.context.test.function.event");
         beanInfo.setParams(params);

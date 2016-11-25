@@ -2,18 +2,19 @@ package com.jfireframework.context.test.function.event;
 
 import javax.annotation.Resource;
 import com.jfireframework.context.ContextInitFinish;
-import com.jfireframework.context.event.EventPoster;
-import com.jfireframework.eventbus.bus.EventBus;
-import com.jfireframework.eventbus.handler.EventHandler;
+import com.jfireframework.context.event.EventRegisterHelper;
+import com.jfireframework.eventbus.bus.EventBuses;
+import com.jfireframework.eventbus.event.EventHandler;
+import com.jfireframework.eventbus.util.RunnerMode;
 
 @Resource
 public class HaftHandler implements EventHandler<UserPhone>, ContextInitFinish
 {
     @Resource
-    private EventPoster publisher;
+    private EventRegisterHelper publisher;
     
     @Override
-    public Object handle(UserPhone myEvent, EventBus eventBus)
+    public Object handle(UserPhone myEvent, RunnerMode runnerMode)
     {
         System.out.println("asdasd");
         System.out.println("用户:" + myEvent.getPhone() + "欠费");
@@ -31,8 +32,7 @@ public class HaftHandler implements EventHandler<UserPhone>, ContextInitFinish
     {
         UserPhone phone = new UserPhone();
         phone.setPhone("1775032");
-        publisher.post(phone, SmsEvent.halt, this).await();
-        ;
+        EventBuses.computation().post(phone, SmsEvent.halt, this).await();
     }
     
 }

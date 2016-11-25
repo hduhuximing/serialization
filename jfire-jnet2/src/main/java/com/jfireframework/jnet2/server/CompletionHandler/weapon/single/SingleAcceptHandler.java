@@ -7,7 +7,8 @@ import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.baseutil.verify.Verify;
 import com.jfireframework.eventbus.bus.EventBus;
-import com.jfireframework.eventbus.bus.impl.CalculateEventBus;
+import com.jfireframework.eventbus.bus.EventBuses;
+import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.jnet2.common.channel.ChannelInitListener;
 import com.jfireframework.jnet2.common.channel.impl.ServerChannel;
 import com.jfireframework.jnet2.server.AioServer;
@@ -24,13 +25,12 @@ import com.jfireframework.jnet2.server.util.WorkMode;
 public class SingleAcceptHandler implements AcceptHandler
 {
     private AioServer           aioServer;
-    private Logger              logger = ConsoleLogFactory.getLogger();
+    private Logger              logger   = ConsoleLogFactory.getLogger();
     private ChannelInitListener initListener;
     private final PushMode      pushMode;
     private final WorkMode      workMode;
-    private final EventBus      eventBus;
+    private final EventBus      eventBus = EventBuses.computation();
     
-    @SuppressWarnings("unchecked")
     public SingleAcceptHandler(AioServer aioServer, ServerConfig serverConfig)
     {
         pushMode = serverConfig.getPushMode();
@@ -41,12 +41,11 @@ public class SingleAcceptHandler implements AcceptHandler
         initListener = serverConfig.getInitListener();
         if (workMode == WorkMode.ASYNC)
         {
-            eventBus = new CalculateEventBus();
-            eventBus.register(Message.class);
+            EventHelper.register(Message.class);
         }
         else
         {
-            eventBus = null;
+            ;
         }
     }
     
