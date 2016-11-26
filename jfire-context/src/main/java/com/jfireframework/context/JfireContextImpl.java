@@ -357,6 +357,10 @@ public class JfireContextImpl implements JfireContext
                 resetValueFromProperties(entry);
             }
         }
+        for (Entry<String, String> each : properties.entrySet())
+        {
+            resetValueFromProperties(each);
+        }
     }
     
     private void resetValueFromProperties(Entry<String, String> entry)
