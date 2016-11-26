@@ -28,7 +28,7 @@ public class BeanInitProcessImpl implements BeanInitProcess
     /** 该bean需要进行属性注入的field */
     protected DependencyField[]     injectFields    = new DependencyField[0];
     /** 该bean需要进行属性初始化的field */
-    protected ParamField[]          paramFields     = new ParamField[0];
+    protected ParamField[]          paramFields;
     /** 该bean是否是多例 */
     protected boolean               prototype       = false;
     

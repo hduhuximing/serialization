@@ -1,12 +1,15 @@
 package com.jfireframework.context.config;
 
+import java.util.HashMap;
+
 public class ContextConfig
 {
-    private String[]   packageNames = new String[0];
-    private BeanInfo[] beans        = new BeanInfo[0];
-    private String[]   properties   = new String[0];
-    private Profile[]  profiles     = new Profile[0];
-    private String     activeProfile;
+    private String[]                packageNames  = new String[0];
+    private BeanInfo[]              beans         = new BeanInfo[0];
+    private String[]                propertyPaths = new String[0];
+    private Profile[]               profiles      = new Profile[0];
+    private HashMap<String, String> properties    = new HashMap<String, String>();
+    private String                  activeProfile;
     
     public String getActiveProfile()
     {
@@ -18,14 +21,14 @@ public class ContextConfig
         this.activeProfile = activeProfile;
     }
     
-    public String[] getProperties()
+    public String[] getPropertyPaths()
     {
-        return properties;
+        return propertyPaths;
     }
     
-    public void setProperties(String[] properties)
+    public void setPropertyPaths(String[] propertyPaths)
     {
-        this.properties = properties;
+        this.propertyPaths = propertyPaths;
     }
     
     public String[] getPackageNames()
@@ -56,6 +59,16 @@ public class ContextConfig
     public void setProfiles(Profile[] profiles)
     {
         this.profiles = profiles;
+    }
+    
+    public HashMap<String, String> getProperties()
+    {
+        return properties;
+    }
+    
+    public void setProperties(HashMap<String, String> properties)
+    {
+        this.properties = properties;
     }
     
 }

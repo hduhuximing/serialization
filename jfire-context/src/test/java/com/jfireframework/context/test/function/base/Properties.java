@@ -7,6 +7,7 @@ import org.junit.Test;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 import com.jfireframework.context.test.function.base.data.ImmutablePerson;
+import com.jfireframework.context.test.function.base.data.PropertyReadData;
 
 public class Properties
 {
@@ -17,5 +18,16 @@ public class Properties
         jfireContext.readConfig(new File(this.getClass().getClassLoader().getResource("propertiestest.json").toURI()));
         ImmutablePerson person = jfireContext.getBean(ImmutablePerson.class);
         Assert.assertEquals(12, person.getAge());
+    }
+    
+    @Test
+    public void test2() throws URISyntaxException
+    {
+        JfireContext jfireContext = new JfireContextImpl();
+        jfireContext.addBean(PropertyReadData.class.getName(), false, PropertyReadData.class);
+        jfireContext.readConfig(new File(this.getClass().getClassLoader().getResource("propertiestest.json").toURI()));
+        PropertyReadData data = jfireContext.getBean(PropertyReadData.class);
+        Assert.assertEquals(13, data.getAge());
+        Assert.assertEquals(10, data.getAge1());
     }
 }

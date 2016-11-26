@@ -102,7 +102,8 @@ public class JfireContextImpl implements JfireContext
             ContextConfig contextConfig = JsonTool.read(ContextConfig.class, config);
             addPackageNames(contextConfig.getPackageNames());
             handleBeanInfos(contextConfig.getBeans());
-            readProperties(contextConfig.getProperties());
+            readProperties(contextConfig.getPropertyPaths());
+            properties.putAll(contextConfig.getProperties());
             profiles = contextConfig.getProfiles();
             activeProfile = contextConfig.getActiveProfile();
         }
@@ -572,15 +573,20 @@ public class JfireContextImpl implements JfireContext
          */
         public void initDependencyAndParamFields()
         {
+            Map<String, String> emptyParams = new HashMap<String, String>();
             for (Bean bean : beanNameMap.values())
             {
                 if (bean.canInject())
                 {
-                    BeanInfo beanConfig = bean.getBeanInfo();
-                    bean.setInjectFields(FieldFactory.buildDependencyField(bean, beanNameMap, beanTypeMap, beanConfig));
-                    if (beanConfig != null)
+                    BeanInfo beanInfo = bean.getBeanInfo();
+                    bean.setInjectFields(FieldFactory.buildDependencyField(bean, beanNameMap, beanTypeMap, beanInfo));
+                    if (beanInfo != null)
                     {
-                        bean.setParamFields(FieldFactory.buildParamField(bean, beanConfig, classLoader));
+                        bean.setParamFields(FieldFactory.buildParamField(bean, beanInfo.getParams(), properties, classLoader));
+                    }
+                    else
+                    {
+                        bean.setParamFields(FieldFactory.buildParamField(bean, emptyParams, properties, classLoader));
                     }
                 }
             }
@@ -608,7 +614,8 @@ public class JfireContextImpl implements JfireContext
             {
                 addPackageNames(each.getPackageNames());
                 addBeanInfo(each.getBeans());
-                readProperties(each.getProperties());
+                readProperties(each.getPropertyPaths());
+                properties.putAll(each.getProperties());
                 return;
             }
         }

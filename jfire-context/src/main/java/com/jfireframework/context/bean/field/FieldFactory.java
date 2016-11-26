@@ -17,6 +17,7 @@ import com.jfireframework.baseutil.verify.Verify;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.context.bean.annotation.field.MapKey;
+import com.jfireframework.context.bean.annotation.field.PropertyRead;
 import com.jfireframework.context.bean.field.dependency.DependencyField;
 import com.jfireframework.context.bean.field.dependency.impl.BeanNameMapField;
 import com.jfireframework.context.bean.field.dependency.impl.DefaultBeanField;
@@ -417,16 +418,28 @@ public class FieldFactory
      * @param beanConfig
      * @return
      */
-    public static ParamField[] buildParamField(Bean bean, BeanInfo beanInfo, ClassLoader classLoader)
+    public static ParamField[] buildParamField(Bean bean, Map<String, String> params, Map<String, String> properties, ClassLoader classLoader)
     {
-        Map<String, String> map = beanInfo.getParams();
         Field[] fields = ReflectUtil.getAllFields(bean.getType());
         List<ParamField> list = new LinkedList<ParamField>();
         for (Field field : fields)
         {
-            if (map.containsKey(field.getName()))
+            if (params.containsKey(field.getName()))
             {
-                list.add(buildParamField(field, map.get(field.getName()), classLoader));
+                list.add(buildParamField(field, params.get(field.getName()), classLoader));
+            }
+            else if (AnnotationUtil.isPresent(PropertyRead.class, field))
+            {
+                PropertyRead propertyRead = AnnotationUtil.getAnnotation(PropertyRead.class, field);
+                String propertyName = propertyRead.value();
+                if (properties.containsKey(propertyName))
+                {
+                    list.add(buildParamField(field, properties.get(propertyName), classLoader));
+                }
+                else
+                {
+                    continue;
+                }
             }
         }
         return list.toArray(new ParamField[list.size()]);
