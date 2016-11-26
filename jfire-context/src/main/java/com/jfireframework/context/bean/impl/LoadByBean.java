@@ -6,7 +6,7 @@ import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.context.bean.load.BeanLoadFactory;
 
-public class LoadByBean extends AbstractBean
+public class LoadByBean extends BaseBean
 {
     private final String factoryBeanName;
     private Bean         factoryBean;

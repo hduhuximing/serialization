@@ -14,7 +14,7 @@ import com.jfireframework.context.ContextInitFinish;
 import com.jfireframework.context.bean.field.dependency.DependencyField;
 import com.jfireframework.context.bean.field.param.ParamField;
 
-public class DefaultBean extends AbstractBean
+public class DefaultBean extends BaseBean
 {
     public DefaultBean(Class<?> ckass)
     {

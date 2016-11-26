@@ -2,7 +2,7 @@ package com.jfireframework.context.bean.impl;
 
 import java.util.Map;
 
-public class OuterEntityBean extends AbstractBean
+public class OuterEntityBean extends BaseBean
 {
     
     public OuterEntityBean(String beanName, Object entity)

@@ -1,7 +1,6 @@
 package com.jfireframework.context.bean.impl;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,63 +11,49 @@ import com.jfireframework.context.aop.annotation.AroundEnhance;
 import com.jfireframework.context.aop.annotation.BeforeEnhance;
 import com.jfireframework.context.aop.annotation.ThrowEnhance;
 import com.jfireframework.context.bean.Bean;
+import com.jfireframework.context.bean.BeanInitProcess;
 import com.jfireframework.context.bean.field.dependency.DependencyField;
 import com.jfireframework.context.bean.field.param.ParamField;
 import com.jfireframework.context.config.BeanInfo;
 import sun.reflect.MethodAccessor;
 
-/**
- * 容器管理的bean
- * 
- * @author 林斌（eric@jfire.cn）
- * 
- */
-public abstract class AbstractBean implements Bean
+public class BeanInitProcessImpl implements BeanInitProcess
 {
     /** 该bean的名称 */
-    protected String                                     beanName;
+    protected String                beanName;
     /** 该bean的class对象，可能为增强后的对象 */
-    protected Class<?>                                   type;
+    protected Class<?>              type;
     /** 该bean的原始class对象，供查询使用 */
-    protected Class<?>                                   originType;
+    protected Class<?>              originType;
     /** 该bean需要进行属性注入的field */
-    protected DependencyField[]                          injectFields    = new DependencyField[0];
+    protected DependencyField[]     injectFields    = new DependencyField[0];
     /** 该bean需要进行属性初始化的field */
-    protected ParamField[]                               paramFields     = new ParamField[0];
+    protected ParamField[]          paramFields     = new ParamField[0];
     /** 该bean是否是多例 */
-    protected boolean                                    prototype       = false;
-    /* bean对象初始化过程中暂存生成的中间对象 */
-    protected final ThreadLocal<HashMap<String, Object>> beanInstanceMap = new ThreadLocal<HashMap<String, Object>>() {
-                                                                             @Override
-                                                                             protected HashMap<String, Object> initialValue()
-                                                                             {
-                                                                                 return new HashMap<String, Object>();
-                                                                             }
-                                                                         };
-    /** 单例的引用对象 */
-    protected Object                                     singletonInstance;
+    protected boolean               prototype       = false;
+    
     /** 该bean是否实现了容器初始化结束接口 */
-    protected boolean                                    hasFinishAction = false;
+    protected boolean               hasFinishAction = false;
     /** 该bean的所有增强方法信息 */
-    protected List<EnhanceAnnoInfo>                      enHanceAnnos    = new LinkedList<EnhanceAnnoInfo>();
+    protected List<EnhanceAnnoInfo> enHanceAnnos    = new LinkedList<EnhanceAnnoInfo>();
     /** 该bean的事务方法 */
-    protected List<Method>                               txMethods       = new LinkedList<Method>();
+    protected List<Method>          txMethods       = new LinkedList<Method>();
     /** 该bean的自动关闭资源方法 */
-    protected List<Method>                               resMethod       = new LinkedList<Method>();
-    protected List<Method>                               cacheMethods    = new LinkedList<Method>();
+    protected List<Method>          resMethod       = new LinkedList<Method>();
+    protected List<Method>          cacheMethods    = new LinkedList<Method>();
     /**
      * 该bean是否可以进行增强。如果是外部直接设置的对象，则不可以进行增强
      */
-    protected boolean                                    canEnhance      = true;
+    protected boolean               canEnhance      = true;
     /**
      * 该bean是否可以进行依赖注入和参数注入
      */
-    protected boolean                                    canInject       = true;
+    protected boolean               canInject       = true;
     /**
      * 对象初始化后，在容器内首先先调用的方法
      */
-    protected MethodAccessor                             postConstructMethod;
-    protected BeanInfo                                   beanInfo;
+    protected MethodAccessor        postConstructMethod;
+    protected BeanInfo              beanInfo;
     
     @Override
     public String getBeanName()
