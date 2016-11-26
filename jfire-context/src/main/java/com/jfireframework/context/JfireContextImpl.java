@@ -139,26 +139,46 @@ public class JfireContextImpl implements JfireContext
     {
         for (String path : paths)
         {
-            if (path.startsWith("classpath:"))
+            InputStream inputStream = null;
+            try
+            {
+                if (path.startsWith("classpath:"))
+                {
+                    path = path.substring(10);
+                    inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
+                }
+                else if (path.startsWith("file:"))
+                {
+                    path = path.substring(5);
+                    inputStream = new FileInputStream(new File(path));
+                }
+                else
+                {
+                    continue;
+                }
+                Properties properties = new Properties();
+                properties.load(inputStream);
+                inputStream.close();
+                addProperties(properties);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            finally
             {
                 try
                 {
-                    path = path.substring(10);
-                    InputStream in = this.getClass().getClassLoader().getResourceAsStream(path);
-                    Properties properties = new Properties();
-                    properties.load(in);
-                    in.close();
-                    addProperties(properties);
+                    if (inputStream != null)
+                    {
+                        inputStream.close();
+                        inputStream = null;
+                    }
                 }
                 catch (IOException e)
                 {
-                    throw new JustThrowException(e);
+                    ;
                 }
-            }
-            else
-            {
-                // 暂时不支持别的模式
-                ;
             }
         }
     }
@@ -329,29 +349,38 @@ public class JfireContextImpl implements JfireContext
         {
             for (Entry<String, String> entry : config.getParams().entrySet())
             {
-                String value = entry.getValue();
-                if (value.startsWith("${"))
+                resetValueFromProperties(entry);
+            }
+            for (Entry<String, String> entry : config.getDependencies().entrySet())
+            {
+                resetValueFromProperties(entry);
+            }
+        }
+    }
+    
+    private void resetValueFromProperties(Entry<String, String> entry)
+    {
+        String value = entry.getValue();
+        if (value.startsWith("${"))
+        {
+            int end = value.indexOf("}||");
+            if (end != -1)
+            {
+                String name = value.substring(2, end);
+                if (properties.get(name) != null)
                 {
-                    int end = value.indexOf("}||");
-                    if (end != -1)
-                    {
-                        String name = value.substring(2, end);
-                        if (properties.get(name) != null)
-                        {
-                            entry.setValue(properties.get(name));
-                        }
-                        else
-                        {
-                            String defaultValue = value.substring(end + 3);
-                            entry.setValue(defaultValue);
-                        }
-                    }
-                    else
-                    {
-                        String name = value.substring(2, value.length() - 1);
-                        entry.setValue(properties.get(name));
-                    }
+                    entry.setValue(properties.get(name));
                 }
+                else
+                {
+                    String defaultValue = value.substring(end + 3);
+                    entry.setValue(defaultValue);
+                }
+            }
+            else
+            {
+                String name = value.substring(2, value.length() - 1);
+                entry.setValue(properties.get(name));
             }
         }
     }
@@ -570,8 +599,7 @@ public class JfireContextImpl implements JfireContext
         }
     }
     
-    @Override
-    public void activeProfile(String name)
+    private void activeProfile(String name)
     {
         Verify.False(init, "只能在初始化之前激活配置");
         for (Profile each : profiles)

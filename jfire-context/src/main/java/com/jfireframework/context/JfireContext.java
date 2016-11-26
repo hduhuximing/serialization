@@ -13,8 +13,7 @@ public interface JfireContext
     public void addProperties(Properties... properties);
     
     /**
-     * 读取配置文件中的信息，如果配置文件中配置了PackageNames，则向容器中增加包信息。
-     * 如果配置了beans，则向容器增加bean信息
+     * 读取配置文件中的信息，如果配置文件中配置了PackageNames，则向容器中增加包信息。 如果配置了beans，则向容器增加bean信息
      * 
      * @param configFile
      */
@@ -58,10 +57,8 @@ public interface JfireContext
     public void addBeanInfo(BeanInfo... beanInfos);
     
     /**
-     * 初始化方法，主要负责
-     * （1）分析给定的路径，并且将路径中有注解的元素解析出来，以Bean的形式放入map中
-     * （2）针对有AOP增强的类，完成AOP增强
-     * （3）在单线程中将单例类全部实例化，构造单例类的对象实例以供后续使用
+     * 初始化方法，主要负责 （1）分析给定的路径，并且将路径中有注解的元素解析出来，以Bean的形式放入map中
+     * （2）针对有AOP增强的类，完成AOP增强 （3）在单线程中将单例类全部实例化，构造单例类的对象实例以供后续使用
      * 
      * @param packageName
      */
@@ -119,8 +116,7 @@ public interface JfireContext
     public Bean[] getBeanByInterface(Class<?> type);
     
     /**
-     * 向容器中增加一个单例Bean，并且该单例bean的对象实例已经提供。
-     * 注意，由于该对象实例是外界提供的，故该bean无法参与aop增强
+     * 向容器中增加一个单例Bean，并且该单例bean的对象实例已经提供。 注意，由于该对象实例是外界提供的，故该bean无法参与aop增强
      * 
      * @param beanName 该bean的名称
      * @param entity 该单例bean的实例
@@ -129,10 +125,4 @@ public interface JfireContext
     
     public void setClassLoader(ClassLoader classLoader);
     
-    /**
-     * 激活某一个配置
-     * 
-     * @param name
-     */
-    public void activeProfile(String name);
 }
