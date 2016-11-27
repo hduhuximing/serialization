@@ -1,6 +1,5 @@
 package com.jfireframework.mvc.util;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -8,30 +7,37 @@ import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
+import org.beetl.core.ResourceLoader;
 import org.beetl.core.Template;
+import org.beetl.core.resource.ClasspathResourceLoader;
 import org.beetl.core.resource.WebAppResourceLoader;
 import org.beetl.ext.web.WebVariable;
 import com.jfireframework.baseutil.exception.JustThrowException;
+import com.jfireframework.context.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.core.ModelAndView;
 
 @Resource
-public class WebAppBeetlKit
+public class AppBeetlKit
 {
-    GroupTemplate          gt = null;
+    GroupTemplate          gt              = null;
     @Resource
     private ServletContext servletContext;
+    @PropertyRead(value = "jfire.mvc.classpathPrefix")
+    private String         classpathPrefix = "";
+    @PropertyRead("jfire.mvc.mode")
+    private String         mode            = "webapp";
     
     @PostConstruct
     public void init()
     {
-        WebAppResourceLoader loader = new WebAppResourceLoader(servletContext.getRealPath(""));
+        ResourceLoader loader = "webapp".equals(mode) ? new WebAppResourceLoader() : new ClasspathResourceLoader(classpathPrefix);
         try
         {
             Configuration configuration = Configuration.defaultConfiguration();
             gt = new GroupTemplate(loader, configuration);
             gt.getConf().setDirectByteOutput(true);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             throw new JustThrowException(e);
         }

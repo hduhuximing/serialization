@@ -1,25 +1,15 @@
 package com.jfireframework.boot;
 
-import java.io.File;
 import javax.servlet.Filter;
+import io.undertow.server.handlers.resource.ResourceManager;
 
 public class BootConfig
 {
     private int                       port          = 80;
-    private String                    baseDir;
+    private ResourceManager           resourceManager;
     private String                    appName;
-    private String                    docBase;
     @SuppressWarnings("unchecked")
     private Class<? extends Filter>[] filterClasses = new Class[0];
-    
-    public static BootConfig newMavenEnv(String appName)
-    {
-        BootConfig config = new BootConfig();
-        config.setBaseDir(new File("target/").getAbsolutePath());
-        config.setDocBase(new File("src/main/webapp/").getAbsolutePath());
-        config.setAppName(appName);
-        return config;
-    }
     
     public int getPort()
     {
@@ -31,14 +21,14 @@ public class BootConfig
         this.port = port;
     }
     
-    public String getBaseDir()
+    public ResourceManager getResourceManager()
     {
-        return baseDir;
+        return resourceManager;
     }
     
-    public void setBaseDir(String baseDir)
+    public void setResourceManager(ResourceManager resourceManager)
     {
-        this.baseDir = baseDir;
+        this.resourceManager = resourceManager;
     }
     
     public String getAppName()
@@ -51,22 +41,12 @@ public class BootConfig
         this.appName = appName;
     }
     
-    public String getDocBase()
-    {
-        return docBase;
-    }
-    
-    public void setDocBase(String docBase)
-    {
-        this.docBase = docBase;
-    }
-    
     public Class<? extends Filter>[] getFilterClasses()
     {
         return filterClasses;
     }
     
-    public void setFilterClasses(Class<? extends Filter>... filterClasses)
+    public void setFilterClasses(Class<? extends Filter>[] filterClasses)
     {
         this.filterClasses = filterClasses;
     }

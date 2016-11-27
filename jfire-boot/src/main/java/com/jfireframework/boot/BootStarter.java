@@ -1,103 +1,70 @@
 package com.jfireframework.boot;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebFilter;
-import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.Wrapper;
-import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.loader.WebappLoader;
-import org.apache.catalina.startup.ContextConfig;
-import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.startup.Tomcat.DefaultWebXmlListener;
-import org.apache.tomcat.util.descriptor.web.FilterDef;
-import org.apache.tomcat.util.descriptor.web.FilterMap;
-import org.xml.sax.InputSource;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.resource.ResourceManager;
+import io.undertow.servlet.Servlets;
+import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.FilterInfo;
 
 public class BootStarter
 {
     private final int                       port;
-    private final String                    baseDir;
     private final String                    appName;
-    private final String                    docBase;
+    private final ResourceManager           resourceManager;
     private final Class<? extends Filter>[] filterClasses;
     
     public BootStarter(BootConfig config)
     {
         port = config.getPort();
-        baseDir = config.getBaseDir();
-        appName = config.getAppName();
-        docBase = config.getDocBase();
+        appName = config.getAppName().startsWith("//") ? config.getAppName() : '/' + config.getAppName();
         filterClasses = config.getFilterClasses();
+        resourceManager = config.getResourceManager();
     }
     
     public void start()
     {
-        Tomcat tomcat = new Tomcat();
-        if (baseDir != null)
-        {
-            tomcat.setBaseDir(baseDir);
-        }
-        tomcat.setPort(port);
-        tomcat.getHost().setAutoDeploy(false);
-        tomcat.getHost().setDeployOnStartup(true);
-        Context ctx = new StandardContext();
-        for (Class<? extends Filter> ckass : filterClasses)
-        {
-            if (ckass.isAnnotationPresent(WebFilter.class))
-            {
-                FilterDef def = new FilterDef();
-                WebFilter webFilter = ckass.getAnnotation(WebFilter.class);
-                def.setFilterName(webFilter.filterName());
-                def.setFilterClass(ckass.getName());
-                def.setAsyncSupported(String.valueOf(webFilter.asyncSupported()));
-                ctx.addFilterDef(def);
-                FilterMap filterMap = new FilterMap();
-                filterMap.setFilterName(def.getFilterName());
-                for (String each : webFilter.value())
-                {
-                    filterMap.addURLPattern(each);
-                }
-                ctx.addFilterMap(filterMap);
-            }
-        }
-        Wrapper mvcServlet = ctx.createWrapper();
-        mvcServlet.setName("easymvcservlet");
-        mvcServlet.setServletClass(EasyMvcDispathServlet.class.getName());
-        mvcServlet.setLoadOnStartup(1);
-        mvcServlet.setOverridable(true);
-        mvcServlet.setAsyncSupported(true);
-        ctx.addChild(mvcServlet);
-        ctx.addServletMapping("/*", "easymvcservlet");
-        ctx.setPath(appName);
-        ctx.setDocBase(docBase);
-        ctx.addLifecycleListener(new DefaultWebXmlListener());
-        ctx.setConfigFile(null);
-        ctx.setParentClassLoader(EasyMvcDispathServlet.class.getClassLoader());
-        WebappLoader loader = new WebappLoader(ctx.getParentClassLoader());
-        loader.setDelegate(true);
-        ctx.setLoader(loader);
-        ContextConfig ctxCfg = new ContextConfig() {
-            
-            @Override
-            protected InputSource getGlobalWebXmlSource()
-            {
-                // 需要返回null，否则mvc框架会被启动两次。原因不明
-                return null;
-            }
-        };
-        ctx.addLifecycleListener(ctxCfg);
-        ctxCfg.setDefaultWebXml(BootStarter.class.getClassLoader().getResource("web.xml").getPath());
-        tomcat.getHost().addChild(ctx);
         try
         {
-            tomcat.start();
-            tomcat.getServer().await();
+            DeploymentInfo servletBuilder = Servlets.deployment()//
+                    .setClassLoader(BootStarter.class.getClassLoader())//
+                    .setContextPath(appName)//
+                    .setDeploymentName("bootstarter")//
+                    .addServlets(//
+                            Servlets.servlet("EasyMvcDispathServlet", EasyMvcDispathServlet.class)//
+                                    .addMapping("/*")//
+                                    .setEnabled(true));
+            servletBuilder.setResourceManager(resourceManager);
+            for (Class<? extends Filter> each : filterClasses)
+            {
+                if (each.isAnnotationPresent(WebFilter.class))
+                {
+                    WebFilter webFilter = each.getAnnotation(WebFilter.class);
+                    FilterInfo filterInfo = new FilterInfo(webFilter.filterName(), each);
+                    servletBuilder.addFilter(filterInfo);
+                    for (String url : webFilter.value())
+                    {
+                        servletBuilder.addFilterUrlMapping(webFilter.filterName(), url, DispatcherType.FORWARD);
+                    }
+                }
+            }
+            DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
+            manager.deploy();
+            PathHandler path = Handlers.path(Handlers.redirect(appName)).addPrefixPath(appName, manager.start());
+            Undertow server = Undertow.builder().addHttpListener(port, "localhost").setHandler(path).build();
+            server.start();
         }
-        catch (LifecycleException e)
+        catch (ServletException e)
         {
-            e.printStackTrace();
+            throw new JustThrowException(e);
         }
     }
     

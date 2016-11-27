@@ -10,14 +10,14 @@ import org.beetl.ext.web.WebVariable;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.core.ModelAndView;
 import com.jfireframework.mvc.util.JfireMvcResponseWrapper;
-import com.jfireframework.mvc.util.WebAppBeetlKit;
+import com.jfireframework.mvc.util.AppBeetlKit;
 import com.jfireframework.mvc.viewrender.ViewRender;
 
 @Resource
 public class BeetlRender implements ViewRender
 {
     @Resource
-    private WebAppBeetlKit beetlKit;
+    private AppBeetlKit beetlKit;
     
     @Override
     public void render(HttpServletRequest request, HttpServletResponse response, Object result) throws Throwable

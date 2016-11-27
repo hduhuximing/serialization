@@ -21,7 +21,7 @@ import com.jfireframework.mvc.annotation.RequestMapping;
 import com.jfireframework.mvc.interceptor.impl.DataBinderInterceptor;
 import com.jfireframework.mvc.interceptor.impl.UploadInterceptor;
 import com.jfireframework.mvc.util.ClasspathBeetlKit;
-import com.jfireframework.mvc.util.WebAppBeetlKit;
+import com.jfireframework.mvc.util.AppBeetlKit;
 import com.jfireframework.mvc.viewrender.impl.BeetlRender;
 import com.jfireframework.mvc.viewrender.impl.BytesRender;
 import com.jfireframework.mvc.viewrender.impl.HtmlRender;
@@ -72,7 +72,7 @@ public class ActionCenterBulder
     
     private static void addViewRender(JfireContext jfireContext)
     {
-        jfireContext.addBean(WebAppBeetlKit.class);
+        jfireContext.addBean(AppBeetlKit.class);
         jfireContext.addBean(ClasspathBeetlKit.class);
         jfireContext.addBean(BeetlRender.class);
         jfireContext.addBean(JspRender.class);
