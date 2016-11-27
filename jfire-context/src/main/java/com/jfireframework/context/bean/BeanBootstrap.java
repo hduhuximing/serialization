@@ -9,7 +9,13 @@ import com.jfireframework.context.bean.field.param.ParamField;
 import com.jfireframework.context.config.BeanInfo;
 import sun.reflect.MethodAccessor;
 
-public interface BeanInitProcess
+/**
+ * 用于承担一个bean初始化中的所有任务
+ * 
+ * @author 林斌
+ *
+ */
+public interface BeanBootstrap
 {
     public String getBeanName();
     

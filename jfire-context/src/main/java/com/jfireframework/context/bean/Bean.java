@@ -2,7 +2,7 @@ package com.jfireframework.context.bean;
 
 import java.util.Map;
 
-public interface Bean extends BeanInitProcess
+public interface Bean extends BeanBootstrap
 {
     
     public Object getInstance();

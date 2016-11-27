@@ -11,13 +11,13 @@ import com.jfireframework.context.aop.annotation.AroundEnhance;
 import com.jfireframework.context.aop.annotation.BeforeEnhance;
 import com.jfireframework.context.aop.annotation.ThrowEnhance;
 import com.jfireframework.context.bean.Bean;
-import com.jfireframework.context.bean.BeanInitProcess;
+import com.jfireframework.context.bean.BeanBootstrap;
 import com.jfireframework.context.bean.field.dependency.DependencyField;
 import com.jfireframework.context.bean.field.param.ParamField;
 import com.jfireframework.context.config.BeanInfo;
 import sun.reflect.MethodAccessor;
 
-public class BeanInitProcessImpl implements BeanInitProcess
+public class BeanInitProcessImpl implements BeanBootstrap
 {
     /** 该bean的名称 */
     protected String                beanName;
