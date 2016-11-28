@@ -7,8 +7,8 @@ import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 import com.jfireframework.context.config.BeanInfo;
 import com.jfireframework.dbunit.schema.DbUnit;
-import com.jfireframework.sql.function.impl.SessionFactoryImpl;
 import com.jfireframework.sql.jfirecontext.MapperLoadFactory;
+import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 
 public class HolderTest
 {

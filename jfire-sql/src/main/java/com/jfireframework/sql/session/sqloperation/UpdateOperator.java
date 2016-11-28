@@ -1,4 +1,4 @@
-package com.jfireframework.sql.function.sqloperation;
+package com.jfireframework.sql.session.sqloperation;
 
 public interface UpdateOperator
 {

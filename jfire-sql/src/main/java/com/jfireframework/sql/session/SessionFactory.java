@@ -1,4 +1,6 @@
-package com.jfireframework.sql.function;
+package com.jfireframework.sql.session;
+
+import com.jfireframework.sql.dao.Dao;
 
 public interface SessionFactory
 {

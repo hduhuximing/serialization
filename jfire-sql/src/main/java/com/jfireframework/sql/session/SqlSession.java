@@ -1,10 +1,10 @@
-package com.jfireframework.sql.function;
+package com.jfireframework.sql.session;
 
 import java.sql.Connection;
-import com.jfireframework.sql.function.sqloperation.GetOperator;
-import com.jfireframework.sql.function.sqloperation.SaveOperator;
-import com.jfireframework.sql.function.sqloperation.SqlOperator;
-import com.jfireframework.sql.function.sqloperation.UpdateOperator;
+import com.jfireframework.sql.session.sqloperation.GetOperator;
+import com.jfireframework.sql.session.sqloperation.SaveOperator;
+import com.jfireframework.sql.session.sqloperation.SqlOperator;
+import com.jfireframework.sql.session.sqloperation.UpdateOperator;
 
 /**
  * 代表一个connection链接，提供各种dao操作入口

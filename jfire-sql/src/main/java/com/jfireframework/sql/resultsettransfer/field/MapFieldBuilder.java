@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.verify.Verify;
-import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
+import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.resultsettransfer.field.impl.BooleanField;
 import com.jfireframework.sql.resultsettransfer.field.impl.ByteArrayField;
 import com.jfireframework.sql.resultsettransfer.field.impl.CalendarField;

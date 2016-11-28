@@ -1,4 +1,4 @@
-package com.jfireframework.sql.extra.interceptor;
+package com.jfireframework.sql.interceptor;
 
 public interface SqlInterceptor
 {

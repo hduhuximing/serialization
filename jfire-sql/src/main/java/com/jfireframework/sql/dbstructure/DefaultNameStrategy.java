@@ -1,4 +1,4 @@
-package com.jfireframework.sql.extra.dbstructure;
+package com.jfireframework.sql.dbstructure;
 
 import com.jfireframework.baseutil.collection.StringCache;
 

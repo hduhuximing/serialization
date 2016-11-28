@@ -3,7 +3,7 @@ package com.jfireframework.sql.test.mappertest;
 import static org.junit.Assert.assertEquals;
 import java.util.List;
 import javax.annotation.Resource;
-import com.jfireframework.sql.function.SessionFactory;
+import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.test.UserDAO;
 
 @Resource

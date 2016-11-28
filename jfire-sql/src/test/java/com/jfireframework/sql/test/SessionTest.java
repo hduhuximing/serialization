@@ -9,7 +9,7 @@ import java.util.Calendar;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
-import com.jfireframework.sql.function.SqlSession;
+import com.jfireframework.sql.session.SqlSession;
 import com.jfireframework.sql.test.entity.User;
 
 public class SessionTest extends BaseTestSupport

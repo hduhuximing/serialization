@@ -7,8 +7,8 @@ import org.junit.Before;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.dbunit.schema.DbUnit;
-import com.jfireframework.sql.function.SqlSession;
-import com.jfireframework.sql.function.impl.SessionFactoryImpl;
+import com.jfireframework.sql.session.SqlSession;
+import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 import com.zaxxer.hikari.HikariDataSource;
 
 public abstract class BaseTestSupport

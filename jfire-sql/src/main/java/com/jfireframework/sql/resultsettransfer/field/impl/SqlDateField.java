@@ -5,7 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
+import com.jfireframework.sql.dbstructure.ColNameStrategy;
 
 public class SqlDateField extends AbstractMapField
 {

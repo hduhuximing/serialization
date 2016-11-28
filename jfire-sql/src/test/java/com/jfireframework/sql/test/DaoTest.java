@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
 import com.jfireframework.baseutil.time.Timewatch;
-import com.jfireframework.sql.function.LockMode;
+import com.jfireframework.sql.dao.LockMode;
 import com.jfireframework.sql.test.entity.User;
 import com.jfireframework.sql.test.entity.User.Enumint;
 import com.jfireframework.sql.test.entity.User.Enumstring;

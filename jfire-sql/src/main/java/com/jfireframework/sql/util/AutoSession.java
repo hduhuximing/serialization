@@ -4,9 +4,9 @@ import javax.annotation.Resource;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.context.tx.RessourceManager;
-import com.jfireframework.sql.function.SessionFactory;
-import com.jfireframework.sql.function.SqlSession;
-import com.jfireframework.sql.function.impl.SqlSessionImpl;
+import com.jfireframework.sql.session.SessionFactory;
+import com.jfireframework.sql.session.SqlSession;
+import com.jfireframework.sql.session.impl.SqlSessionImpl;
 
 @Resource
 public class AutoSession implements RessourceManager

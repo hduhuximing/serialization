@@ -1,6 +1,6 @@
-package com.jfireframework.sql.function.sqloperation;
+package com.jfireframework.sql.session.sqloperation;
 
-import com.jfireframework.sql.function.LockMode;
+import com.jfireframework.sql.dao.LockMode;
 
 public interface GetOperator
 {

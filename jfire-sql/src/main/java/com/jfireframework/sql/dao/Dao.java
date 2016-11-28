@@ -1,4 +1,4 @@
-package com.jfireframework.sql.function;
+package com.jfireframework.sql.dao;
 
 import java.sql.Connection;
 import java.util.List;
@@ -6,27 +6,6 @@ import com.jfireframework.sql.resultsettransfer.field.MapField;
 
 public interface Dao<T>
 {
-    
-    /**
-     * 得到描述数据库结构的field字段
-     * 
-     * @return
-     */
-    public MapField[] getStructureFields();
-    
-    /**
-     * 返回表名称
-     * 
-     * @return
-     */
-    public String getTableName();
-    
-    /**
-     * 返回主键id的mapField
-     * 
-     * @return
-     */
-    public MapField getIdField();
     
     /**
      * 将对象信息保存到数据库中。如果对象id值为null，进行插入操作，否则进行更新操作

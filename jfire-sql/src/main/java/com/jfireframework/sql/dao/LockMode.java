@@ -1,4 +1,4 @@
-package com.jfireframework.sql.function;
+package com.jfireframework.sql.dao;
 
 public enum LockMode
 {

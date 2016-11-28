@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.sql.annotation.Column;
-import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
+import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 import sun.misc.Unsafe;
 

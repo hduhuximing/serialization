@@ -1,4 +1,4 @@
-package com.jfireframework.sql.function.impl;
+package com.jfireframework.sql.session.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,15 +8,15 @@ import java.util.List;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
-import com.jfireframework.sql.extra.interceptor.SqlInterceptor;
-import com.jfireframework.sql.extra.interceptor.SqlInterceptor.InterceptorContext;
-import com.jfireframework.sql.extra.interceptor.SqlPreInterceptor;
-import com.jfireframework.sql.function.LockMode;
-import com.jfireframework.sql.function.SessionFactory;
-import com.jfireframework.sql.function.SqlSession;
+import com.jfireframework.sql.dao.LockMode;
+import com.jfireframework.sql.interceptor.SqlInterceptor;
+import com.jfireframework.sql.interceptor.SqlPreInterceptor;
+import com.jfireframework.sql.interceptor.SqlInterceptor.InterceptorContext;
 import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.page.PageParse;
 import com.jfireframework.sql.resultsettransfer.ResultSetTransfer;
+import com.jfireframework.sql.session.SessionFactory;
+import com.jfireframework.sql.session.SqlSession;
 
 public class SqlSessionImpl implements SqlSession
 {

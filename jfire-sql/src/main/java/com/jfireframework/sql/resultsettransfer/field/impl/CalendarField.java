@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
+import com.jfireframework.sql.dbstructure.ColNameStrategy;
 
 public class CalendarField extends AbstractMapField
 {

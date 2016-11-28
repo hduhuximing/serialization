@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.Ignore;
 import org.junit.Test;
-import com.jfireframework.sql.function.SqlSession;
+import com.jfireframework.sql.session.SqlSession;
 import com.jfireframework.sql.test.entity.User;
 
 public class ConcurrentTest extends BaseTestSupport

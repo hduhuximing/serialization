@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
+import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.util.enumhandler.AbstractEnumHandler;
 import com.jfireframework.sql.util.enumhandler.EnumHandler;
 

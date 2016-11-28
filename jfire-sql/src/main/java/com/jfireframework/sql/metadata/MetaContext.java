@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import com.jfireframework.sql.annotation.NameStrategy;
 import com.jfireframework.sql.annotation.TableEntity;
-import com.jfireframework.sql.extra.dbstructure.ColNameStrategy;
-import com.jfireframework.sql.extra.dbstructure.DefaultNameStrategy;
+import com.jfireframework.sql.dbstructure.ColNameStrategy;
+import com.jfireframework.sql.dbstructure.DefaultNameStrategy;
 
 public class MetaContext
 {

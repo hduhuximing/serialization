@@ -3,7 +3,7 @@ package com.jfireframework.sql.test;
 import java.sql.SQLException;
 import org.junit.Test;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.jfireframework.sql.function.impl.SessionFactoryImpl;
+import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 
 public class CreateTableTest
 {

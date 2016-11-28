@@ -2,7 +2,7 @@ package com.jfireframework.sql.test;
 
 import java.sql.SQLException;
 import org.junit.Test;
-import com.jfireframework.sql.function.impl.SessionFactoryImpl;
+import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class TimeTest

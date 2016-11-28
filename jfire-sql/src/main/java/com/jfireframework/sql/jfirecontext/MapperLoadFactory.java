@@ -2,7 +2,7 @@ package com.jfireframework.sql.jfirecontext;
 
 import javax.annotation.Resource;
 import com.jfireframework.context.bean.load.BeanLoadFactory;
-import com.jfireframework.sql.function.impl.SessionFactoryImpl;
+import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 
 @Resource(name = "sessionFactory")
 public class MapperLoadFactory extends SessionFactoryImpl implements BeanLoadFactory

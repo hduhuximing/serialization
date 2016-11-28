@@ -1,4 +1,4 @@
-package com.jfireframework.sql.extra.dbstructure;
+package com.jfireframework.sql.dbstructure;
 
 import java.sql.SQLException;
 import javax.sql.DataSource;

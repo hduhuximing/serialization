@@ -1,4 +1,4 @@
-package com.jfireframework.sql.function.impl;
+package com.jfireframework.sql.session.impl;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -20,21 +20,22 @@ import com.jfireframework.baseutil.uniqueid.SummerId;
 import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.sql.annotation.Sql;
-import com.jfireframework.sql.extra.dbstructure.MariaDBStructure;
-import com.jfireframework.sql.extra.dbstructure.Structure;
-import com.jfireframework.sql.extra.interceptor.SqlInterceptor;
-import com.jfireframework.sql.extra.interceptor.SqlPreInterceptor;
-import com.jfireframework.sql.function.Dao;
-import com.jfireframework.sql.function.SessionFactory;
-import com.jfireframework.sql.function.SqlSession;
-import com.jfireframework.sql.function.mapper.Mapper;
+import com.jfireframework.sql.dao.Dao;
+import com.jfireframework.sql.dao.impl.MysqlDAO;
+import com.jfireframework.sql.dbstructure.MariaDBStructure;
+import com.jfireframework.sql.dbstructure.Structure;
+import com.jfireframework.sql.interceptor.SqlInterceptor;
+import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.MetaContext;
 import com.jfireframework.sql.metadata.TableMetaData;
 import com.jfireframework.sql.page.MysqlParse;
 import com.jfireframework.sql.page.PageParse;
+import com.jfireframework.sql.session.SessionFactory;
+import com.jfireframework.sql.session.SqlSession;
+import com.jfireframework.sql.session.mapper.Mapper;
 import com.jfireframework.sql.util.MapperBuilder;
 
-public class SessionFactoryImpl implements SessionFactory
+public abstract class SessionFactoryBootstrap implements SessionFactory
 {
     @Resource
     protected DataSource                        dataSource;
@@ -53,18 +54,8 @@ public class SessionFactoryImpl implements SessionFactory
     protected PageParse                         pageParse;
     protected String                            productName;
     protected static final Logger               logger       = ConsoleLogFactory.getLogger();
-    private int                                 workerid     = 0;
-    private Uid                                 uid;
-    
-    public SessionFactoryImpl()
-    {
-        
-    }
-    
-    public SessionFactoryImpl(DataSource dataSource)
-    {
-        this.dataSource = dataSource;
-    }
+    protected int                               workerid     = 0;
+    protected Uid                               uid;
     
     @PostConstruct
     public void init()
@@ -93,6 +84,11 @@ public class SessionFactoryImpl implements SessionFactory
         {
             throw new JustThrowException(e);
         }
+    }
+    
+    public void setScanPackage(String scanPackage)
+    {
+        this.scanPackage = scanPackage;
     }
     
     private SqlPreInterceptor[] findSqlPreInterceptors(Set<Class<?>> set) throws InstantiationException, IllegalAccessException
@@ -252,79 +248,6 @@ public class SessionFactoryImpl implements SessionFactory
         }
     }
     
-    @Override
-    public SqlSession getCurrentSession()
-    {
-        return sessionLocal.get();
-    }
-    
-    @Override
-    public SqlSession openSession()
-    {
-        try
-        {
-            SqlSession session = new SqlSessionImpl(dataSource.getConnection(), this, preInterceptors, sqlInterceptors, pageParse);
-            return session;
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    @Override
-    public void removeCurrentSession()
-    {
-        sessionLocal.remove();
-    }
-    
-    public void setDataSource(DataSource dataSource)
-    {
-        this.dataSource = dataSource;
-    }
-    
-    @Override
-    public void setCurrentSession(SqlSession session)
-    {
-        sessionLocal.set(session);
-    }
-    
-    public void setScanPackage(String scanPackage)
-    {
-        this.scanPackage = scanPackage;
-    }
-    
-    public void setTableMode(String mode)
-    {
-        tableMode = mode;
-    }
-    
-    @Override
-    public SqlSession getOrCreateCurrentSession()
-    {
-        SqlSession session = getCurrentSession();
-        if (session == null)
-        {
-            session = openSession();
-            sessionLocal.set(session);
-        }
-        return session;
-    }
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getMapper(Class<T> entityClass)
-    {
-        try
-        {
-            return (T) mappers.get(entityClass);
-        }
-        catch (Exception e)
-        {
-            throw new JustThrowException(e);
-        }
-    }
-    
     class DaoBuilder
     {
         @SuppressWarnings("rawtypes")
@@ -334,18 +257,10 @@ public class SessionFactoryImpl implements SessionFactory
             {
                 if (each.getIdInfo() != null)
                 {
-                    daos.put(each.getEntityClass(), new DAOBeanImpl(each, preInterceptors, uid));
+                    daos.put(each.getEntityClass(), new MysqlDAO(each, preInterceptors, uid));
                 }
             }
         }
         
     }
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> Dao<T> getDao(Class<T> ckass)
-    {
-        return (Dao<T>) daos.get(ckass);
-    }
-    
 }
