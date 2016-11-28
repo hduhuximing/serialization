@@ -35,6 +35,7 @@ public abstract class BasePipeline implements Pipeline
     @Override
     public void onError(Throwable e, RunnerMode runnerMode)
     {
+        operator.onError(e, runnerMode);
         if (next != null)
         {
             next.onError(e, runnerMode);

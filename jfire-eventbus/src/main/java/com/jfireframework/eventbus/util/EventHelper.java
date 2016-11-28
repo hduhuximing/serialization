@@ -17,6 +17,7 @@ import com.jfireframework.eventbus.executor.ReadWriteExecutor;
 import com.jfireframework.eventbus.executor.RowKeyHandlerExecutor;
 import com.jfireframework.eventbus.executor.TypeRowKeySerialHandlerExecutor;
 import com.jfireframework.eventbus.executor.TypeSerialHandlerExecutor;
+import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
 
 public class EventHelper
 {
@@ -155,4 +156,25 @@ public class EventHelper
         EventHelper.checkParallelLevel(event, rowkey);
         return new RowEventContextImpl(runnerMode, data, handler, findExecutor(event), rowkey);
     }
+    
+    @SuppressWarnings("unchecked")
+    public static <T> EventContext<T> sync(Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowkey)
+    {
+        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentThread, null);
+        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data, rowkey);
+        eventContext.run();
+        eventContext.await();
+        return eventContext;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T> EventContext<T> sync(Enum<? extends EventConfig> event, EventHandler<?> handler, Object data)
+    {
+        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentThread, null);
+        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data);
+        eventContext.run();
+        eventContext.await();
+        return eventContext;
+    }
+    
 }

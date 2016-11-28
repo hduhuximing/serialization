@@ -14,11 +14,8 @@ public interface EventBus
     
     public Pipeline pipeline();
     
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler);
+    public <T> EventContext<T> post(Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowkey);
     
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler);
+    public <T> EventContext<T> post(Enum<? extends EventConfig> event, EventHandler<?> handler, Object data);
     
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler);
-    
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler);
 }

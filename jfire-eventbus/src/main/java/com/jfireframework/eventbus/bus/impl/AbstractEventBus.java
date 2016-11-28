@@ -27,7 +27,7 @@ public abstract class AbstractEventBus implements EventBus
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
+    public <T> EventContext<T> post(Enum<? extends EventConfig> event, EventHandler<?> handler, Object data)
     {
         RunnerMode runnerMode = new RunnerMode(ThreadMode.currentEventbus, this);
         EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data);
@@ -37,7 +37,7 @@ public abstract class AbstractEventBus implements EventBus
     
     @SuppressWarnings({ "unchecked" })
     @Override
-    public <T> EventContext<T> post(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
+    public <T> EventContext<T> post(Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowkey)
     {
         RunnerMode runnerMode = new RunnerMode(ThreadMode.currentEventbus, this);
         EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data, rowkey);
@@ -49,28 +49,6 @@ public abstract class AbstractEventBus implements EventBus
     public void post(EventContext<?> eventContext)
     {
         pool.submit(eventContext);
-    }
-    
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, Object rowkey, EventHandler<?> handler)
-    {
-        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentEventbus, this);
-        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data, rowkey);
-        eventContext.run();
-        eventContext.await();
-        return eventContext;
-    }
-    
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    public <T> EventContext<T> syncPost(Object data, Enum<? extends EventConfig> event, EventHandler<?> handler)
-    {
-        RunnerMode runnerMode = new RunnerMode(ThreadMode.currentThread, null);
-        EventContext<T> eventContext = (EventContext<T>) EventHelper.build(runnerMode, event, handler, data);
-        eventContext.run();
-        eventContext.await();
-        return eventContext;
     }
     
     @Override
