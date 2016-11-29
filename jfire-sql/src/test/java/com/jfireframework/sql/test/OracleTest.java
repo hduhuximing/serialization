@@ -1,11 +1,17 @@
 package com.jfireframework.sql.test;
 
 import java.sql.SQLException;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
+import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.session.impl.SessionFactoryBootstrap;
 import com.jfireframework.sql.session.impl.SessionFactoryImpl;
+import com.jfireframework.sql.test.oracle.User;
+import com.jfireframework.sql.test.oracle.UserOp;
 import com.zaxxer.hikari.HikariDataSource;
+import oracle.net.aso.p;
 
 public class OracleTest
 {
@@ -35,12 +41,20 @@ public class OracleTest
             e.printStackTrace();
         }
         sessionFactory = new SessionFactoryImpl(dataSource);
-        ((SessionFactoryBootstrap) sessionFactory).setScanPackage("com.jfireframework.sql.test");
+        ((SessionFactoryBootstrap) sessionFactory).setScanPackage("com.jfireframework.sql.test.oracle");
         ((SessionFactoryBootstrap) sessionFactory).init();
     }
     
+    @Test
     public void test()
     {
-        
+        sessionFactory.getOrCreateCurrentSession();
+        UserOp userOp = sessionFactory.getMapper(UserOp.class);
+        Page page = new Page();
+        page.setPage(1);
+        page.setPageSize(3);
+        userOp.find(page);
+        Assert.assertEquals(3, page.getData().size());
+        Assert.assertEquals(13, page.getTotal());
     }
 }

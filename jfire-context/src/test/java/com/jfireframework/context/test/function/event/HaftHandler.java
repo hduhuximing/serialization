@@ -32,7 +32,7 @@ public class HaftHandler implements EventHandler<UserPhone>, ContextInitFinish
     {
         UserPhone phone = new UserPhone();
         phone.setPhone("1775032");
-        EventBuses.computation().post(phone, SmsEvent.halt, this).await();
+        EventBuses.computation().post(SmsEvent.halt, this, phone).await();
     }
     
 }

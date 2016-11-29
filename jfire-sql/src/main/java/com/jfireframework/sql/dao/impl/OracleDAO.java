@@ -3,10 +3,12 @@ package com.jfireframework.sql.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
+import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.uniqueid.Uid;
@@ -21,6 +23,7 @@ public class OracleDAO<T> extends BaseDAO<T>
     private SqlAndFields  seqInsertInfo;
     private SqlAndFields  insertInfo;
     private final boolean useSeq;
+    private String[]      returnKey;
     
     public OracleDAO(TableMetaData metaData, SqlPreInterceptor[] preInterceptors, Uid uid)
     {
@@ -158,7 +161,7 @@ public class OracleDAO<T> extends BaseDAO<T>
             cache.appendStrsByComma("?", count);
             cache.append(')');
             insertInfo = new SqlAndFields(cache.toString(), insertFields.toArray(new MapField[insertFields.size()]));
-            LOGGER.debug("为表{},类{}创建的插入语句是{}", tableName, entityClass.getName(), seqInsertInfo.getSql());
+            LOGGER.debug("为表{},类{}创建的插入语句是{}", tableName, entityClass.getName(), insertInfo.getSql());
         }
         if (idField.getField().isAnnotationPresent(SeqId.class))
         {
@@ -184,6 +187,7 @@ public class OracleDAO<T> extends BaseDAO<T>
             cache.append(')');
             seqInsertInfo = new SqlAndFields(cache.toString(), insertFields.toArray(new MapField[insertFields.size()]));
             LOGGER.debug("为表{},类{}创建的插入语句是{}", tableName, entityClass.getName(), seqInsertInfo.getSql());
+            returnKey = new String[] { idField.getColName() };
         }
         
     }
@@ -232,7 +236,7 @@ public class OracleDAO<T> extends BaseDAO<T>
                 }
                 else
                 {
-                    pStat = connection.prepareStatement(seqInsertInfo.getSql(), Statement.RETURN_GENERATED_KEYS);
+                    pStat = connection.prepareStatement(seqInsertInfo.getSql(), returnKey);
                     sqlAndFields = seqInsertInfo;
                 }
             }

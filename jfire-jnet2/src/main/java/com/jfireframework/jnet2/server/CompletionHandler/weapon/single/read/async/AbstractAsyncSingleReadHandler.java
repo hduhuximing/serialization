@@ -44,7 +44,7 @@ public abstract class AbstractAsyncSingleReadHandler extends AbstractSingleReadH
                 internalResult.setChannelInfo(serverChannel);
                 internalResult.setData(intermediateResult);
                 internalResult.setIndex(0);
-                eventBus.post(this, Message.recive, reciveHandler);
+                eventBus.post(Message.recive, reciveHandler, this);
                 break;
         }
     }
