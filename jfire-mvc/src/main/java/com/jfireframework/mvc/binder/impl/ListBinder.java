@@ -2,6 +2,7 @@ package com.jfireframework.mvc.binder.impl;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -62,10 +63,15 @@ public abstract class ListBinder implements DataBinder
         }
     }
     
+    @SuppressWarnings("rawtypes")
     @Override
     public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
     {
         ParamNode node = treeValueNode.get(prefixName);
+        if (node == null)
+        {
+            return new LinkedList();
+        }
         if (node instanceof ArrayNode)
         {
             ArrayNode arrayNode = (ArrayNode) node;

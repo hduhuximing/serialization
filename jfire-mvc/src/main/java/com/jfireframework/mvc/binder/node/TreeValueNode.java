@@ -22,7 +22,6 @@ public class TreeValueNode extends HashMap<String, ParamNode> implements ParamNo
     {
         if (text.charAt(0) == '[')
         {
-            
             int end = text.indexOf(']');
             String key = text.substring(1, end);
             if (end == text.length() - 1)
