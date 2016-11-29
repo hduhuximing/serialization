@@ -53,7 +53,8 @@ public class MapperBuilder
         ClassPool.doPruning = true;
         classPool.importPackage("com.jfireframework.sql");
         classPool.importPackage("com.jfireframework.baseutil.collection");
-        classPool.importPackage("com.jfireframework.sql.function");
+        classPool.importPackage("com.jfireframework.sql.session");
+        classPool.importPackage("com.jfireframework.sql.session.impl");
         classPool.importPackage("com.jfireframework.baseutil.exception");
         classPool.importPackage("java.sql");
         classPool.importPackage("java.util");

@@ -22,6 +22,7 @@ import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.sql.annotation.Sql;
 import com.jfireframework.sql.dao.Dao;
 import com.jfireframework.sql.dao.impl.MysqlDAO;
+import com.jfireframework.sql.dao.impl.OracleDAO;
 import com.jfireframework.sql.dbstructure.MariaDBStructure;
 import com.jfireframework.sql.dbstructure.Structure;
 import com.jfireframework.sql.interceptor.SqlInterceptor;
@@ -257,7 +258,18 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
             {
                 if (each.getIdInfo() != null)
                 {
-                    daos.put(each.getEntityClass(), new MysqlDAO(each, preInterceptors, uid));
+                    if (productName.equals("mysql") || productName.equals("marridb"))
+                    {
+                        daos.put(each.getEntityClass(), new MysqlDAO(each, preInterceptors, uid));
+                    }
+                    else if (productName.equals("oracle"))
+                    {
+                        daos.put(each.getEntityClass(), new OracleDAO(each, preInterceptors, uid));
+                    }
+                    else
+                    {
+                        throw new UnsupportedOperationException("不支持的数据库产品");
+                    }
                 }
             }
         }

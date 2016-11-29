@@ -22,14 +22,14 @@ public abstract class BaseTestSupport
     static
     {
         HikariDataSource dataSource = new HikariDataSource();
-        // dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/test?characterEncoding=utf8");
-        dataSource.setJdbcUrl("jdbc:oracle:thin:@192.168.10.21:1521/orcl");
-        dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-        // dataSource.setConnectionTestQuery("select count(*) from dual");
-        // dataSource.setUsername("root");
-        // dataSource.setPassword("centerm");
-        dataSource.setUsername("test8");
-        dataSource.setPassword("bs");
+        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/test?characterEncoding=utf8");
+        // dataSource.setJdbcUrl("jdbc:oracle:thin:@192.168.10.21:1521/orcl");
+        // dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUsername("root");
+        dataSource.setPassword("centerm");
+        // dataSource.setUsername("test8");
+        // dataSource.setPassword("bs");
         dataSource.setMaximumPoolSize(150);
         dataSource.setConnectionTimeout(1500);
         try
@@ -44,20 +44,20 @@ public abstract class BaseTestSupport
         sessionFactory = new SessionFactoryImpl(dataSource);
         sessionFactory.setScanPackage("com.jfireframework.sql.test");
         sessionFactory.init();
-        // testUnit = new DbUnit(DbUnit.SAVE_IN_MEM, dataSource);
+        testUnit = new DbUnit(DbUnit.SAVE_IN_MEM, dataSource);
     }
     
     public BaseTestSupport()
     {
-        // testUnit.clearSchemaData();
-        // testUnit.importExcelFile();
+        testUnit.clearSchemaData();
+        testUnit.importExcelFile();
     }
     
     @Before
     public void before()
     {
-        // testUnit.clearSchemaData();
-        // testUnit.importExcelFile();
+        testUnit.clearSchemaData();
+        testUnit.importExcelFile();
         session = sessionFactory.getOrCreateCurrentSession();
         connection = session.getConnection();
     }

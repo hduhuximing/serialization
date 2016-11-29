@@ -31,8 +31,106 @@ public class OracleDAO<T> extends BaseDAO<T>
     @Override
     public void batchInsert(List<T> entitys, Connection connection)
     {
-        // TODO Auto-generated method stub
-        
+        if (useUid || useSeq == false)
+        {
+            for (SqlPreInterceptor each : preInterceptors)
+            {
+                each.preIntercept(insertInfo.getSql(), entitys);
+            }
+            PreparedStatement pStat = null;
+            try
+            {
+                pStat = connection.prepareStatement(insertInfo.getSql());
+                for (Object entity : entitys)
+                {
+                    int index = 1;
+                    if (useUid)
+                    {
+                        Object idValue = unsafe.getObject(entity, idOffset);
+                        if (idValue == null)
+                        {
+                            switch (idType)
+                            {
+                                case LONG:
+                                    unsafe.putObject(entity, idOffset, Long.valueOf(uid.generateLong()));
+                                    break;
+                                case STRING:
+                                    unsafe.putObject(entity, idOffset, uid.generateDigits());
+                                    break;
+                                default:
+                                    throw new IllegalArgumentException();
+                            }
+                        }
+                    }
+                    for (MapField field : insertInfo.getFields())
+                    {
+                        field.setStatementValue(pStat, entity, index);
+                        index++;
+                    }
+                    pStat.addBatch();
+                }
+                pStat.executeBatch();
+            }
+            catch (Exception e)
+            {
+                throw new JustThrowException(e);
+            }
+            finally
+            {
+                if (pStat != null)
+                {
+                    try
+                    {
+                        pStat.close();
+                    }
+                    catch (SQLException e)
+                    {
+                        throw new JustThrowException(e);
+                    }
+                }
+            }
+        }
+        else if (useSeq)
+        {
+            for (SqlPreInterceptor each : preInterceptors)
+            {
+                each.preIntercept(seqInsertInfo.getSql(), entitys);
+            }
+            PreparedStatement pStat = null;
+            try
+            {
+                pStat = connection.prepareStatement(seqInsertInfo.getSql());
+                for (Object entity : entitys)
+                {
+                    int index = 1;
+                    for (MapField field : insertInfo.getFields())
+                    {
+                        field.setStatementValue(pStat, entity, index);
+                        index++;
+                    }
+                    pStat.addBatch();
+                }
+                pStat.executeBatch();
+            }
+            catch (Exception e)
+            {
+                throw new JustThrowException(e);
+            }
+            finally
+            {
+                if (pStat != null)
+                {
+                    try
+                    {
+                        pStat.close();
+                    }
+                    catch (SQLException e)
+                    {
+                        throw new JustThrowException(e);
+                    }
+                }
+            }
+        }
     }
     
     @Override
@@ -62,6 +160,7 @@ public class OracleDAO<T> extends BaseDAO<T>
             insertInfo = new SqlAndFields(cache.toString(), insertFields.toArray(new MapField[insertFields.size()]));
             LOGGER.debug("为表{},类{}创建的插入语句是{}", tableName, entityClass.getName(), seqInsertInfo.getSql());
         }
+        if (idField.getField().isAnnotationPresent(SeqId.class))
         {
             List<MapField> insertFields = new LinkedList<MapField>();
             StringCache cache = new StringCache();

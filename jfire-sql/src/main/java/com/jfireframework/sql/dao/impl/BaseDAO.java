@@ -160,7 +160,6 @@ public abstract class BaseDAO<T> implements Dao<T>
             }
             updateFields.add(each);
             cache.append(each.getColName()).append("=?,");
-            updateFields.add(each);
         }
         cache.deleteLast().append(" where ").append(idField.getColName()).append("=?");
         updateFields.add(idField);
@@ -203,7 +202,7 @@ public abstract class BaseDAO<T> implements Dao<T>
             getInSahreFields.add(each);
             cache.append(each.getColName()).append(",");
         }
-        cache.deleteLast().append(" from ").append(tableName).append(" where ").append(idField.getColName()).append("=? in share mode");
+        cache.deleteLast().append(" from ").append(tableName).append(" where ").append(idField.getColName()).append("=? lock in share mode");
         return new SqlAndFields(cache.toString(), getInSahreFields.toArray(new MapField[getInSahreFields.size()]));
     }
     
