@@ -104,11 +104,26 @@ public abstract class ListBinder implements DataBinder
     
     protected Object buildFromTree(Set<Entry<String, ParamNode>> set, HttpServletRequest request, HttpServletResponse response)
     {
-        List<Object> list = new ArrayList<Object>();
+        Object[] t_array;
+        int length = 0;
         for (Entry<String, ParamNode> each : set)
         {
             int index = Integer.valueOf(each.getKey());
-            list.add(index, buildByNode(each.getValue(), request, response));
+            if (index > length)
+            {
+                length = index;
+            }
+        }
+        t_array = new Object[length + 1];
+        for (Entry<String, ParamNode> each : set)
+        {
+            int index = Integer.valueOf(each.getKey());
+            t_array[index] = buildByNode(each.getValue(), request, response);
+        }
+        List<Object> list = new ArrayList<Object>();
+        for (Object each : t_array)
+        {
+            list.add(each);
         }
         return list;
     }

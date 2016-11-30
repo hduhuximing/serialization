@@ -30,7 +30,7 @@ public class AppBeetlKit
     @PostConstruct
     public void init()
     {
-        ResourceLoader loader = "webapp".equals(mode) ? new WebAppResourceLoader() : new ClasspathResourceLoader(classpathPrefix);
+        ResourceLoader loader = "webapp".equals(mode) ? new WebAppResourceLoader(servletContext.getRealPath("")) : new ClasspathResourceLoader(classpathPrefix);
         try
         {
             Configuration configuration = Configuration.defaultConfiguration();

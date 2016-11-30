@@ -2,8 +2,12 @@ package com.jfireframework.mvc;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import java.lang.annotation.Annotation;
+import java.util.List;
 import org.junit.Test;
 import com.jfireframework.codejson.JsonTool;
+import com.jfireframework.mvc.binder.impl.ArrayBinder;
+import com.jfireframework.mvc.binder.impl.ListBinder;
 import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
 import com.jfireframework.mvc.binder.node.TreeValueNode;
 import com.jfireframework.mvc.vo.Desk;
@@ -28,6 +32,67 @@ public class NewBinderTest
         paramTree.put("foo[barsMap][bar03][id]", "foo01");
         paramTree.put("foo[barsMap][bar03][numbers][]", "foo01");
         System.out.println(JsonTool.write(paramTree));
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test6()
+    {
+        ArrayBinder binder = ArrayBinder.valueOf(int[].class, "i", new Annotation[0]);
+        TreeValueNode node = new TreeValueNode();
+        node.put("i", "1");
+        node.put("i", "2");
+        int[] result = (int[]) binder.bind(null, node, null);
+        assertArrayEquals(new int[] { 1, 2 }, result);
+        node.clear();
+        node.put("i[]", "1");
+        node.put("i[]", "2");
+        result = (int[]) binder.bind(null, node, null);
+        assertArrayEquals(new int[] { 1, 2 }, result);
+        node.clear();
+        node.put("i[0]", "1");
+        node.put("i[1]", "2");
+        result = (int[]) binder.bind(null, node, null);
+        assertArrayEquals(new int[] { 1, 2 }, result);
+        ListBinder listBinder = ListBinder.valueOf(Integer.class, "i", new Annotation[0]);
+        node.clear();
+        node.put("i", "1");
+        node.put("i", "2");
+        List<Integer> result1 = (List<Integer>) listBinder.bind(null, node, null);
+        for (int i = 0; i < result1.size(); i++)
+        {
+            assertEquals(i + 1, result1.get(i).intValue());
+        }
+        node.clear();
+        node.put("i[0]", "1");
+        node.put("i[1]", "2");
+        result1 = (List<Integer>) listBinder.bind(null, node, null);
+        for (int i = 0; i < result1.size(); i++)
+        {
+            assertEquals(i + 1, result1.get(i).intValue());
+        }
+        node.clear();
+        node.put("i[]", "1");
+        node.put("i[]", "2");
+        result1 = (List<Integer>) listBinder.bind(null, node, null);
+        for (int i = 0; i < result1.size(); i++)
+        {
+            assertEquals(i + 1, result1.get(i).intValue());
+        }
+    }
+    
+    @Test
+    public void test7()
+    {
+        TreeValueNode node = new TreeValueNode();
+        node.put("desk[name]", "aa");
+        node.put("desk[name]", "bb");
+        node.put("desk[l]", "1");
+        node.put("desk[l]", "2");
+        ArrayBinder binder = ArrayBinder.valueOf(Desk[].class, "desk", new Annotation[0]);
+        Desk[] desks = (Desk[]) binder.bind(null, node, null);
+        assertEquals("aa", desks[0].getName());
+        assertEquals("bb", desks[1].getName());
     }
     
     @Test
