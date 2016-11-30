@@ -13,6 +13,7 @@ import com.jfireframework.mvc.binder.node.TreeValueNode;
 import com.jfireframework.mvc.vo.Desk;
 import com.jfireframework.mvc.vo.Desk.length;
 import com.jfireframework.mvc.vo.Home;
+import com.jfireframework.mvc.vo.ListData;
 import com.jfireframework.mvc.vo.Person;
 
 public class NewBinderTest
@@ -32,6 +33,18 @@ public class NewBinderTest
         paramTree.put("foo[barsMap][bar03][id]", "foo01");
         paramTree.put("foo[barsMap][bar03][numbers][]", "foo01");
         System.out.println(JsonTool.write(paramTree));
+    }
+    
+    @Test
+    public void test8()
+    {
+        TreeValueNode node = new TreeValueNode();
+        node.put("pre[desks][0][name]", "1");
+        node.put("pre[desks][1][name]", "2");
+        ObjectDataBinder binder = new ObjectDataBinder(ListData.class, "pre", new Annotation[0]);
+        ListData listData = (ListData) binder.bind(null, node, null);
+        assertEquals("1", listData.getDesks().get(0).getName());
+        assertEquals("2", listData.getDesks().get(1).getName());
     }
     
     @SuppressWarnings("unchecked")
