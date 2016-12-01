@@ -25,7 +25,7 @@ public class DispathServletHelper
     private final JsonObject        config;
     private final FileChangeDetect  detect;
     private final boolean           devMode;
-    private final String            encode;
+    private final String            encode = "utf-8";
     
     public DispathServletHelper(ServletContext servletContext, JsonObject config)
     {
