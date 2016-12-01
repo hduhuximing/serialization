@@ -34,7 +34,7 @@ import com.jfireframework.mvc.viewrender.impl.StringRender;
 public class ActionCenterBulder
 {
     
-    public static ActionCenter generate(JsonObject config, ServletContext servletContext, String encode)
+    public static ActionCenter generate(JsonObject config, ServletContext servletContext)
     {
         boolean devMode = config.containsKey("devMode") ? config.getBoolean("devMode") : false;
         JfireContext jfireContext = new JfireContextImpl();
@@ -61,7 +61,6 @@ public class ActionCenterBulder
         {
             classLoader = Thread.currentThread().getContextClassLoader();
         }
-        jfireContext.addSingletonEntity("charset", Charset.forName(encode));
         addViewRender(jfireContext);
         jfireContext.readConfig(config);
         jfireContext.addSingletonEntity("servletContext", servletContext);

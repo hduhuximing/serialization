@@ -1,11 +1,16 @@
 package com.jfireframework.baseutil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import com.jfireframework.baseutil.collection.StringCache;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
 
 public class StringUtil
 {
     private final static ThreadLocal<StringCache> cacheLocal   = new ThreadLocal<StringCache>() {
+                                                                   @Override
                                                                    protected StringCache initialValue()
                                                                    {
                                                                        return new StringCache();
@@ -235,6 +240,36 @@ public class StringUtil
             tmp[index++] = (byte) c;
         }
         return toHexString(tmp);
+    }
+    
+    public static String readFromClasspath(String resName, Charset charset)
+    {
+        InputStream inputStream = null;
+        try
+        {
+            inputStream = StringUtil.class.getClassLoader().getResourceAsStream(resName);
+            byte[] src = new byte[inputStream.available()];
+            inputStream.read(src);
+            return new String(src, charset);
+        }
+        catch (IOException e)
+        {
+            throw new JustThrowException(e);
+        }
+        finally
+        {
+            if (inputStream != null)
+            {
+                try
+                {
+                    inputStream.close();
+                }
+                catch (IOException e)
+                {
+                    throw new JustThrowException(e);
+                }
+            }
+        }
     }
     
     public static void main(String[] args)
