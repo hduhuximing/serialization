@@ -98,10 +98,24 @@ public abstract class ListField extends AbstractBinderField
     private List<?> buildFromTree(Set<Entry<String, ParamNode>> set, HttpServletRequest request, HttpServletResponse response)
     {
         List<Object> list = new ArrayList<Object>();
+        int max = 0;
         for (Entry<String, ParamNode> each : set)
         {
             int index = Integer.valueOf(each.getKey());
-            list.add(index, buildByNode(each.getValue(), request, response));
+            if (index > max)
+            {
+                max = index;
+            }
+        }
+        Object[] t_array = new Object[max + 1];
+        for (Entry<String, ParamNode> each : set)
+        {
+            int index = Integer.valueOf(each.getKey());
+            t_array[index] = buildByNode(each.getValue(), request, response);
+        }
+        for (Object each : t_array)
+        {
+            list.add(each);
         }
         return list;
     }

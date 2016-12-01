@@ -45,6 +45,12 @@ public class NewBinderTest
         ListData listData = (ListData) binder.bind(null, node, null);
         assertEquals("1", listData.getDesks().get(0).getName());
         assertEquals("2", listData.getDesks().get(1).getName());
+        node.clear();
+        node.put("pre[names]", "1");
+        node.put("pre[names]", "2");
+        listData = (ListData) binder.bind(null, node, null);
+        assertEquals("1", listData.getNames().get(0));
+        assertEquals("2", listData.getNames().get(1));
     }
     
     @SuppressWarnings("unchecked")
