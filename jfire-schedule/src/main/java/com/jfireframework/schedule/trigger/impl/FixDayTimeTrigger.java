@@ -21,20 +21,27 @@ public class FixDayTimeTrigger extends BaseTrigger
     @Override
     public void calNext()
     {
-        Calendar now = Calendar.getInstance();
-        Calendar target = Calendar.getInstance();
-        target.set(Calendar.HOUR_OF_DAY, hour);
-        target.set(Calendar.MINUTE, minute);
-        target.set(Calendar.SECOND, second);
-        if (target.after(now) == false)
+        if (timetask.canceled() == false)
         {
-            target.add(Calendar.DAY_OF_YEAR, 1);
+            Calendar now = Calendar.getInstance();
+            Calendar target = Calendar.getInstance();
+            target.set(Calendar.HOUR_OF_DAY, hour);
+            target.set(Calendar.MINUTE, minute);
+            target.set(Calendar.SECOND, second);
+            if (target.after(now) == false)
+            {
+                target.add(Calendar.DAY_OF_YEAR, 1);
+            }
+            else
+            {
+                ;
+            }
+            deadline = target.getTimeInMillis();
         }
         else
         {
-            ;
+            cancel();
         }
-        deadline = target.getTimeInMillis();
     }
     
 }

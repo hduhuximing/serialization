@@ -23,7 +23,14 @@ public class RepeatDelayTrigger extends BaseTrigger
     @Override
     public void calNext()
     {
-        deadline = System.currentTimeMillis() + delay;
+        if (timetask.canceled() == false)
+        {
+            deadline = System.currentTimeMillis() + delay;
+        }
+        else
+        {
+            cancel();
+        }
     }
     
 }

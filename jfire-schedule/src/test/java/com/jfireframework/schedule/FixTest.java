@@ -27,6 +27,13 @@ public class FixTest
                                 System.out.println(System.currentTimeMillis() - t0);
                                 t0 = System.currentTimeMillis();
                             }
+                            
+                            @Override
+                            public boolean canceled()
+                            {
+                                // TODO Auto-generated method stub
+                                return false;
+                            }
                         }, 1, TimeUnit.SECONDS
                 )
         );
@@ -47,6 +54,13 @@ public class FixTest
                             {
                                 System.out.println(System.currentTimeMillis() - t0);
                                 t0 = System.currentTimeMillis();
+                            }
+                            
+                            @Override
+                            public boolean canceled()
+                            {
+                                // TODO Auto-generated method stub
+                                return false;
                             }
                         }, 19, 39, 30
                 )
