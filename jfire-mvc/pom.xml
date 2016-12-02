@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.jfireframework</groupId>
 		<artifactId>framework-parent</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0</version>
 	</parent>
 	<artifactId>jfire-mvc</artifactId>
 	<name>mvc</name>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-context</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 </project>

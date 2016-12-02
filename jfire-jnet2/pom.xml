@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.jfireframework</groupId>
 		<artifactId>framework-parent</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0</version>
 	</parent>
 	<artifactId>jfire-jnet2</artifactId>
 	<name>jnet2</name>
@@ -20,12 +20,12 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-eventbus</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-baseutil</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
