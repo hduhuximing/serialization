@@ -33,10 +33,5 @@
 			<artifactId>jfire-context</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>com.jfireframework</groupId>
-			<artifactId>beanvalidation</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 </project>

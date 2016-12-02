@@ -4,13 +4,12 @@ import java.io.File;
 
 public class FileChangeDetect
 {
-    private final File root;
-    private long       lastModitySum = 0;
+    private final File[] roots;
+    private long         lastModitySum = 0;
     
-    public FileChangeDetect(File root)
+    public FileChangeDetect(File[] roots)
     {
-        this.root = root;
-        lastModitySum = calculateModitySum(root);
+        this.roots = roots;
     }
     
     private long calculateModitySum(File file)
@@ -32,7 +31,11 @@ public class FileChangeDetect
     
     public boolean detectChange()
     {
-        long newModitySum = calculateModitySum(root);
+        long newModitySum = 0;
+        for (File root : roots)
+        {
+            newModitySum = calculateModitySum(root);
+        }
         if (newModitySum == lastModitySum)
         {
             return false;

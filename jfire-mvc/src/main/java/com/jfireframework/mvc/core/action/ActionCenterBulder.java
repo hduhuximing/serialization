@@ -6,10 +6,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletContext;
+import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
-import com.jfireframework.baseutil.reflect.SimpleHotswapClassLoader;
-import com.jfireframework.baseutil.verify.Verify;
 import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.JfireContext;
@@ -20,7 +19,6 @@ import com.jfireframework.mvc.annotation.Controller;
 import com.jfireframework.mvc.annotation.RequestMapping;
 import com.jfireframework.mvc.interceptor.impl.DataBinderInterceptor;
 import com.jfireframework.mvc.interceptor.impl.UploadInterceptor;
-import com.jfireframework.mvc.util.ClasspathBeetlKit;
 import com.jfireframework.mvc.util.AppBeetlKit;
 import com.jfireframework.mvc.viewrender.impl.BeetlRender;
 import com.jfireframework.mvc.viewrender.impl.BytesRender;
@@ -34,33 +32,14 @@ import com.jfireframework.mvc.viewrender.impl.StringRender;
 public class ActionCenterBulder
 {
     
-    public static ActionCenter generate(JsonObject config, ServletContext servletContext)
+    public static ActionCenter generate(ClassLoader classLoader, ServletContext servletContext)
     {
-        boolean devMode = config.containsKey("devMode") ? config.getBoolean("devMode") : false;
+        JsonObject config = (JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("mvc.json", Charset.forName("utf8")));
         JfireContext jfireContext = new JfireContextImpl();
-        ClassLoader classLoader;
-        if (devMode)
-        {
-            Verify.True(config.contains("reloadPackage"), "开发模式为true，此时应该配置reloadPackage内容");
-            Verify.True(config.contains("reloadPath"), "开发模式为true，此时应该配置monitorPath内容");
-            String reloadPackage = config.getWString("reloadPackage");
-            String excludePackage = config.getWString("excludePackage");
-            String reloadPath = config.getWString("reloadPath");
-            classLoader = new SimpleHotswapClassLoader(reloadPath);
-            ((SimpleHotswapClassLoader) classLoader).setReloadPackages(reloadPackage.split(","));
-            if (excludePackage != null)
-            {
-                ((SimpleHotswapClassLoader) classLoader).setExcludePackages(excludePackage.split(","));
-            }
-            jfireContext.addSingletonEntity(classLoader.getClass().getName(), classLoader);
-            jfireContext.setClassLoader(classLoader);
-            AopUtil.initClassPool(classLoader);
-            JsonTool.initClassPool(classLoader);
-        }
-        else
-        {
-            classLoader = Thread.currentThread().getContextClassLoader();
-        }
+        jfireContext.addSingletonEntity(classLoader.getClass().getName(), classLoader);
+        jfireContext.setClassLoader(classLoader);
+        AopUtil.initClassPool(classLoader);
+        JsonTool.initClassPool(classLoader);
         addViewRender(jfireContext);
         jfireContext.readConfig(config);
         jfireContext.addSingletonEntity("servletContext", servletContext);
@@ -72,7 +51,6 @@ public class ActionCenterBulder
     private static void addViewRender(JfireContext jfireContext)
     {
         jfireContext.addBean(AppBeetlKit.class);
-        jfireContext.addBean(ClasspathBeetlKit.class);
         jfireContext.addBean(BeetlRender.class);
         jfireContext.addBean(JspRender.class);
         jfireContext.addBean(JsonRender.class);

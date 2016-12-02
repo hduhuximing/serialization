@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
@@ -15,9 +14,6 @@ import com.jfireframework.baseutil.order.AescComparator;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.uniqueid.SummerId;
 import com.jfireframework.baseutil.uniqueid.Uid;
-import com.jfireframework.beanvalidation.BeanValidatorFactory;
-import com.jfireframework.beanvalidation.ValidResult;
-import com.jfireframework.beanvalidation.validator.BeanValidator;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
@@ -90,34 +86,7 @@ public class ActionFactory
             throw new JustThrowException(e);
         }
         actionInfo.setInterceptors(getInterceptors(jfireContext, actionInfo));
-        setValidator(method, actionInfo);
         return new Action(actionInfo);
-    }
-    
-    private static void setValidator(Method method, ActionInfo info)
-    {
-        List<BeanValidator<?>> list = new LinkedList<BeanValidator<?>>();
-        List<Integer> indexs = new LinkedList<Integer>();
-        Class<?>[] types = method.getParameterTypes();
-        for (int i = 0; i < types.length; i++)
-        {
-            if (types[i] == ValidResult.class)
-            {
-                if (i == 0 || types[i - 1] == ValidResult.class)
-                {
-                    throw new UnsupportedOperationException(StringUtil.format("验证结果对象之前必须有一个可以验证的对象，请检查{}.{}", method.getDeclaringClass().getName(), method.getName()));
-                }
-                indexs.add(i);
-                list.add(BeanValidatorFactory.build(types[i - 1]));
-            }
-        }
-        info.setValidators(list.toArray(new BeanValidator[list.size()]));
-        int[] validatorIndexs = new int[indexs.size()];
-        for (int i = 0; i < validatorIndexs.length; i++)
-        {
-            validatorIndexs[i] = indexs.get(i);
-        }
-        info.setValidatorIndex(validatorIndexs);
     }
     
     private static ActionInterceptor[] getInterceptors(JfireContext jfireContext, ActionInfo info)
@@ -204,7 +173,8 @@ public class ActionFactory
                                 || each instanceof HttpServletRequestBinder //
                                 || each instanceof HttpServletResponseBinder //
                                 || each instanceof CookieBinder //
-                                || each instanceof HeaderBinder)
+                                || each instanceof HeaderBinder
+                        )
                         {
                             continue;
                         }
