@@ -5,7 +5,7 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class WFloatArraySerializer extends AbstractArraySerializer
+public class WFloatArraySerializer extends AbstractArraySerializer<Float[]>
 {
     
     public WFloatArraySerializer()
@@ -14,9 +14,9 @@ public class WFloatArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Float[] src, ByteBuf<?> buf, Licp licp)
     {
-        Float[] array = (Float[]) src;
+        Float[] array = src;
         buf.writePositive(array.length);
         for (Float each : array)
         {
@@ -33,7 +33,7 @@ public class WFloatArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Float[] deserialize(ByteBuf<?> buf, Licp licp)
     {
         int length = buf.readPositive();
         Float[] array = new Float[length];
@@ -54,7 +54,7 @@ public class WFloatArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Float[] deserialize(ByteBuffer buf, Licp licp)
     {
         int length = BufferUtil.readPositive(buf);
         Float[] array = new Float[length];

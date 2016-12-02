@@ -8,13 +8,13 @@ import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class HashMapSerializer implements LicpSerializer
+public class HashMapSerializer implements LicpSerializer<HashMap<?, ?>>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(HashMap<?, ?> src, ByteBuf<?> buf, Licp licp)
     {
-        HashMap<?, ?> map = (HashMap<?, ?>) src;
+        HashMap<?, ?> map = src;
         int size = map.size();
         buf.writePositive(size);
         for (Entry<?, ?> entry : map.entrySet())
@@ -25,7 +25,7 @@ public class HashMapSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public HashMap<?, ?> deserialize(ByteBuf<?> buf, Licp licp)
     {
         int size = buf.readPositive();
         HashMap<Object, Object> map = new HashMap<Object, Object>(size);
@@ -40,7 +40,7 @@ public class HashMapSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public HashMap<?, ?> deserialize(ByteBuffer buf, Licp licp)
     {
         int size = BufferUtil.readPositive(buf);
         HashMap<Object, Object> map = new HashMap<Object, Object>(size);

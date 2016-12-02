@@ -5,7 +5,7 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class ShortArraySerializer extends AbstractArraySerializer
+public class ShortArraySerializer extends AbstractArraySerializer<short[]>
 {
     
     public ShortArraySerializer()
@@ -14,9 +14,9 @@ public class ShortArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(short[] src, ByteBuf<?> buf, Licp licp)
     {
-        short[] array = (short[]) src;
+        short[] array = src;
         buf.writePositive(array.length);
         for (short each : array)
         {
@@ -25,7 +25,7 @@ public class ShortArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public short[] deserialize(ByteBuf<?> buf, Licp licp)
     {
         int length = buf.readPositive();
         short[] array = new short[length];
@@ -38,7 +38,7 @@ public class ShortArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public short[] deserialize(ByteBuffer buf, Licp licp)
     {
         int length = BufferUtil.readPositive(buf);
         short[] array = new short[length];

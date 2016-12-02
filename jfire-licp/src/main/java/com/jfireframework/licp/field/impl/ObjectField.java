@@ -8,7 +8,7 @@ import com.jfireframework.licp.serializer.LicpSerializer;
 
 public class ObjectField extends AbstractCacheField
 {
-    private LicpSerializer serializer;
+    private LicpSerializer<?> serializer;
     
     public ObjectField(Field field, Licp licp)
     {
@@ -19,13 +19,14 @@ public class ObjectField extends AbstractCacheField
         }
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void write(Object holder, ByteBuf<?> buf, Licp licp)
     {
         Object value = unsafe.getObject(holder, offset);
         if (finalField)
         {
-            licp._serialize(value, buf, serializer);
+            licp._serialize(value, buf, (LicpSerializer<Object>) serializer);
         }
         else
         {

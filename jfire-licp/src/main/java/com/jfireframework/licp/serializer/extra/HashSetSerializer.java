@@ -7,13 +7,13 @@ import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class HashSetSerializer implements LicpSerializer
+public class HashSetSerializer implements LicpSerializer<HashSet<?>>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(HashSet<?> src, ByteBuf<?> buf, Licp licp)
     {
-        HashSet<?> set = (HashSet<?>) src;
+        HashSet<?> set = src;
         int length = set.size();
         buf.writePositive(length);
         for (Object each : set)
@@ -23,7 +23,7 @@ public class HashSetSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public HashSet<?> deserialize(ByteBuf<?> buf, Licp licp)
     {
         int length = buf.readPositive();
         HashSet<Object> set = new HashSet<Object>(length);
@@ -35,7 +35,7 @@ public class HashSetSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public HashSet<?> deserialize(ByteBuffer buf, Licp licp)
     {
         int length = BufferUtil.readPositive(buf);
         HashSet<Object> set = new HashSet<Object>(length);

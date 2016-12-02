@@ -36,14 +36,15 @@ import com.jfireframework.licp.serializer.base.ShortSerializer;
 import com.jfireframework.licp.serializer.base.StringSerializer;
 import com.jfireframework.licp.serializer.extra.ArraylistSerializer;
 import com.jfireframework.licp.serializer.extra.CalendarSerializer;
-import com.jfireframework.licp.serializer.extra.DateSerializer;
 import com.jfireframework.licp.serializer.extra.HashMapSerializer;
 import com.jfireframework.licp.serializer.extra.HashSetSerializer;
 import com.jfireframework.licp.serializer.extra.LinkedListSerializer;
+import com.jfireframework.licp.serializer.extra.SqlDateSerializer;
+import com.jfireframework.licp.serializer.extra.UtilDateSerializer;
 
 public class SerializerFactory
 {
-    private final HashMap<Class<?>, LicpSerializer> serializerMap = new HashMap<Class<?>, LicpSerializer>();
+    private final HashMap<Class<?>, LicpSerializer<?>> serializerMap = new HashMap<Class<?>, LicpSerializer<?>>();
     
     public SerializerFactory()
     {
@@ -76,8 +77,8 @@ public class SerializerFactory
         serializerMap.put(Double[].class, new WDoubleArraySerializer());
         serializerMap.put(Boolean[].class, new WBooleanArraySerializer());
         /**************************/
-        serializerMap.put(Date.class, new DateSerializer(false));
-        serializerMap.put(java.sql.Date.class, new DateSerializer(true));
+        serializerMap.put(Date.class, new UtilDateSerializer());
+        serializerMap.put(java.sql.Date.class, new SqlDateSerializer());
         serializerMap.put(Calendar.class, new CalendarSerializer());
         serializerMap.put(ArrayList.class, new ArraylistSerializer());
         serializerMap.put(LinkedList.class, new LinkedListSerializer());
@@ -85,25 +86,26 @@ public class SerializerFactory
         serializerMap.put(HashSet.class, new HashSetSerializer());
     }
     
-    public void register(Class<?> type, LicpSerializer serializer)
+    public void register(Class<?> type, LicpSerializer<?> serializer)
     {
         serializerMap.put(type, serializer);
     }
     
-    public LicpSerializer get(Class<?> type, Licp licp)
+    @SuppressWarnings("unchecked")
+    public <T> LicpSerializer<T> get(Class<T> type, Licp licp)
     {
-        LicpSerializer serializer = serializerMap.get(type);
+        LicpSerializer<T> serializer = (LicpSerializer<T>) serializerMap.get(type);
         if (serializer != null)
         {
             return serializer;
         }
         if (type.isArray())
         {
-            serializer = new ObjectArraySerializer(type, licp);
+            serializer = new ObjectArraySerializer<T>(type, licp);
         }
         else
         {
-            serializer = new ObjectSerializer(type, licp);
+            serializer = new ObjectSerializer<T>(type, licp);
         }
         serializerMap.put(type, serializer);
         return serializer;

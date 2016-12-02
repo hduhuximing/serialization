@@ -7,11 +7,11 @@ import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class ObjectArraySerializer extends AbstractArraySerializer
+public class ObjectArraySerializer<T> extends AbstractArraySerializer<T>
 {
-    private final LicpSerializer elementSerializer;
+    private final LicpSerializer<?> elementSerializer;
     
-    public ObjectArraySerializer(Class<?> type, Licp licp)
+    public ObjectArraySerializer(Class<T> type, Licp licp)
     {
         super(type);
         if (elementSameType)
@@ -24,8 +24,9 @@ public class ObjectArraySerializer extends AbstractArraySerializer
         }
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(T src, ByteBuf<?> buf, Licp licp)
     {
         Object[] array = (Object[]) src;
         buf.writePositive(array.length);
@@ -33,7 +34,7 @@ public class ObjectArraySerializer extends AbstractArraySerializer
         {
             for (Object each : array)
             {
-                licp._serialize(each, buf, elementSerializer);
+                licp._serialize(each, buf, (LicpSerializer<Object>) elementSerializer);
             }
         }
         else
@@ -46,8 +47,9 @@ public class ObjectArraySerializer extends AbstractArraySerializer
         
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public T deserialize(ByteBuf<?> buf, Licp licp)
     {
         int length = buf.readPositive();
         Object[] array = (Object[]) Array.newInstance(elementType, length);
@@ -63,11 +65,12 @@ public class ObjectArraySerializer extends AbstractArraySerializer
                 array[i] = licp._deserialize(buf);
             }
         }
-        return array;
+        return (T) array;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public T deserialize(ByteBuffer buf, Licp licp)
     {
         int length = BufferUtil.readPositive(buf);
         Object[] array = (Object[]) Array.newInstance(elementType, length);
@@ -83,7 +86,7 @@ public class ObjectArraySerializer extends AbstractArraySerializer
                 array[i] = licp._deserialize(buf);
             }
         }
-        return array;
+        return (T) array;
     }
     
 }

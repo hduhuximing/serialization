@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.Licp;
 
-public interface LicpSerializer
+public interface LicpSerializer<T>
 {
     
     /**
@@ -16,7 +16,7 @@ public interface LicpSerializer
      * @param collect
      * @param register TODO
      */
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp);
+    public void serialize(T src, ByteBuf<?> buf, Licp licp);
     
     /**
      * 反序列化二进制字节到对象中去
@@ -27,8 +27,8 @@ public interface LicpSerializer
      * @param collect
      * @param register TODO
      */
-    public Object deserialize(ByteBuf<?> buf, Licp licp);
+    public T deserialize(ByteBuf<?> buf, Licp licp);
     
-    public Object deserialize(ByteBuffer buf, Licp licp);
+    public T deserialize(ByteBuffer buf, Licp licp);
     
 }

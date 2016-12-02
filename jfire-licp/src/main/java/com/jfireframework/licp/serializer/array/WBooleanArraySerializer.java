@@ -5,7 +5,7 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class WBooleanArraySerializer extends AbstractArraySerializer
+public class WBooleanArraySerializer extends AbstractArraySerializer<Boolean[]>
 {
     
     public WBooleanArraySerializer()
@@ -14,9 +14,9 @@ public class WBooleanArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Boolean[] src, ByteBuf<?> buf, Licp licp)
     {
-        Boolean[] array = (Boolean[]) src;
+        Boolean[] array = src;
         buf.writePositive(array.length);
         for (Boolean each : array)
         {
@@ -36,7 +36,7 @@ public class WBooleanArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Boolean[] deserialize(ByteBuf<?> buf, Licp licp)
     {
         int length = buf.readPositive();
         Boolean[] array = new Boolean[length];
@@ -61,7 +61,7 @@ public class WBooleanArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Boolean[] deserialize(ByteBuffer buf, Licp licp)
     {
         int length = BufferUtil.readPositive(buf);
         Boolean[] array = new Boolean[length];

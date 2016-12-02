@@ -6,17 +6,17 @@ import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class LongSerializer implements LicpSerializer
+public class LongSerializer implements LicpSerializer<Long>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Long src, ByteBuf<?> buf, Licp licp)
     {
-        buf.writeVarLong((Long) src);
+        buf.writeVarLong(src);
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Long deserialize(ByteBuf<?> buf, Licp licp)
     {
         Long l = buf.readVarLong();
         licp.putObject(l);
@@ -24,7 +24,7 @@ public class LongSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Long deserialize(ByteBuffer buf, Licp licp)
     {
         Long l = BufferUtil.readVarLong(buf);
         licp.putObject(l);

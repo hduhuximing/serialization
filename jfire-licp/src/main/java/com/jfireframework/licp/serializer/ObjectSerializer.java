@@ -12,11 +12,12 @@ import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.LicpIgnore;
+import com.jfireframework.licp.LicpInterceptor;
 import com.jfireframework.licp.field.CacheField;
 import com.jfireframework.licp.field.FieldFactory;
 import sun.misc.Unsafe;
 
-public class ObjectSerializer implements LicpSerializer
+public class ObjectSerializer<T> implements LicpSerializer<T>
 {
     private final CacheField[]             fields;
     private static final Comparator<Field> fieldCompator = new Comparator<Field>() {
@@ -30,8 +31,9 @@ public class ObjectSerializer implements LicpSerializer
                                                          };
     private final Class<?>                 type;
     private final static Unsafe            unsafe        = ReflectUtil.getUnsafe();
+    private final LicpInterceptor<T>       licpInterceptor;
     
-    public ObjectSerializer(Class<?> type, Licp licp)
+    public ObjectSerializer(Class<T> type, Licp licp)
     {
         this.type = type;
         Field[] fields = ReflectUtil.getAllFields(type);
@@ -52,28 +54,38 @@ public class ObjectSerializer implements LicpSerializer
             tmp[i] = FieldFactory.build(fields[i], licp);
         }
         this.fields = tmp;
+        licpInterceptor = licp.getInterceptor(type);
     }
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(T src, ByteBuf<?> buf, Licp licp)
     {
+        if (licpInterceptor != null)
+        {
+            src = licpInterceptor.serialize(src);
+        }
         for (CacheField each : fields)
         {
             each.write(src, buf, licp);
         }
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public T deserialize(ByteBuf<?> buf, Licp licp)
     {
         try
         {
-            Object holder = unsafe.allocateInstance(type);
+            T holder = (T) unsafe.allocateInstance(type);
             // 在这个地方把对象放入。在外面放入就来不及了
             licp.putObject(holder);
             for (CacheField each : fields)
             {
                 each.read(holder, buf, licp);
+            }
+            if (licpInterceptor != null)
+            {
+                holder = licpInterceptor.deserialize(holder);
             }
             return holder;
         }
@@ -83,17 +95,22 @@ public class ObjectSerializer implements LicpSerializer
         }
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public T deserialize(ByteBuffer buf, Licp licp)
     {
         try
         {
-            Object holder = unsafe.allocateInstance(type);
+            T holder = (T) unsafe.allocateInstance(type);
             // 在这个地方把对象放入。在外面放入就来不及了
             licp.putObject(holder);
             for (CacheField each : fields)
             {
                 each.read(holder, buf, licp);
+            }
+            if (licpInterceptor != null)
+            {
+                holder = licpInterceptor.deserialize(holder);
             }
             return holder;
         }

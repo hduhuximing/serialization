@@ -6,17 +6,17 @@ import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class CharSerializer implements LicpSerializer
+public class CharSerializer implements LicpSerializer<Character>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Character src, ByteBuf<?> buf, Licp licp)
     {
-        buf.writeChar((Character) src);
+        buf.writeChar(src);
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Character deserialize(ByteBuf<?> buf, Licp licp)
     {
         Character c = buf.readChar();
         licp.putObject(c);
@@ -24,7 +24,7 @@ public class CharSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Character deserialize(ByteBuffer buf, Licp licp)
     {
         Character c = BufferUtil.readChar(buf);
         licp.putObject(c);

@@ -6,17 +6,17 @@ import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class DoubleSerializer implements LicpSerializer
+public class DoubleSerializer implements LicpSerializer<Double>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Double src, ByteBuf<?> buf, Licp licp)
     {
-        buf.writeDouble((Double) src);
+        buf.writeDouble(src);
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Double deserialize(ByteBuf<?> buf, Licp licp)
     {
         Double d = buf.readDouble();
         licp.putObject(d);
@@ -24,7 +24,7 @@ public class DoubleSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Double deserialize(ByteBuffer buf, Licp licp)
     {
         Double d = BufferUtil.readDouble(buf);
         licp.putObject(d);

@@ -6,17 +6,17 @@ import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class FloatSerializer implements LicpSerializer
+public class FloatSerializer implements LicpSerializer<Float>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Float src, ByteBuf<?> buf, Licp licp)
     {
-        buf.writeFloat((Float) src);
+        buf.writeFloat(src);
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Float deserialize(ByteBuf<?> buf, Licp licp)
     {
         Float f = buf.readFloat();
         licp.putObject(f);
@@ -24,7 +24,7 @@ public class FloatSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Float deserialize(ByteBuffer buf, Licp licp)
     {
         Float f = BufferUtil.readFloat(buf);
         licp.putObject(f);

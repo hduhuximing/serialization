@@ -5,17 +5,17 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 
-public class ByteSerializer implements LicpSerializer
+public class ByteSerializer implements LicpSerializer<Byte>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Byte src, ByteBuf<?> buf, Licp licp)
     {
-        buf.put((Byte) src);
+        buf.put(src);
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Byte deserialize(ByteBuf<?> buf, Licp licp)
     {
         Byte b = buf.get();
         licp.putObject(b);
@@ -23,7 +23,7 @@ public class ByteSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Byte deserialize(ByteBuffer buf, Licp licp)
     {
         Byte b = buf.get();
         licp.putObject(b);

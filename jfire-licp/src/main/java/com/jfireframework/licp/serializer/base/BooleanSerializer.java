@@ -5,13 +5,13 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 
-public class BooleanSerializer implements LicpSerializer
+public class BooleanSerializer implements LicpSerializer<Boolean>
 {
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Boolean src, ByteBuf<?> buf, Licp licp)
     {
-        if ((Boolean) src)
+        if (src)
         {
             buf.put((byte) 0);
         }
@@ -22,7 +22,7 @@ public class BooleanSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Boolean deserialize(ByteBuf<?> buf, Licp licp)
     {
         if (buf.get() == 1)
         {
@@ -37,7 +37,7 @@ public class BooleanSerializer implements LicpSerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Boolean deserialize(ByteBuffer buf, Licp licp)
     {
         if (buf.get() == 1)
         {

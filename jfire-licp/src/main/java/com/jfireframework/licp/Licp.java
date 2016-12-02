@@ -2,6 +2,7 @@ package com.jfireframework.licp;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Map;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
@@ -11,16 +12,17 @@ import com.jfireframework.licp.util.BufferUtil;
 
 public class Licp
 {
-    private ObjectCollect                   collect      = new ObjectCollect(true);
-    private ClassNoRegister                 register     = new ClassNoRegister();
-    public static final int                 NULL         = 0;
-    public static final int                 EXIST        = 1;
-    private final HashMap<String, Class<?>> nameClassMap = new HashMap<String, Class<?>>();
-    private final SerializerFactory         factory      = new SerializerFactory();
+    private ObjectCollect                           collect      = new ObjectCollect(true);
+    private ClassNoRegister                         register     = new ClassNoRegister();
+    public static final int                         NULL         = 0;
+    public static final int                         EXIST        = 1;
+    private final HashMap<String, Class<?>>         nameClassMap = new HashMap<String, Class<?>>();
+    private final SerializerFactory                 factory      = new SerializerFactory();
+    private final Map<Class<?>, LicpInterceptor<?>> interceptors = new HashMap<Class<?>, LicpInterceptor<?>>();
     /**
      * 版本号标识，用来防止不同的版本互相转化导致的异常
      */
-    private static final byte               version      = 0;
+    private static final byte                       version      = 0;
     
     public void disableCycleSupport()
     {
@@ -49,6 +51,7 @@ public class Licp
      * @param src
      * @param buf
      */
+    @SuppressWarnings("unchecked")
     public void _serialize(Object src, ByteBuf<?> buf)
     {
         if (src == null)
@@ -86,12 +89,13 @@ public class Licp
         _getSerializer(type).serialize(src, buf, this);
     }
     
+    @SuppressWarnings("rawtypes")
     public LicpSerializer _getSerializer(Class<?> type)
     {
         return factory.get(type, this);
     }
     
-    public void _serialize(Object src, ByteBuf<?> buf, LicpSerializer serializer)
+    public void _serialize(Object src, ByteBuf<?> buf, LicpSerializer<Object> serializer)
     {
         if (src == null)
         {
@@ -146,6 +150,7 @@ public class Licp
         return (T) _deserialize(buffer);
     }
     
+    @SuppressWarnings("unchecked")
     public Object _deserialize(ByteBuf<?> buf)
     {
         int result = buf.readPositive();
@@ -220,7 +225,7 @@ public class Licp
         }
     }
     
-    public Object _deserialize(ByteBuf<?> buf, LicpSerializer serializer)
+    public Object _deserialize(ByteBuf<?> buf, LicpSerializer<?> serializer)
     {
         int result = buf.readPositive();
         if (result == 0)
@@ -243,7 +248,7 @@ public class Licp
         }
     }
     
-    public Object _deserialize(ByteBuffer buf, LicpSerializer serializer)
+    public Object _deserialize(ByteBuffer buf, LicpSerializer<?> serializer)
     {
         int result = BufferUtil.readPositive(buf);
         if (result == 0)
@@ -296,5 +301,11 @@ public class Licp
     public void putObject(Object x)
     {
         collect.putForDesc(x);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T> LicpInterceptor<T> getInterceptor(Class<T> rule)
+    {
+        return (LicpInterceptor<T>) interceptors.get(rule);
     }
 }

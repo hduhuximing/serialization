@@ -5,7 +5,7 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.Licp;
 import com.jfireframework.licp.util.BufferUtil;
 
-public class WCharArraySerializer extends AbstractArraySerializer
+public class WCharArraySerializer extends AbstractArraySerializer<Character[]>
 {
     
     public WCharArraySerializer()
@@ -14,9 +14,9 @@ public class WCharArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public void serialize(Object src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Character[] src, ByteBuf<?> buf, Licp licp)
     {
-        Character[] array = (Character[]) src;
+        Character[] array = src;
         buf.writePositive(array.length);
         for (Character each : array)
         {
@@ -33,7 +33,7 @@ public class WCharArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuf<?> buf, Licp licp)
+    public Character[] deserialize(ByteBuf<?> buf, Licp licp)
     {
         int length = buf.readPositive();
         Character[] array = new Character[length];
@@ -54,7 +54,7 @@ public class WCharArraySerializer extends AbstractArraySerializer
     }
     
     @Override
-    public Object deserialize(ByteBuffer buf, Licp licp)
+    public Character[] deserialize(ByteBuffer buf, Licp licp)
     {
         int length = BufferUtil.readPositive(buf);
         Character[] array = new Character[length];
