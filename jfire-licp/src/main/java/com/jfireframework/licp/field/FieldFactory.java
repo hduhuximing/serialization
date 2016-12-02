@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.field.impl.BooleanField;
 import com.jfireframework.licp.field.impl.ByteField;
 import com.jfireframework.licp.field.impl.CharField;
@@ -57,7 +57,7 @@ public class FieldFactory
         }
     }
     
-    public static final CacheField build(Field field, Licp licp)
+    public static final CacheField build(Field field, InternalLicp licp)
     {
         Class<?> type = field.getType();
         Constructor<? extends CacheField> constructor = map.get(type);

@@ -3,7 +3,7 @@ package com.jfireframework.licp.serializer.extra;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
@@ -11,7 +11,7 @@ public class HashSetSerializer implements LicpSerializer<HashSet<?>>
 {
     
     @Override
-    public void serialize(HashSet<?> src, ByteBuf<?> buf, Licp licp)
+    public void serialize(HashSet<?> src, ByteBuf<?> buf, InternalLicp licp)
     {
         HashSet<?> set = src;
         int length = set.size();
@@ -23,7 +23,7 @@ public class HashSetSerializer implements LicpSerializer<HashSet<?>>
     }
     
     @Override
-    public HashSet<?> deserialize(ByteBuf<?> buf, Licp licp)
+    public HashSet<?> deserialize(ByteBuf<?> buf, InternalLicp licp)
     {
         int length = buf.readPositive();
         HashSet<Object> set = new HashSet<Object>(length);
@@ -35,7 +35,7 @@ public class HashSetSerializer implements LicpSerializer<HashSet<?>>
     }
     
     @Override
-    public HashSet<?> deserialize(ByteBuffer buf, Licp licp)
+    public HashSet<?> deserialize(ByteBuffer buf, InternalLicp licp)
     {
         int length = BufferUtil.readPositive(buf);
         HashSet<Object> set = new HashSet<Object>(length);

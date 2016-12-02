@@ -3,7 +3,7 @@ package com.jfireframework.licp.serializer.extra;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
@@ -11,7 +11,7 @@ public class ArraylistSerializer implements LicpSerializer<ArrayList<?>>
 {
     
     @Override
-    public void serialize(ArrayList<?> src, ByteBuf<?> buf, Licp licp)
+    public void serialize(ArrayList<?> src, ByteBuf<?> buf, InternalLicp licp)
     {
         ArrayList<?> list = src;
         int length = list.size();
@@ -23,7 +23,7 @@ public class ArraylistSerializer implements LicpSerializer<ArrayList<?>>
     }
     
     @Override
-    public ArrayList<?> deserialize(ByteBuf<?> buf, Licp licp)
+    public ArrayList<?> deserialize(ByteBuf<?> buf, InternalLicp licp)
     {
         int length = buf.readPositive();
         ArrayList<Object> list = new ArrayList<Object>(length);
@@ -36,7 +36,7 @@ public class ArraylistSerializer implements LicpSerializer<ArrayList<?>>
     }
     
     @Override
-    public ArrayList<?> deserialize(ByteBuffer buf, Licp licp)
+    public ArrayList<?> deserialize(ByteBuffer buf, InternalLicp licp)
     {
         int length = BufferUtil.readPositive(buf);
         ArrayList<Object> list = new ArrayList<Object>(length);

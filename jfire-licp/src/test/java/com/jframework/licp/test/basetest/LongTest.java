@@ -9,7 +9,7 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.collection.buffer.HeapByteBufPool;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jframework.licp.test.basetest.data.BaseData;
 import com.jframework.licp.test.basetest.data.LongData;
 
@@ -27,7 +27,7 @@ public class LongTest
 		kryo.writeClassAndObject(output, new LongData());
 		byte[] bb = output.toBytes();
 		logger.info("LongData序列化：kryo基础数据长度：{}", bb.length);
-		Licp lbse = new Licp();
+		InternalLicp lbse = new InternalLicp();
 		ByteBuf<?> buf = HeapByteBufPool.getInstance().get(100);
 		lbse.serialize(new LongData(), buf);
 		logger.info("LongData序列化：lbse基础数据长度：" + buf.writeIndex());
@@ -53,7 +53,7 @@ public class LongTest
 		byte[] bb = output.toBytes();
 		logger.info("LongData序列化：kryo基础数据长度：{}", bb.length);
 		System.out.println(StringUtil.toHexString(bb));
-		Licp lbse = new Licp();
+		InternalLicp lbse = new InternalLicp();
 		lbse.register(LongData2.class);
 		ByteBuf<?> buf = HeapByteBufPool.getInstance().get(100);
 		lbse.serialize(new LongData2(), buf);

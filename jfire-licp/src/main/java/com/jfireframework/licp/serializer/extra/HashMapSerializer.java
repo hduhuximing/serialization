@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
@@ -12,7 +12,7 @@ public class HashMapSerializer implements LicpSerializer<HashMap<?, ?>>
 {
     
     @Override
-    public void serialize(HashMap<?, ?> src, ByteBuf<?> buf, Licp licp)
+    public void serialize(HashMap<?, ?> src, ByteBuf<?> buf, InternalLicp licp)
     {
         HashMap<?, ?> map = src;
         int size = map.size();
@@ -25,7 +25,7 @@ public class HashMapSerializer implements LicpSerializer<HashMap<?, ?>>
     }
     
     @Override
-    public HashMap<?, ?> deserialize(ByteBuf<?> buf, Licp licp)
+    public HashMap<?, ?> deserialize(ByteBuf<?> buf, InternalLicp licp)
     {
         int size = buf.readPositive();
         HashMap<Object, Object> map = new HashMap<Object, Object>(size);
@@ -40,7 +40,7 @@ public class HashMapSerializer implements LicpSerializer<HashMap<?, ?>>
     }
     
     @Override
-    public HashMap<?, ?> deserialize(ByteBuffer buf, Licp licp)
+    public HashMap<?, ?> deserialize(ByteBuffer buf, InternalLicp licp)
     {
         int size = BufferUtil.readPositive(buf);
         HashMap<Object, Object> map = new HashMap<Object, Object>(size);

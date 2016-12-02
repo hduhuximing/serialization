@@ -7,7 +7,7 @@ import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.collection.buffer.HeapByteBufPool;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jframework.licp.test.basetest.data.Device;
 import com.jframework.licp.test.basetest.data.SpeedData;
 import com.jframework.licp.test.basetest.data.SpeedData2;
@@ -52,7 +52,7 @@ public class PerTest
     {
         int testSum = 1000000;
         Object data = new SpeedData2();
-        Licp context = new Licp();
+        InternalLicp context = new InternalLicp();
         long t0 = System.currentTimeMillis();
         for (int i = 0; i < testSum; i++)
         {
@@ -66,7 +66,7 @@ public class PerTest
     public void test2()
     {
         Device device = Builder();
-        Licp context = new Licp();
+        InternalLicp context = new InternalLicp();
         context.serialize(device, buf);
         for (int i = 0; i < testSum; i++)
         {

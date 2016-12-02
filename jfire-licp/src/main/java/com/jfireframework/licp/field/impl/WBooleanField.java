@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.exception.UnSupportException;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 
 public class WBooleanField extends AbstractCacheField
 {
@@ -15,7 +15,7 @@ public class WBooleanField extends AbstractCacheField
     }
     
     @Override
-    public void write(Object holder, ByteBuf<?> buf, Licp licp)
+    public void write(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         Boolean value = (Boolean) unsafe.getObject(holder, offset);
         if (value == null)
@@ -37,7 +37,7 @@ public class WBooleanField extends AbstractCacheField
     }
     
     @Override
-    public void read(Object holder, ByteBuf<?> buf, Licp licp)
+    public void read(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         byte b = buf.get();
         if (b == 0)
@@ -59,7 +59,7 @@ public class WBooleanField extends AbstractCacheField
     }
     
     @Override
-    public void read(Object holder, ByteBuffer buf, Licp licp)
+    public void read(Object holder, ByteBuffer buf, InternalLicp licp)
     {
         byte b = buf.get();
         if (b == 0)

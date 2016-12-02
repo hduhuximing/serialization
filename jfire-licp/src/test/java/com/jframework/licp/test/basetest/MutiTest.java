@@ -6,7 +6,7 @@ import com.jfire.test.rule.CustomRule;
 import com.jfire.test.rule.MutiThreadTest;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.collection.buffer.HeapByteBufPool;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jframework.licp.test.basetest.data.Person;
 
 public class MutiTest
@@ -19,7 +19,7 @@ public class MutiTest
     public void test()
     {
         ByteBuf<?> buf = HeapByteBufPool.getInstance().get(100);
-        Licp lbse = new Licp();
+        InternalLicp lbse = new InternalLicp();
         Person person = new Person();
         lbse.serialize(person, buf);
         lbse.deserialize(buf, Person.class);

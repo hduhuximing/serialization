@@ -2,14 +2,14 @@ package com.jfireframework.licp.serializer.base;
 
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 
 public class BooleanSerializer implements LicpSerializer<Boolean>
 {
     
     @Override
-    public void serialize(Boolean src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Boolean src, ByteBuf<?> buf, InternalLicp licp)
     {
         if (src)
         {
@@ -22,7 +22,7 @@ public class BooleanSerializer implements LicpSerializer<Boolean>
     }
     
     @Override
-    public Boolean deserialize(ByteBuf<?> buf, Licp licp)
+    public Boolean deserialize(ByteBuf<?> buf, InternalLicp licp)
     {
         if (buf.get() == 1)
         {
@@ -37,7 +37,7 @@ public class BooleanSerializer implements LicpSerializer<Boolean>
     }
     
     @Override
-    public Boolean deserialize(ByteBuffer buf, Licp licp)
+    public Boolean deserialize(ByteBuffer buf, InternalLicp licp)
     {
         if (buf.get() == 1)
         {

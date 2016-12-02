@@ -3,14 +3,14 @@ package com.jfireframework.licp.field.impl;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 
 public class ObjectField extends AbstractCacheField
 {
     private LicpSerializer<?> serializer;
     
-    public ObjectField(Field field, Licp licp)
+    public ObjectField(Field field, InternalLicp licp)
     {
         super(field);
         if (finalField)
@@ -21,7 +21,7 @@ public class ObjectField extends AbstractCacheField
     
     @SuppressWarnings("unchecked")
     @Override
-    public void write(Object holder, ByteBuf<?> buf, Licp licp)
+    public void write(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         Object value = unsafe.getObject(holder, offset);
         if (finalField)
@@ -35,7 +35,7 @@ public class ObjectField extends AbstractCacheField
     }
     
     @Override
-    public void read(Object holder, ByteBuf<?> buf, Licp licp)
+    public void read(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         Object value;
         if (finalField)
@@ -50,7 +50,7 @@ public class ObjectField extends AbstractCacheField
     }
     
     @Override
-    public void read(Object holder, ByteBuffer buf, Licp licp)
+    public void read(Object holder, ByteBuffer buf, InternalLicp licp)
     {
         Object value;
         if (finalField)

@@ -3,14 +3,14 @@ package com.jfireframework.licp.serializer.extra;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.util.BufferUtil;
 
 public class LinkedListSerializer implements LicpSerializer<LinkedList<?>>
 {
     @Override
-    public void serialize(LinkedList<?> src, ByteBuf<?> buf, Licp licp)
+    public void serialize(LinkedList<?> src, ByteBuf<?> buf, InternalLicp licp)
     {
         LinkedList<?> list = src;
         int length = list.size();
@@ -22,7 +22,7 @@ public class LinkedListSerializer implements LicpSerializer<LinkedList<?>>
     }
     
     @Override
-    public LinkedList<?> deserialize(ByteBuf<?> buf, Licp licp)
+    public LinkedList<?> deserialize(ByteBuf<?> buf, InternalLicp licp)
     {
         LinkedList<Object> list = new LinkedList<Object>();
         licp.putObject(list);
@@ -35,7 +35,7 @@ public class LinkedListSerializer implements LicpSerializer<LinkedList<?>>
     }
     
     @Override
-    public LinkedList<?> deserialize(ByteBuffer buf, Licp licp)
+    public LinkedList<?> deserialize(ByteBuffer buf, InternalLicp licp)
     {
         LinkedList<Object> list = new LinkedList<Object>();
         licp.putObject(list);

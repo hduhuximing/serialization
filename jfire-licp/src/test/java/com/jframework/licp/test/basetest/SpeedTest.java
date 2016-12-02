@@ -15,7 +15,7 @@ import com.jfireframework.baseutil.collection.buffer.HeapByteBufPool;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.baseutil.time.Timewatch;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jframework.licp.test.basetest.data.BaseData;
 import com.jframework.licp.test.basetest.data.Device;
 import com.jframework.licp.test.basetest.data.Person;
@@ -65,7 +65,7 @@ public class SpeedTest
         output = new Output(4096, 109096);
         kryo.writeClassAndObject(output, data);
         System.out.println(output.toBytes().length);
-        Licp licp = new Licp();
+        InternalLicp licp = new InternalLicp();
         ByteBuf<?> buf = HeapByteBuf.allocate(4058);
         licp.serialize(data, buf);
         System.out.println(buf.toArray().length);
@@ -80,7 +80,7 @@ public class SpeedTest
         person.setLeader(tPerson);
         tPerson.setLeader(person);
         Device device = Builder();
-        Licp context = new Licp();
+        InternalLicp context = new InternalLicp();
         long t0 = System.currentTimeMillis();
         for (int i = 0; i < testSum; i++)
         {
@@ -110,7 +110,7 @@ public class SpeedTest
     public void ser2()
     {
         Object data = new SpeedData2();
-        Licp licp = new Licp();
+        InternalLicp licp = new InternalLicp();
         licp.disableCycleSupport();
         int testSum = 100000;
         Kryo kryo = new Kryo();
@@ -149,7 +149,7 @@ public class SpeedTest
         Person tPerson = new Person("zhangshi[in", 30);
         person.setLeader(tPerson);
         tPerson.setLeader(person);
-        Licp context = new Licp();
+        InternalLicp context = new InternalLicp();
         Device device = Builder();
         context.serialize(device, buf.clear());
         long t0 = System.currentTimeMillis();

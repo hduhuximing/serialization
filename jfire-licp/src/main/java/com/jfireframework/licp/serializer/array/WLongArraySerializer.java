@@ -2,7 +2,7 @@ package com.jfireframework.licp.serializer.array;
 
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.util.BufferUtil;
 
 public class WLongArraySerializer extends AbstractArraySerializer<Long[]>
@@ -14,7 +14,7 @@ public class WLongArraySerializer extends AbstractArraySerializer<Long[]>
     }
     
     @Override
-    public void serialize(Long[] src, ByteBuf<?> buf, Licp licp)
+    public void serialize(Long[] src, ByteBuf<?> buf, InternalLicp licp)
     {
         Long[] array = src;
         buf.writePositive(array.length);
@@ -33,7 +33,7 @@ public class WLongArraySerializer extends AbstractArraySerializer<Long[]>
     }
     
     @Override
-    public Long[] deserialize(ByteBuf<?> buf, Licp licp)
+    public Long[] deserialize(ByteBuf<?> buf, InternalLicp licp)
     {
         int length = buf.readPositive();
         Long[] array = new Long[length];
@@ -54,7 +54,7 @@ public class WLongArraySerializer extends AbstractArraySerializer<Long[]>
     }
     
     @Override
-    public Long[] deserialize(ByteBuffer buf, Licp licp)
+    public Long[] deserialize(ByteBuffer buf, InternalLicp licp)
     {
         int length = BufferUtil.readPositive(buf);
         Long[] array = new Long[length];

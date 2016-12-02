@@ -10,7 +10,7 @@ import java.util.List;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.LicpIgnore;
 import com.jfireframework.licp.LicpInterceptor;
 import com.jfireframework.licp.field.CacheField;
@@ -33,7 +33,7 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
     private final static Unsafe            unsafe        = ReflectUtil.getUnsafe();
     private final LicpInterceptor<T>       licpInterceptor;
     
-    public ObjectSerializer(Class<T> type, Licp licp)
+    public ObjectSerializer(Class<T> type, InternalLicp licp)
     {
         this.type = type;
         Field[] fields = ReflectUtil.getAllFields(type);
@@ -58,7 +58,7 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
     }
     
     @Override
-    public void serialize(T src, ByteBuf<?> buf, Licp licp)
+    public void serialize(T src, ByteBuf<?> buf, InternalLicp licp)
     {
         if (licpInterceptor != null)
         {
@@ -72,7 +72,7 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
     
     @SuppressWarnings("unchecked")
     @Override
-    public T deserialize(ByteBuf<?> buf, Licp licp)
+    public T deserialize(ByteBuf<?> buf, InternalLicp licp)
     {
         try
         {
@@ -97,7 +97,7 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
     
     @SuppressWarnings("unchecked")
     @Override
-    public T deserialize(ByteBuffer buf, Licp licp)
+    public T deserialize(ByteBuffer buf, InternalLicp licp)
     {
         try
         {

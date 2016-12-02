@@ -1,4 +1,4 @@
-package com.jfireframework.licp;
+package com.jfireframework.licp.util;
 
 import java.util.IdentityHashMap;
 

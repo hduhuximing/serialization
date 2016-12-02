@@ -3,7 +3,7 @@ package com.jfireframework.licp.field.impl;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 
 public class WByteField extends AbstractCacheField
 {
@@ -14,7 +14,7 @@ public class WByteField extends AbstractCacheField
     }
     
     @Override
-    public void write(Object holder, ByteBuf<?> buf, Licp licp)
+    public void write(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         Byte b = (Byte) unsafe.getObject(holder, offset);
         if (b == null)
@@ -29,7 +29,7 @@ public class WByteField extends AbstractCacheField
     }
     
     @Override
-    public void read(Object holder, ByteBuf<?> buf, Licp licp)
+    public void read(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         byte b = buf.get();
         if (b == 0)
@@ -44,7 +44,7 @@ public class WByteField extends AbstractCacheField
     }
     
     @Override
-    public void read(Object holder, ByteBuffer buf, Licp licp)
+    public void read(Object holder, ByteBuffer buf, InternalLicp licp)
     {
         byte b = buf.get();
         if (b == 0)

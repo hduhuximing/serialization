@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.serializer.array.BooleanArraySerializer;
 import com.jfireframework.licp.serializer.array.ByteArraySerializer;
 import com.jfireframework.licp.serializer.array.CharArraySerializer;
@@ -92,7 +92,7 @@ public class SerializerFactory
     }
     
     @SuppressWarnings("unchecked")
-    public <T> LicpSerializer<T> get(Class<T> type, Licp licp)
+    public <T> LicpSerializer<T> get(Class<T> type, InternalLicp licp)
     {
         LicpSerializer<T> serializer = (LicpSerializer<T>) serializerMap.get(type);
         if (serializer != null)

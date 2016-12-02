@@ -2,7 +2,7 @@ package com.jfireframework.licp.serializer;
 
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.licp.Licp;
+import com.jfireframework.licp.InternalLicp;
 
 public interface LicpSerializer<T>
 {
@@ -16,7 +16,7 @@ public interface LicpSerializer<T>
      * @param collect
      * @param register TODO
      */
-    public void serialize(T src, ByteBuf<?> buf, Licp licp);
+    public void serialize(T src, ByteBuf<?> buf, InternalLicp licp);
     
     /**
      * 反序列化二进制字节到对象中去
@@ -27,8 +27,8 @@ public interface LicpSerializer<T>
      * @param collect
      * @param register TODO
      */
-    public T deserialize(ByteBuf<?> buf, Licp licp);
+    public T deserialize(ByteBuf<?> buf, InternalLicp licp);
     
-    public T deserialize(ByteBuffer buf, Licp licp);
+    public T deserialize(ByteBuffer buf, InternalLicp licp);
     
 }
