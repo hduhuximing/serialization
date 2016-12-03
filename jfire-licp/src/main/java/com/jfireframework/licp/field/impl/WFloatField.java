@@ -4,20 +4,25 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.InternalLicp;
+import com.jfireframework.licp.interceptor.LicpFieldInterceptor;
 import com.jfireframework.licp.util.BufferUtil;
 
 public class WFloatField extends AbstractCacheField
 {
     
-    public WFloatField(Field field)
+    public WFloatField(Field field, LicpFieldInterceptor fieldInterceptor)
     {
-        super(field);
+        super(field, fieldInterceptor);
     }
     
     @Override
     public void write(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         Float d = (Float) unsafe.getObject(holder, offset);
+        if (fieldInterceptor != null)
+        {
+            d = fieldInterceptor.serialize(d);
+        }
         if (d == null)
         {
             buf.put((byte) 0);
@@ -33,28 +38,40 @@ public class WFloatField extends AbstractCacheField
     public void read(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         boolean exist = buf.get() == 1 ? true : false;
+        Float value;
         if (exist)
         {
-            unsafe.putObject(holder, offset, buf.readFloat());
+            value = buf.readFloat();
         }
         else
         {
-            unsafe.putObject(holder, offset, null);
+            value = null;
         }
+        if (fieldInterceptor != null)
+        {
+            value = fieldInterceptor.deserialize(value);
+        }
+        unsafe.putObject(holder, offset, value);
     }
     
     @Override
     public void read(Object holder, ByteBuffer buf, InternalLicp licp)
     {
         boolean exist = buf.get() == 1 ? true : false;
+        Float value;
         if (exist)
         {
-            unsafe.putObject(holder, offset, BufferUtil.readFloat(buf));
+            value = BufferUtil.readFloat(buf);
         }
         else
         {
-            unsafe.putObject(holder, offset, null);
+            value = null;
         }
+        if (fieldInterceptor != null)
+        {
+            value = fieldInterceptor.deserialize(value);
+        }
+        unsafe.putObject(holder, offset, value);
     }
     
 }

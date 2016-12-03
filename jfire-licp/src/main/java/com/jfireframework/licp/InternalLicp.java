@@ -6,6 +6,7 @@ import java.util.Map;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
+import com.jfireframework.licp.interceptor.LicpFieldInterceptor;
 import com.jfireframework.licp.serializer.LicpSerializer;
 import com.jfireframework.licp.serializer.SerializerFactory;
 import com.jfireframework.licp.util.BufferUtil;
@@ -20,7 +21,7 @@ public class InternalLicp
     public static final int                         EXIST        = 1;
     private final HashMap<String, Class<?>>         nameClassMap = new HashMap<String, Class<?>>();
     private final SerializerFactory                 factory      = new SerializerFactory();
-    private final Map<Class<?>, LicpInterceptor<?>> interceptors = new HashMap<Class<?>, LicpInterceptor<?>>();
+    private final Map<String, LicpFieldInterceptor> interceptors = new HashMap<String, LicpFieldInterceptor>();
     /**
      * 版本号标识，用来防止不同的版本互相转化导致的异常
      */
@@ -45,8 +46,7 @@ public class InternalLicp
     }
     
     /**
-     * 00代表为null
-     * 01代表对象已经在收集器中，之后的数字代表对象在收集器中的id
+     * 00代表为null 01代表对象已经在收集器中，之后的数字代表对象在收集器中的id
      * 10代表对象不在收集器中并且对象的类型尚未注册。之后的数字代表对象类型的名称的byte数组的长度
      * 11代表对象不在收集器中并且对象的类型已经注册。之后的数字代表对象类型的注册顺序。
      * 
@@ -305,13 +305,12 @@ public class InternalLicp
         collect.putForDesc(x);
     }
     
-    @SuppressWarnings("unchecked")
-    public <T> LicpInterceptor<T> getInterceptor(Class<T> rule)
+    public LicpFieldInterceptor getFieldInterceptor(String rule)
     {
-        return (LicpInterceptor<T>) interceptors.get(rule);
+        return interceptors.get(rule);
     }
     
-    public void addInterceptor(LicpInterceptor<?> licpInterceptor)
+    public void addFieldInterceptor(LicpFieldInterceptor licpInterceptor)
     {
         interceptors.put(licpInterceptor.rule(), licpInterceptor);
     }

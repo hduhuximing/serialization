@@ -12,7 +12,6 @@ import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.licp.InternalLicp;
 import com.jfireframework.licp.LicpIgnore;
-import com.jfireframework.licp.LicpInterceptor;
 import com.jfireframework.licp.field.CacheField;
 import com.jfireframework.licp.field.FieldFactory;
 import sun.misc.Unsafe;
@@ -31,7 +30,6 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
                                                          };
     private final Class<?>                 type;
     private final static Unsafe            unsafe        = ReflectUtil.getUnsafe();
-    private final LicpInterceptor<T>       licpInterceptor;
     
     public ObjectSerializer(Class<T> type, InternalLicp licp)
     {
@@ -54,16 +52,11 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
             tmp[i] = FieldFactory.build(fields[i], licp);
         }
         this.fields = tmp;
-        licpInterceptor = licp.getInterceptor(type);
     }
     
     @Override
     public void serialize(T src, ByteBuf<?> buf, InternalLicp licp)
     {
-        if (licpInterceptor != null)
-        {
-            src = licpInterceptor.serialize(src);
-        }
         for (CacheField each : fields)
         {
             each.write(src, buf, licp);
@@ -82,10 +75,6 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
             for (CacheField each : fields)
             {
                 each.read(holder, buf, licp);
-            }
-            if (licpInterceptor != null)
-            {
-                holder = licpInterceptor.deserialize(holder);
             }
             return holder;
         }
@@ -107,10 +96,6 @@ public class ObjectSerializer<T> implements LicpSerializer<T>
             for (CacheField each : fields)
             {
                 each.read(holder, buf, licp);
-            }
-            if (licpInterceptor != null)
-            {
-                holder = licpInterceptor.deserialize(holder);
             }
             return holder;
         }

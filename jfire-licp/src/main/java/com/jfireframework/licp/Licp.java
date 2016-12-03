@@ -2,6 +2,7 @@ package com.jfireframework.licp;
 
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
+import com.jfireframework.licp.interceptor.LicpFieldInterceptor;
 
 public class Licp
 {
@@ -32,8 +33,8 @@ public class Licp
         return internalLicp.deserialize(buffer);
     }
     
-    public void addInterceptor(LicpInterceptor<?> licpInterceptor)
+    public void addInterceptor(LicpFieldInterceptor licpInterceptor)
     {
-        internalLicp.addInterceptor(licpInterceptor);
+        internalLicp.addFieldInterceptor(licpInterceptor);
     }
 }

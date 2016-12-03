@@ -4,15 +4,16 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.InternalLicp;
+import com.jfireframework.licp.interceptor.LicpFieldInterceptor;
 import com.jfireframework.licp.serializer.LicpSerializer;
 
 public class ObjectField extends AbstractCacheField
 {
     private LicpSerializer<?> serializer;
     
-    public ObjectField(Field field, InternalLicp licp)
+    public ObjectField(Field field, InternalLicp licp, LicpFieldInterceptor fieldInterceptor)
     {
-        super(field);
+        super(field, fieldInterceptor);
         if (finalField)
         {
             serializer = licp._getSerializer(field.getType());

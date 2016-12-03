@@ -4,20 +4,25 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.licp.InternalLicp;
+import com.jfireframework.licp.interceptor.LicpFieldInterceptor;
 import com.jfireframework.licp.util.BufferUtil;
 
 public class StringField extends AbstractCacheField
 {
     
-    public StringField(Field field)
+    public StringField(Field field, LicpFieldInterceptor fieldInterceptor)
     {
-        super(field);
+        super(field, fieldInterceptor);
     }
     
     @Override
     public void write(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
         String value = (String) unsafe.getObject(holder, offset);
+        if (fieldInterceptor != null)
+        {
+            value = fieldInterceptor.serialize(value);
+        }
         if (value == null)
         {
             buf.writePositive(0);
@@ -36,17 +41,18 @@ public class StringField extends AbstractCacheField
     @Override
     public void read(Object holder, ByteBuf<?> buf, InternalLicp licp)
     {
+        String value;
         int length = buf.readPositive();
         if (length == 0)
         {
-            unsafe.putObject(holder, offset, null);
+            value = null;
         }
         else
         {
             length >>>= 1;
             if (length == 0)
             {
-                unsafe.putObject(holder, offset, "");
+                value = "";
             }
             else
             {
@@ -55,25 +61,31 @@ public class StringField extends AbstractCacheField
                 {
                     src[i] = buf.readVarChar();
                 }
-                unsafe.putObject(holder, offset, new String(src));
+                value = new String(src);
             }
         }
+        if (fieldInterceptor != null)
+        {
+            value = fieldInterceptor.deserialize(value);
+        }
+        unsafe.putObject(holder, offset, value);
     }
     
     @Override
     public void read(Object holder, ByteBuffer buf, InternalLicp licp)
     {
+        String value;
         int length = BufferUtil.readPositive(buf);
         if (length == 0)
         {
-            unsafe.putObject(holder, offset, null);
+            value = null;
         }
         else
         {
             length >>>= 1;
             if (length == 0)
             {
-                unsafe.putObject(holder, offset, "");
+                value = "";
             }
             else
             {
@@ -82,9 +94,14 @@ public class StringField extends AbstractCacheField
                 {
                     src[i] = BufferUtil.readVarChar(buf);
                 }
-                unsafe.putObject(holder, offset, new String(src));
+                value = new String(src);
             }
         }
+        if (fieldInterceptor != null)
+        {
+            value = fieldInterceptor.deserialize(value);
+        }
+        unsafe.putObject(holder, offset, value);
     }
     
 }
