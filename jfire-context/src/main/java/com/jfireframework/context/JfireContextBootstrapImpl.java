@@ -246,11 +246,19 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
                 if (path.startsWith("classpath:"))
                 {
                     path = path.substring(10);
+                    if (this.getClass().getClassLoader().getResource(path) == null)
+                    {
+                        continue;
+                    }
                     inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
                 }
                 else if (path.startsWith("file:"))
                 {
                     path = path.substring(5);
+                    if (new File(path).exists() == false)
+                    {
+                        continue;
+                    }
                     inputStream = new FileInputStream(new File(path));
                 }
                 else
@@ -262,7 +270,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
                 inputStream.close();
                 addProperties(properties);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 e.printStackTrace();
             }
