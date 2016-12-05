@@ -14,19 +14,27 @@ import sun.misc.Unsafe;
 
 public abstract class AbstractParamField implements ParamField
 {
-    protected long   offset;
-    protected Unsafe unsafe = ReflectUtil.getUnsafe();
-    protected Object value;
+    protected long         offset;
+    protected Unsafe       unsafe = ReflectUtil.getUnsafe();
+    protected Object       value;
+    protected final String name;
     
     public AbstractParamField(Field field, String value)
     {
         offset = unsafe.objectFieldOffset(field);
+        name = field.getName();
     }
     
     @Override
     public void setParam(Object entity)
     {
         unsafe.putObject(entity, offset, value);
+    }
+    
+    @Override
+    public String getName()
+    {
+        return name;
     }
     
     public static ParamField build(Field field, String value, ClassLoader classLoader)

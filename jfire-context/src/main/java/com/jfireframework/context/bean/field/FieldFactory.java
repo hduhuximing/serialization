@@ -418,7 +418,7 @@ public class FieldFactory
      * @param beanConfig
      * @return
      */
-    public static ParamField[] buildParamField(Bean bean, Map<String, String> params, Map<String, String> properties, ClassLoader classLoader)
+    public static List<ParamField> buildParamField(Bean bean, Map<String, String> params, Map<String, String> properties, ClassLoader classLoader)
     {
         Field[] fields = ReflectUtil.getAllFields(bean.getType());
         List<ParamField> list = new LinkedList<ParamField>();
@@ -442,7 +442,7 @@ public class FieldFactory
                 }
             }
         }
-        return list.toArray(new ParamField[list.size()]);
+        return list;
     }
     
     private static ParamField buildParamField(Field field, String value, ClassLoader classLoader)

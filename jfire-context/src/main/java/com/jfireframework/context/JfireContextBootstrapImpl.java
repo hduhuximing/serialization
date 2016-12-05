@@ -31,6 +31,7 @@ import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.context.bean.field.FieldFactory;
+import com.jfireframework.context.bean.field.param.ParamField;
 import com.jfireframework.context.bean.impl.DefaultBean;
 import com.jfireframework.context.bean.impl.LoadByBean;
 import com.jfireframework.context.bean.impl.OuterEntityBean;
@@ -130,20 +131,33 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
         public void initDependencyAndParamFields()
         {
             Map<String, String> emptyParams = new HashMap<String, String>();
+            Map<String, ParamField> fieldMap = new HashMap<String, ParamField>();
             for (Bean bean : beanNameMap.values())
             {
                 if (bean.canInject())
                 {
                     BeanInfo beanInfo = bean.getBeanInfo();
                     bean.setInjectFields(FieldFactory.buildDependencyField(bean, beanNameMap, beanTypeMap, beanInfo));
+                    fieldMap.clear();
                     if (beanInfo != null)
                     {
-                        bean.setParamFields(FieldFactory.buildParamField(bean, beanInfo.getParams(), properties, classLoader));
+                        for (ParamField each : FieldFactory.buildParamField(bean, beanInfo.getParams(), properties, classLoader))
+                        {
+                            fieldMap.put(each.getName(), each);
+                        }
+                        for (ParamField each : FieldFactory.buildParamField(bean, emptyParams, properties, classLoader))
+                        {
+                            fieldMap.put(each.getName(), each);
+                        }
                     }
                     else
                     {
-                        bean.setParamFields(FieldFactory.buildParamField(bean, emptyParams, properties, classLoader));
+                        for (ParamField each : FieldFactory.buildParamField(bean, emptyParams, properties, classLoader))
+                        {
+                            fieldMap.put(each.getName(), each);
+                        }
                     }
+                    bean.setParamFields(fieldMap.values().toArray(new ParamField[fieldMap.size()]));
                 }
             }
         }
