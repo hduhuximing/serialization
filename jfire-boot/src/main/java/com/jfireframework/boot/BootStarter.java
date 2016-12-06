@@ -1,8 +1,8 @@
 package com.jfireframework.boot;
 
+import java.net.Inet4Address;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebFilter;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
@@ -38,10 +38,12 @@ public class BootStarter
                     .setClassLoader(BootStarter.class.getClassLoader())//
                     .setContextPath(appName)//
                     .setDeploymentName("bootstarter")//
-                    .addServlets(//
+                    .addServlets(
+                            //
                             Servlets.servlet("EasyMvcDispathServlet", EasyMvcDispathServlet.class)//
                                     .addMapping("/*")//
-                                    .setEnabled(true));
+                                    .setEnabled(true)
+                    );
             servletBuilder.setResourceManager(resourceManager);
             for (Class<? extends Filter> each : filterClasses)
             {
@@ -59,10 +61,10 @@ public class BootStarter
             DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
             manager.deploy();
             PathHandler path = Handlers.path(Handlers.redirect(appName)).addPrefixPath(appName, manager.start());
-            Undertow server = Undertow.builder().addHttpListener(port, "localhost").setHandler(path).build();
+            Undertow server = Undertow.builder().addHttpListener(port, Inet4Address.getLocalHost().getHostAddress()).addHttpListener(port, "localhost").setHandler(path).build();
             server.start();
         }
-        catch (ServletException e)
+        catch (Exception e)
         {
             throw new JustThrowException(e);
         }
