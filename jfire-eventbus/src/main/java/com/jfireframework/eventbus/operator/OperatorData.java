@@ -2,7 +2,7 @@ package com.jfireframework.eventbus.operator;
 
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.event.EventHandler;
-import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.InternalPipeline;
 
 public class OperatorData
 {
@@ -21,12 +21,12 @@ public class OperatorData
     
     public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData)
     {
-        this(event, handler, eventData, Pipeline.USE_UPSTREAM_RESULT);
+        this(event, handler, eventData, InternalPipeline.USE_UPSTREAM_RESULT);
     }
     
     public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
-        this(event, handler, Pipeline.USE_UPSTREAM_RESULT, Pipeline.USE_UPSTREAM_RESULT);
+        this(event, handler, InternalPipeline.USE_UPSTREAM_RESULT, InternalPipeline.USE_UPSTREAM_RESULT);
     }
     
     public Object getEventData()

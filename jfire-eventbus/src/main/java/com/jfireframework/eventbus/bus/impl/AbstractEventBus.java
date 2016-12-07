@@ -1,7 +1,6 @@
 package com.jfireframework.eventbus.bus.impl;
 
 import java.util.concurrent.ExecutorService;
-import com.jfireframework.baseutil.concurrent.MPMCQueue;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.eventbus.bus.EventBus;
@@ -16,7 +15,6 @@ import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
 
 public abstract class AbstractEventBus implements EventBus
 {
-    protected final MPMCQueue<EventContext<?>> eventQueue = new MPMCQueue<EventContext<?>>();
     protected static final Logger              LOGGER     = ConsoleLogFactory.getLogger();
     protected ExecutorService                  pool;
     
@@ -54,7 +52,7 @@ public abstract class AbstractEventBus implements EventBus
     @Override
     public Pipeline pipeline()
     {
-        return DefaultPipeline.create().switchMode(this);
+        return DefaultPipeline.create().switchTo(this);
     }
     
     @Override

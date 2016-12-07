@@ -54,7 +54,7 @@ public class HeadPipeline extends DefaultPipeline
      * 管道开始投递
      */
     @Override
-    public void start()
+    public void internalStart()
     {
         work(null, new RunnerMode(ThreadMode.currentThread, null));
     }
@@ -65,7 +65,7 @@ public class HeadPipeline extends DefaultPipeline
      * @param initParam
      */
     @Override
-    public void start(Object initParam)
+    public void internalStart(Object initParam)
     {
         work(initParam, new RunnerMode(ThreadMode.currentThread, null));
     }

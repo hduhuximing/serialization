@@ -1,23 +1,24 @@
 package com.jfireframework.eventbus.pipeline.impl;
 
 import com.jfireframework.eventbus.operator.Operator;
+import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 
-public abstract class BasePipeline implements Pipeline
+public abstract class BasePipeline implements InternalPipeline, Pipeline
 {
-    protected Pipeline       next;
-    protected final Pipeline pred;
-    protected final Operator operator;
+    protected InternalPipeline       next;
+    protected final InternalPipeline pred;
+    protected final Operator         operator;
     
-    public BasePipeline(Operator operator, Pipeline pred)
+    public BasePipeline(Operator operator, InternalPipeline pred)
     {
         this.operator = operator;
         this.pred = pred;
     }
     
     @Override
-    public Pipeline add(final Operator operator)
+    public InternalPipeline internalAdd(final Operator operator)
     {
         next = new DefaultPipeline(operator, this);
         return next;
@@ -49,15 +50,31 @@ public abstract class BasePipeline implements Pipeline
     }
     
     @Override
+    public void internalStart()
+    {
+        pred.internalStart();
+    }
+    
+    @Override
+    public void internalStart(Object initParam)
+    {
+        pred.internalStart(initParam);
+    }
+    
+    @Override
     public void start()
     {
-        pred.start();
+        internalStart();
     }
     
     @Override
     public void start(Object initParam)
     {
-        pred.start(initParam);
+        internalStart(initParam);
     }
-    
+    @Override
+    public Pipeline add(Operator operator)
+    {
+        return (Pipeline) internalAdd(operator);
+    }
 }

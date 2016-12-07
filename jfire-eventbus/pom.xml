@@ -8,6 +8,7 @@
 		<artifactId>framework-parent</artifactId>
 		<version>1.0</version>
 	</parent>
+	<version>1.1-SNAPSHOT</version>
 	<artifactId>jfire-eventbus</artifactId>
 	<name>jfire-eventbus</name>
 	<url>http://maven.apache.org</url>

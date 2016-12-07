@@ -2,7 +2,7 @@ package com.jfireframework.eventbus.operator.impl;
 
 import com.jfireframework.baseutil.concurrent.SingleSync;
 import com.jfireframework.eventbus.operator.Operator;
-import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public class SingleAwaitOp implements Operator
@@ -12,7 +12,7 @@ public class SingleAwaitOp implements Operator
     private Object     result;
     
     @Override
-    public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+    public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
     {
         result = data;
         sync.signal();

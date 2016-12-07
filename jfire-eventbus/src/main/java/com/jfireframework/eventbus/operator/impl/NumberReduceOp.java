@@ -4,7 +4,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.jfireframework.eventbus.operator.Operator;
-import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public class NumberReduceOp implements Operator
@@ -19,7 +19,7 @@ public class NumberReduceOp implements Operator
     }
     
     @Override
-    public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+    public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
     {
         int left = total.incrementAndGet();
         if (left < 0)

@@ -1,7 +1,7 @@
 package com.jfireframework.eventbus.operator.impl;
 
 import com.jfireframework.eventbus.operator.Operator;
-import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public class ResultOp implements Operator
@@ -10,7 +10,7 @@ public class ResultOp implements Operator
     private Throwable e;
     
     @Override
-    public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+    public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
     {
         result = data;
     }

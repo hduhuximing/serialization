@@ -1,6 +1,6 @@
 package com.jfireframework.eventbus.operator;
 
-import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.util.RunnerMode;
 
 public interface Operator
@@ -12,7 +12,7 @@ public interface Operator
      * @param pipeline
      * @param runnerMode
      */
-    public void work(Object data, Pipeline pipeline, RunnerMode runnerMode);
+    public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode);
     
     /**
      * 当本节点发生异常的时候会被调用的方法。入参的值和pipeline.onError相同

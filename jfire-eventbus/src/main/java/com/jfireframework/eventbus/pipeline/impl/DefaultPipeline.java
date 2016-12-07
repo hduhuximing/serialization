@@ -13,16 +13,19 @@ import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.operator.MapOp;
 import com.jfireframework.eventbus.operator.Operator;
 import com.jfireframework.eventbus.operator.OperatorData;
+import com.jfireframework.eventbus.operator.impl.FilterOp;
+import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.eventbus.util.RunnerMode;
 import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
+import com.jfireframework.eventbus.util.Schedules;
 import com.jfireframework.eventbus.util.DefaultEvent;
 
 public class DefaultPipeline extends BasePipeline
 {
     
-    public DefaultPipeline(Operator operator, Pipeline pred)
+    public DefaultPipeline(Operator operator, InternalPipeline pred)
     {
         super(operator, pred);
     }
@@ -33,7 +36,7 @@ public class DefaultPipeline extends BasePipeline
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private EventContext<?> proxy(Pipeline pipeline, RunnerMode runnerMode, Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowKey)
+    private EventContext<?> proxy(InternalPipeline pipeline, RunnerMode runnerMode, Enum<? extends EventConfig> event, EventHandler<?> handler, Object data, Object rowKey)
     {
         EventContext<?> eventContext;
         switch (((EventConfig) event).parallelLevel())
@@ -45,7 +48,7 @@ public class DefaultPipeline extends BasePipeline
                 eventContext = new NormalEventContextProxy(pipeline, runnerMode, data, handler, EventHelper.findExecutor(event));
                 break;
             case ROWKEY_SERIAL:
-                if (rowKey == Pipeline.USE_UPSTREAM_RESULT)
+                if (rowKey == InternalPipeline.USE_UPSTREAM_RESULT)
                 {
                     eventContext = new RowEventContextProxy(pipeline, runnerMode, data, data, handler, EventHelper.findExecutor(event));
                 }
@@ -61,7 +64,7 @@ public class DefaultPipeline extends BasePipeline
                 eventContext = new ReadWriteEventContextProxy(pipeline, runnerMode, ReadWriteEventContext.WRITE, data, handler, EventHelper.findExecutor(event));
                 break;
             case TYPE_ROWKEY_SERIAL:
-                if (rowKey == Pipeline.USE_UPSTREAM_RESULT)
+                if (rowKey == InternalPipeline.USE_UPSTREAM_RESULT)
                 {
                     eventContext = new RowEventContextProxy(pipeline, runnerMode, data, data, handler, EventHelper.findExecutor(event));
                 }
@@ -81,9 +84,9 @@ public class DefaultPipeline extends BasePipeline
     
     static class ReadWriteEventContextProxy<T> extends ReadWriteEventContextImpl<T>
     {
-        private final Pipeline pipeline;
+        private final InternalPipeline pipeline;
         
-        public ReadWriteEventContextProxy(Pipeline pipeline, RunnerMode runnerMode, int mode, Object eventData, EventHandler<?> handler, EventExecutor executor)
+        public ReadWriteEventContextProxy(InternalPipeline pipeline, RunnerMode runnerMode, int mode, Object eventData, EventHandler<?> handler, EventExecutor executor)
         {
             super(runnerMode, mode, eventData, handler, executor);
             this.pipeline = pipeline;
@@ -106,9 +109,9 @@ public class DefaultPipeline extends BasePipeline
     
     static class RowEventContextProxy<T> extends RowEventContextImpl<T>
     {
-        private final Pipeline pipeline;
+        private final InternalPipeline pipeline;
         
-        public RowEventContextProxy(Pipeline pipeline, RunnerMode runnerMode, Object eventData, Object rowkey, EventHandler<?> handler, EventExecutor executor)
+        public RowEventContextProxy(InternalPipeline pipeline, RunnerMode runnerMode, Object eventData, Object rowkey, EventHandler<?> handler, EventExecutor executor)
         {
             super(runnerMode, eventData, handler, executor, rowkey);
             this.pipeline = pipeline;
@@ -131,9 +134,9 @@ public class DefaultPipeline extends BasePipeline
     
     static class NormalEventContextProxy<T> extends NormalEventContext<T>
     {
-        private final Pipeline pipeline;
+        private final InternalPipeline pipeline;
         
-        public NormalEventContextProxy(Pipeline pipeline, RunnerMode runnerMode, Object eventData, EventHandler<?> handler, EventExecutor executor)
+        public NormalEventContextProxy(InternalPipeline pipeline, RunnerMode runnerMode, Object eventData, EventHandler<?> handler, EventExecutor executor)
         {
             super(runnerMode, eventData, handler, executor);
             this.pipeline = pipeline;
@@ -155,14 +158,14 @@ public class DefaultPipeline extends BasePipeline
     }
     
     @Override
-    public Pipeline work(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final Object rowKey)
+    public Pipeline next(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final Object rowKey)
     {
         Operator operator = new Operator() {
             
             @Override
-            public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+            public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
             {
-                if (eventData != Pipeline.USE_UPSTREAM_RESULT)
+                if (eventData != InternalPipeline.USE_UPSTREAM_RESULT)
                 {
                     data = eventData;
                 }
@@ -176,25 +179,25 @@ public class DefaultPipeline extends BasePipeline
                 ;
             }
         };
-        return add(operator);
+        return (Pipeline) internalAdd(operator);
     }
     
     @Override
-    public Pipeline work(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData)
+    public Pipeline next(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData)
     {
-        return work(event, handler, eventData, Pipeline.USE_UPSTREAM_RESULT);
+        return next(event, handler, eventData, InternalPipeline.USE_UPSTREAM_RESULT);
     }
     
     @Override
-    public Pipeline work(final Enum<? extends EventConfig> event, final EventHandler<?> handler)
+    public Pipeline next(final Enum<? extends EventConfig> event, final EventHandler<?> handler)
     {
-        return work(event, handler, Pipeline.USE_UPSTREAM_RESULT, Pipeline.USE_UPSTREAM_RESULT);
+        return next(event, handler, InternalPipeline.USE_UPSTREAM_RESULT, InternalPipeline.USE_UPSTREAM_RESULT);
     }
     
     @Override
-    public Pipeline work(EventHandler<?> handler)
+    public Pipeline next(EventHandler<?> handler)
     {
-        return work(DefaultEvent.JUST_PAEALLEL_EVENT, handler, USE_UPSTREAM_RESULT, USE_UPSTREAM_RESULT);
+        return next(DefaultEvent.JUST_PAEALLEL_EVENT, handler, USE_UPSTREAM_RESULT, USE_UPSTREAM_RESULT);
     }
     
     private static final EventHandler<Object> switchHandler = new EventHandler<Object>() {
@@ -207,13 +210,13 @@ public class DefaultPipeline extends BasePipeline
     };
     
     @Override
-    public Pipeline switchMode(final EventBus eventBus)
+    public Pipeline switchTo(final EventBus eventBus)
     {
         final RunnerMode newRunnerMode = new RunnerMode(ThreadMode.currentEventbus, eventBus);
         Operator operator = new Operator() {
             
             @Override
-            public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+            public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
             {
                 EventContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, data, switchHandler, EventHelper.findExecutor(DefaultEvent.SWITCH));
                 eventBus.post(eventContext);
@@ -226,7 +229,7 @@ public class DefaultPipeline extends BasePipeline
             }
             
         };
-        return add(operator);
+        return (Pipeline) internalAdd(operator);
     }
     
     @Override
@@ -236,7 +239,7 @@ public class DefaultPipeline extends BasePipeline
             
             @SuppressWarnings("rawtypes")
             @Override
-            public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+            public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
             {
                 if (data instanceof int[])
                 {
@@ -317,7 +320,7 @@ public class DefaultPipeline extends BasePipeline
             }
             
         };
-        return add(operator);
+        return (Pipeline) internalAdd(operator);
     }
     
     public static Pipeline from(final Object data)
@@ -408,7 +411,7 @@ public class DefaultPipeline extends BasePipeline
             
             @SuppressWarnings("unchecked")
             @Override
-            public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+            public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
             {
                 pipeline.onCompleted(mapOp.map((E) data), runnerMode);
             }
@@ -420,7 +423,7 @@ public class DefaultPipeline extends BasePipeline
             }
             
         };
-        return add(operator);
+        return (Pipeline) internalAdd(operator);
     }
     
     @Override
@@ -429,7 +432,7 @@ public class DefaultPipeline extends BasePipeline
         Operator operator = new Operator() {
             
             @Override
-            public void work(Object data, Pipeline pipeline, RunnerMode runnerMode)
+            public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
             {
                 if (runnerMode.getEventBus() == null)
                 {
@@ -439,11 +442,11 @@ public class DefaultPipeline extends BasePipeline
                 {
                     Object eventData = data;
                     Object rowKey = data;
-                    if (each.getEventData() != Pipeline.USE_UPSTREAM_RESULT)
+                    if (each.getEventData() != InternalPipeline.USE_UPSTREAM_RESULT)
                     {
                         eventData = each.getEventData();
                     }
-                    if (each.getRowKey() != Pipeline.USE_UPSTREAM_RESULT)
+                    if (each.getRowKey() != InternalPipeline.USE_UPSTREAM_RESULT)
                     {
                         rowKey = each.getRowKey();
                     }
@@ -459,7 +462,63 @@ public class DefaultPipeline extends BasePipeline
             }
             
         };
-        return add(operator);
+        return (Pipeline) internalAdd(operator);
+    }
+    
+    @Override
+    public Pipeline filter(final FilterOp filterOp)
+    {
+        Operator operator = new Operator() {
+            
+            @Override
+            public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
+            {
+                if (filterOp.prevent(data) == false)
+                {
+                    pipeline.onCompleted(data, runnerMode);
+                }
+            }
+            
+            @Override
+            public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
+        };
+        return (Pipeline) internalAdd(operator);
+    }
+    
+    @Override
+    public Pipeline switchTo(Schedules schedules)
+    {
+        switch (schedules)
+        {
+            case IO:
+                return switchTo(EventBuses.io());
+            case COMPUTATION:
+                return switchTo(EventBuses.computation());
+            case NEW_THREAD:
+                final RunnerMode newRunnerMode = new RunnerMode(ThreadMode.currentThread, null);
+                Operator operator = new Operator() {
+                    
+                    @Override
+                    public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
+                    {
+                        EventContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, data, switchHandler, EventHelper.findExecutor(DefaultEvent.SWITCH));
+                        new Thread(eventContext).start();
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e, RunnerMode runnerMode)
+                    {
+                        ;
+                    }
+                    
+                };
+                return (Pipeline) internalAdd(operator);
+        }
+        throw new NullPointerException();
     }
     
 }

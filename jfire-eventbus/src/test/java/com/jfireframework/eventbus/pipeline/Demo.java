@@ -37,9 +37,9 @@ public class Demo
         EventHelper.register(PipeLineEvent.class);
         Pipeline pipeline = eventBus.pipeline();
         pipeline = pipeline//
-                .work(PipeLineEvent.one, handler, "1", "")//
-                .switchMode(EventBuses.computation())//
-                .work(PipeLineEvent.one, handler2, Pipeline.USE_UPSTREAM_RESULT, "");
+                .next(PipeLineEvent.one, handler, "1", "")//
+                .switchTo(EventBuses.computation())//
+                .next(PipeLineEvent.one, handler2, InternalPipeline.USE_UPSTREAM_RESULT, "");
         pipeline.start();
         LockSupport.parkNanos(1000000000000000l);
     }

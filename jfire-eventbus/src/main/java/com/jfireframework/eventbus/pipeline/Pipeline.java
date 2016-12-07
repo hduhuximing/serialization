@@ -1,32 +1,64 @@
 package com.jfireframework.eventbus.pipeline;
 
+import com.jfireframework.eventbus.bus.EventBus;
+import com.jfireframework.eventbus.event.EventConfig;
+import com.jfireframework.eventbus.event.EventHandler;
+import com.jfireframework.eventbus.operator.MapOp;
 import com.jfireframework.eventbus.operator.Operator;
-import com.jfireframework.eventbus.util.RunnerMode;
+import com.jfireframework.eventbus.operator.OperatorData;
+import com.jfireframework.eventbus.operator.impl.FilterOp;
+import com.jfireframework.eventbus.util.Schedules;
 
-public interface Pipeline extends PipelineConnect
+/**
+ * 用户提供pipeline的连接操作
+ * 
+ * @author linbin
+ *
+ */
+public interface Pipeline
 {
-    public static final Object USE_UPSTREAM_RESULT = new Object();
+    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, Object rowKey);
+    
+    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData);
+    
+    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler);
+    
+    public Pipeline next(EventHandler<?> handler);
     
     /**
-     * 开始本节点的逻辑任务。并且传入一个上游的结果参数
+     * 增加一个from操作的节点。该节点可以将数组以及集合中的元素以单个元素的方式不断的传递给后续
      * 
-     * @param upstreamResult
+     * @return
      */
-    public void work(Object upstreamResult, RunnerMode runnerMode);
+    public Pipeline from();
     
     /**
-     * 本节点逻辑任务完成后被调用，并且传入本节点的结果对象
+     * 增加一个拦截节点
      * 
-     * @param result
+     * @param filterOp
+     * @return
      */
-    public void onCompleted(Object result, RunnerMode runnerMode);
+    public Pipeline filter(FilterOp filterOp);
     
     /**
-     * 本节点发生异常后调用
+     * 增加一个转换节点
      * 
-     * @param e
+     * @param mapOp
+     * @return
      */
-    public void onError(Throwable e, RunnerMode runnerMode);
+    public <E> Pipeline map(final MapOp<E> mapOp);
+    
+    /**
+     * 将后续节点的执行切换到指定的eventbus上
+     * 
+     * @param eventBus
+     * @return
+     */
+    public Pipeline switchTo(final EventBus eventBus);
+    
+    public Pipeline switchTo(Schedules schedules);
+    
+    public Pipeline distribute(final OperatorData... datas);
     
     /**
      * 管道开始投递
@@ -40,14 +72,5 @@ public interface Pipeline extends PipelineConnect
      */
     public void start(Object initParam);
     
-    /**
-     * 增加一个pipeline到事件编排末尾
-     * 
-     * @param <T>
-     * 
-     * @param pipeline
-     * @return
-     */
     public Pipeline add(Operator operator);
-    
 }
