@@ -1,6 +1,5 @@
 package com.jfireframework.boot;
 
-import java.net.Inet4Address;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.annotation.WebFilter;
@@ -61,7 +60,7 @@ public class BootStarter
             DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
             manager.deploy();
             PathHandler path = Handlers.path(Handlers.redirect(appName)).addPrefixPath(appName, manager.start());
-            Undertow server = Undertow.builder().addHttpListener(port, Inet4Address.getLocalHost().getHostAddress()).addHttpListener(port, "localhost").setHandler(path).build();
+            Undertow server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(path).build();
             server.start();
         }
         catch (Exception e)
