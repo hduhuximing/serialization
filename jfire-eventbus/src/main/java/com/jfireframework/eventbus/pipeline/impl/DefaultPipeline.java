@@ -13,6 +13,7 @@ import com.jfireframework.eventbus.executor.EventExecutor;
 import com.jfireframework.eventbus.operator.MapOp;
 import com.jfireframework.eventbus.operator.Operator;
 import com.jfireframework.eventbus.operator.OperatorData;
+import com.jfireframework.eventbus.operator.TransferOp;
 import com.jfireframework.eventbus.operator.impl.FilterOp;
 import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.pipeline.Pipeline;
@@ -521,4 +522,9 @@ public class DefaultPipeline extends BasePipeline
         throw new NullPointerException();
     }
     
+    @Override
+    public Pipeline compose(TransferOp transferOp)
+    {
+        return transferOp.transfer(this);
+    }
 }

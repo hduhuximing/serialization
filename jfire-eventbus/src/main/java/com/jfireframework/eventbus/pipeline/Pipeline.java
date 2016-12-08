@@ -6,6 +6,7 @@ import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.operator.MapOp;
 import com.jfireframework.eventbus.operator.Operator;
 import com.jfireframework.eventbus.operator.OperatorData;
+import com.jfireframework.eventbus.operator.TransferOp;
 import com.jfireframework.eventbus.operator.impl.FilterOp;
 import com.jfireframework.eventbus.util.Schedules;
 
@@ -73,4 +74,6 @@ public interface Pipeline
     public void start(Object initParam);
     
     public Pipeline add(Operator operator);
+    
+    public Pipeline compose(TransferOp transferOp);
 }
