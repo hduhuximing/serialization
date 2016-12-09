@@ -74,6 +74,7 @@ public class SqlSessionImpl implements SqlSession
             if (transNum == 0)
             {
                 connection.commit();
+                connection.setAutoCommit(true);
             }
         }
         catch (SQLException e)
@@ -119,6 +120,7 @@ public class SqlSessionImpl implements SqlSession
             if (transNum == 0)
             {
                 connection.rollback();
+                connection.setAutoCommit(true);
             }
         }
         catch (SQLException e)
