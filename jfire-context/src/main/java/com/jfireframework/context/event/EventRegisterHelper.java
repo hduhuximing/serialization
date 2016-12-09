@@ -14,13 +14,13 @@ public class EventRegisterHelper
     @PostConstruct
     public void init()
     {
-        
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String[] events = PackageScan.scan(eventPath);
         for (String each : events)
         {
             try
             {
-                Class<?> ckass = Class.forName(each);
+                Class<?> ckass = classLoader.loadClass(each);
                 if (Enum.class.isAssignableFrom(ckass) || EventConfig.class.isAssignableFrom(ckass))
                 {
                     EventHelper.register((Class<? extends Enum<? extends EventConfig>>) ckass);
