@@ -8,7 +8,7 @@
 		<artifactId>framework-parent</artifactId>
 		<version>1.0</version>
 	</parent>
-	<version>1.0.1-SNAPHOST</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<artifactId>jfire-context</artifactId>
 	<name>context</name>
 	<description> 

@@ -42,16 +42,17 @@ import com.jfireframework.context.config.Profile;
 
 public class JfireContextBootstrapImpl implements JfireContextBootstrap
 {
-    protected Map<String, BeanInfo> configMap   = new HashMap<String, BeanInfo>();
-    protected Map<String, Bean>     beanNameMap = new HashMap<String, Bean>();
-    protected Map<Class<?>, Bean>   beanTypeMap = new HashMap<Class<?>, Bean>();
-    protected boolean               init        = false;
-    protected List<String>          classNames  = new LinkedList<String>();
-    protected static Logger         logger      = ConsoleLogFactory.getLogger();
-    protected ClassLoader           classLoader = JfireContextImpl.class.getClassLoader();
-    protected BeanUtil              beanUtil    = new BeanUtil();
-    protected Map<String, String>   properties  = new HashMap<String, String>();
-    protected Profile[]             profiles    = new Profile[0];
+    protected Map<String, BeanInfo> configMap        = new HashMap<String, BeanInfo>();
+    protected Map<String, Bean>     beanNameMap      = new HashMap<String, Bean>();
+    protected Map<Class<?>, Bean>   beanTypeMap      = new HashMap<Class<?>, Bean>();
+    protected boolean               init             = false;
+    protected List<String>          classNames       = new LinkedList<String>();
+    protected static Logger         logger           = ConsoleLogFactory.getLogger();
+    protected ClassLoader           classLoader      = JfireContextImpl.class.getClassLoader();
+    protected BeanUtil              beanUtil         = new BeanUtil();
+    protected Map<String, String>   properties       = new HashMap<String, String>();
+    protected Map<String, String>   outterProperties = new HashMap<String, String>();
+    protected Profile[]             profiles         = new Profile[0];
     protected String                activeProfile;
     
     class BeanUtil
@@ -351,6 +352,43 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
         }
     }
     
+    private void aggregateProperties()
+    {
+        for (Entry<String, String> entry : properties.entrySet())
+        {
+            String value = entry.getValue();
+            if (value.startsWith("${"))
+            {
+                int end = value.indexOf("}||");
+                if (end != -1)
+                {
+                    String name = value.substring(2, end);
+                    if (outterProperties.get(name) != null)
+                    {
+                        entry.setValue(outterProperties.get(name));
+                    }
+                    else
+                    {
+                        String defaultValue = value.substring(end + 3);
+                        entry.setValue(defaultValue);
+                    }
+                }
+                else
+                {
+                    String name = value.substring(2, value.length() - 1);
+                    entry.setValue(outterProperties.get(name));
+                }
+            }
+        }
+        for (Entry<String, String> entry : outterProperties.entrySet())
+        {
+            if (properties.containsKey(entry.getKey()) == false)
+            {
+                properties.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+    
     @Override
     public void initContext()
     {
@@ -359,6 +397,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
         {
             activeProfile(getActiveProfile(activeProfile));
         }
+        aggregateProperties();
         init = true;
         replaceValueFromPropertiesToBeancfg();
         beanUtil.buildBean(classNames);
@@ -435,9 +474,8 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             if (activeProfile.contains("||"))
             {
                 String[] part = activeProfile.split("\\|\\|");
-                activeProfile = part[0];
-                String key = activeProfile.substring(2, activeProfile.length() - 1);
-                activeProfile = properties.get(key);
+                String key = activeProfile.substring(2, part[0].length() - 1);
+                activeProfile = outterProperties.get(key);
                 if (activeProfile == null)
                 {
                     activeProfile = part[1];
@@ -446,7 +484,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             else
             {
                 String key = activeProfile.substring(2, activeProfile.length() - 1);
-                activeProfile = properties.get(key);
+                activeProfile = outterProperties.get(key);
             }
         }
         return activeProfile;
@@ -464,10 +502,6 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             {
                 resetValueFromProperties(entry);
             }
-        }
-        for (Entry<String, String> each : properties.entrySet())
-        {
-            resetValueFromProperties(each);
         }
     }
     
@@ -517,7 +551,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
         {
             for (Entry<Object, Object> entry : each.entrySet())
             {
-                this.properties.put((String) entry.getKey(), (String) entry.getValue());
+                outterProperties.put((String) entry.getKey(), (String) entry.getValue());
             }
         }
     }
