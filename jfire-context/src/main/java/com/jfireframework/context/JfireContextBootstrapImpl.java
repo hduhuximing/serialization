@@ -354,6 +354,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     
     private void aggregateProperties()
     {
+        List<String> deleteKeys = new LinkedList<String>();
         for (Entry<String, String> entry : properties.entrySet())
         {
             String value = entry.getValue();
@@ -376,9 +377,20 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
                 else
                 {
                     String name = value.substring(2, value.length() - 1);
-                    entry.setValue(outterProperties.get(name));
+                    if (outterProperties.get(name) != null)
+                    {
+                        entry.setValue(outterProperties.get(name));
+                    }
+                    else
+                    {
+                        deleteKeys.add(entry.getKey());
+                    }
                 }
             }
+        }
+        for (String deleteKey : deleteKeys)
+        {
+            properties.remove(deleteKey);
         }
         for (Entry<String, String> entry : outterProperties.entrySet())
         {
