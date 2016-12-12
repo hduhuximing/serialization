@@ -26,11 +26,13 @@ public class SingleAwaitOp implements Operator
     
     public Throwable getE()
     {
+        sync.await();
         return e;
     }
     
     public Object getResult()
     {
+        sync.await();
         return result;
     }
     
