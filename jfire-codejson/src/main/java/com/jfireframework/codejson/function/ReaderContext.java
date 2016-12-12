@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
@@ -60,6 +61,7 @@ public class ReaderContext
     private static ClassPool             classPool;
     private static Set<Class<?>>         wrapperSet = new HashSet<Class<?>>();
     private static Logger                logger     = ConsoleLogFactory.getLogger();
+    private static final AtomicInteger   count      = new AtomicInteger(1);
     static
     {
         wrapperSet.add(String.class);
@@ -251,11 +253,11 @@ public class ReaderContext
     {
         try
         {
-            CtClass implClass = classPool.makeClass("JsonReader_" + targetClass.getSimpleName() + "_" + System.nanoTime());
+            CtClass implClass = classPool.makeClass("JsonReader_reader_" + count.getAndIncrement());
             CtClass interfaceCtClass = classPool.getCtClass(JsonReader.class.getName());
             if (strategy != null)
             {
-                implClass.setName("JsonRead_Strategy_" + targetClass.getSimpleName() + '_' + System.nanoTime());
+                implClass.setName("JsonRead_Strategy_reader_" + count.getAndIncrement());
                 createStrategyConstructor(implClass);
             }
             implClass.setInterfaces(new CtClass[] { interfaceCtClass });

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
@@ -60,6 +61,7 @@ public class WriterContext
     private static ConcurrentHashMap<Class<?>, JsonWriter> writerMap = new ConcurrentHashMap<Class<?>, JsonWriter>();
     private static ClassPool                               classPool;
     private static Logger                                  logger    = ConsoleLogFactory.getLogger();
+    private static AtomicInteger                           count     = new AtomicInteger(1);
     static
     {
         initClassPool(null);
@@ -214,11 +216,11 @@ public class WriterContext
             stringCache.append("cache.append('}');\n}");
             try
             {
-                CtClass implClass = classPool.makeClass("JsonWriter_" + cklas.getSimpleName() + "_" + System.nanoTime());
+                CtClass implClass = classPool.makeClass("JsonWriter_writer_" + count.getAndIncrement());
                 implClass.setSuperclass(classPool.getCtClass(WriterAdapter.class.getName()));
                 if (strategy != null)
                 {
-                    implClass.setName("JsonWriter_Strategy_" + cklas.getSimpleName() + '_' + System.nanoTime());
+                    implClass.setName("JsonWriter_Strategy_writer_" + count.getAndIncrement());
                     createStrategyConstructor(implClass);
                 }
                 CtClass ObjectCc = classPool.get(Object.class.getName());
