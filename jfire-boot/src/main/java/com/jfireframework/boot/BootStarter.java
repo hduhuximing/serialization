@@ -41,7 +41,9 @@ public class BootStarter
                             //
                             Servlets.servlet("EasyMvcDispathServlet", EasyMvcDispathServlet.class)//
                                     .addMapping("/*")//
-                                    .setEnabled(true)
+                                    .setEnabled(true)//
+                                    .setLoadOnStartup(1)//
+                                    .setAsyncSupported(true)
                     );
             servletBuilder.setResourceManager(resourceManager);
             for (Class<? extends Filter> each : filterClasses)
