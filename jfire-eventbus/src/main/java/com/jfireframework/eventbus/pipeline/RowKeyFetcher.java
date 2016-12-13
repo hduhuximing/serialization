@@ -1,6 +1,6 @@
 package com.jfireframework.eventbus.pipeline;
 
-public interface RowKeyFetcher
+public interface RowKeyFetcher<D>
 {
     /**
      * 从参数对象中得到rowKey
@@ -8,5 +8,5 @@ public interface RowKeyFetcher
      * @param data
      * @return
      */
-    public Object getRowKey(Object data);
+    public Object getRowKey(D data);
 }

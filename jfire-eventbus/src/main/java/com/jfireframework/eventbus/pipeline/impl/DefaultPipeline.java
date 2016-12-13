@@ -540,7 +540,7 @@ public class DefaultPipeline extends BasePipeline
     }
     
     @Override
-    public Pipeline next(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final RowKeyFetcher rowKeyFetcher)
+    public Pipeline next(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final RowKeyFetcher<?> rowKeyFetcher)
     {
         Operator operator = new Operator() {
             
@@ -565,7 +565,7 @@ public class DefaultPipeline extends BasePipeline
     }
     
     @Override
-    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, RowKeyFetcher fetcher)
+    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, RowKeyFetcher<?> fetcher)
     {
         return next(event, handler, InternalPipeline.USE_UPSTREAM_RESULT, fetcher);
     }

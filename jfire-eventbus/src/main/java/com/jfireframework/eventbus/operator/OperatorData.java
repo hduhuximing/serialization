@@ -3,6 +3,7 @@ package com.jfireframework.eventbus.operator;
 import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.pipeline.InternalPipeline;
+import com.jfireframework.eventbus.pipeline.RowKeyFetcher;
 
 public class OperatorData
 {
@@ -19,6 +20,14 @@ public class OperatorData
         this.handler = handler;
     }
     
+    public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, RowKeyFetcher<?> rowKey)
+    {
+        this.eventData = eventData;
+        this.rowKey = rowKey;
+        this.event = event;
+        this.handler = handler;
+    }
+    
     public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData)
     {
         this(event, handler, eventData, InternalPipeline.USE_UPSTREAM_RESULT);
@@ -27,6 +36,11 @@ public class OperatorData
     public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler)
     {
         this(event, handler, InternalPipeline.USE_UPSTREAM_RESULT, InternalPipeline.USE_UPSTREAM_RESULT);
+    }
+    
+    public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler, RowKeyFetcher<?> rowKeyFetcher)
+    {
+        this(event, handler, InternalPipeline.USE_UPSTREAM_RESULT, rowKeyFetcher);
     }
     
     public Object getEventData()
