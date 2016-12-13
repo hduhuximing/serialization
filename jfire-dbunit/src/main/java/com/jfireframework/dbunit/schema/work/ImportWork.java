@@ -47,7 +47,7 @@ public class ImportWork
                 String insertSql = SqlUtil.insertSqlForTable(nameData, each.getTableName());
                 PreparedStatement ps = importConn.prepareStatement(insertSql);
                 int rowLength = sheet.getLastRowNum();
-                for (int i = 1; i < rowLength; i++)
+                for (int i = 1; i <= rowLength; i++)
                 {
                     Row row = sheet.getRow(i);
                     if (row == null)
