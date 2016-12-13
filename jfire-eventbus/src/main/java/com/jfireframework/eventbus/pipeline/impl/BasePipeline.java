@@ -52,10 +52,17 @@ public abstract class BasePipeline implements InternalPipeline, Pipeline
     @Override
     public void onCompleted(Object result, RunnerMode runnerMode)
     {
-        operator.onComplete(result, runnerMode);
-        if (next != null)
+        try
         {
-            next.onCompleted(result, runnerMode);
+            operator.onComplete(result, runnerMode);
+            if (next != null)
+            {
+                next.onCompleted(result, runnerMode);
+            }
+        }
+        catch (Throwable e)
+        {
+            onError(e, runnerMode);
         }
     }
     

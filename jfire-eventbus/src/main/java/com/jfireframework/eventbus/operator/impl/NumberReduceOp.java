@@ -27,7 +27,10 @@ public class NumberReduceOp implements Operator
             total.set(0);
             left = total.incrementAndGet();
         }
-        queue.offer(data);
+        if (data != null)
+        {
+            queue.offer(data);
+        }
         if (left % count == 0)
         {
             pipeline.onNext(queue, runnerMode);
