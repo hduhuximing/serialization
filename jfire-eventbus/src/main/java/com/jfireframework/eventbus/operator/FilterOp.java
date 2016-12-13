@@ -1,4 +1,4 @@
-package com.jfireframework.eventbus.operator.impl;
+package com.jfireframework.eventbus.operator;
 
 public interface FilterOp
 {

@@ -30,12 +30,19 @@ public class NumberReduceOp implements Operator
         queue.offer(data);
         if (left % count == 0)
         {
-            pipeline.onCompleted(queue, runnerMode);
+            pipeline.onNext(queue, runnerMode);
         }
     }
     
     @Override
     public void onError(Throwable e, RunnerMode runnerMode)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public void onComplete(Object result, RunnerMode runnerMode)
     {
         // TODO Auto-generated method stub
         

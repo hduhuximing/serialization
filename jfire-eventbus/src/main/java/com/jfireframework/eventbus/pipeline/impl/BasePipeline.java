@@ -24,12 +24,31 @@ public abstract class BasePipeline implements InternalPipeline, Pipeline
         return next;
     }
     
+    /**
+     * 本节点逻辑任务完成后会调用该方法,将上游结果传递到下方
+     * 
+     * @param result
+     */
     @Override
-    public void onCompleted(Object result, RunnerMode runnerMode)
+    public void onNext(Object result, RunnerMode runnerMode)
     {
         if (next != null)
         {
             next.work(result, runnerMode);
+        }
+        else
+        {
+            onCompleted(result, runnerMode);
+        }
+    }
+    
+    @Override
+    public void onCompleted(Object result, RunnerMode runnerMode)
+    {
+        operator.onComplete(result, runnerMode);
+        if (next != null)
+        {
+            next.onCompleted(result, runnerMode);
         }
     }
     
@@ -72,6 +91,7 @@ public abstract class BasePipeline implements InternalPipeline, Pipeline
     {
         internalStart(initParam);
     }
+    
     @Override
     public Pipeline add(Operator operator)
     {

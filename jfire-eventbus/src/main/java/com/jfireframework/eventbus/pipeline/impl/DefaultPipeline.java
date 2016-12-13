@@ -10,11 +10,11 @@ import com.jfireframework.eventbus.eventcontext.impl.NormalEventContext;
 import com.jfireframework.eventbus.eventcontext.impl.ReadWriteEventContextImpl;
 import com.jfireframework.eventbus.eventcontext.impl.RowEventContextImpl;
 import com.jfireframework.eventbus.executor.EventExecutor;
+import com.jfireframework.eventbus.operator.FilterOp;
 import com.jfireframework.eventbus.operator.MapOp;
 import com.jfireframework.eventbus.operator.Operator;
 import com.jfireframework.eventbus.operator.OperatorData;
 import com.jfireframework.eventbus.operator.TransferOp;
-import com.jfireframework.eventbus.operator.impl.FilterOp;
 import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.pipeline.Pipeline;
 import com.jfireframework.eventbus.pipeline.RowKeyFetcher;
@@ -108,7 +108,7 @@ public class DefaultPipeline extends BasePipeline
         public void setResult(Object result)
         {
             super.setResult(result);
-            pipeline.onCompleted(result, runnerMode);
+            pipeline.onNext(result, runnerMode);
         }
         
         @Override
@@ -133,7 +133,7 @@ public class DefaultPipeline extends BasePipeline
         public void setResult(Object result)
         {
             super.setResult(result);
-            pipeline.onCompleted(result, runnerMode);
+            pipeline.onNext(result, runnerMode);
         }
         
         @Override
@@ -158,7 +158,7 @@ public class DefaultPipeline extends BasePipeline
         public void setResult(Object result)
         {
             super.setResult(result);
-            pipeline.onCompleted(result, runnerMode);
+            pipeline.onNext(result, runnerMode);
         }
         
         @Override
@@ -187,6 +187,12 @@ public class DefaultPipeline extends BasePipeline
             
             @Override
             public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
+            @Override
+            public void onComplete(Object result, RunnerMode runnerMode)
             {
                 ;
             }
@@ -240,6 +246,12 @@ public class DefaultPipeline extends BasePipeline
                 ;
             }
             
+            @Override
+            public void onComplete(Object result, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
         };
         return (Pipeline) internalAdd(operator);
     }
@@ -257,76 +269,82 @@ public class DefaultPipeline extends BasePipeline
                 {
                     for (int i : (int[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof byte[])
                 {
                     for (byte i : (byte[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof short[])
                 {
                     for (short i : (short[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof long[])
                 {
                     for (long i : (long[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof float[])
                 {
                     for (float i : (float[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof double[])
                 {
                     for (double i : (double[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof boolean[])
                 {
                     for (boolean i : (boolean[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof char[])
                 {
                     for (char i : (char[]) data)
                     {
-                        pipeline.onCompleted(i, runnerMode);
+                        pipeline.onNext(i, runnerMode);
                     }
                 }
                 else if (data instanceof Iterable)
                 {
                     for (Object each : (Iterable) data)
                     {
-                        pipeline.onCompleted(each, runnerMode);
+                        pipeline.onNext(each, runnerMode);
                     }
                 }
                 else
                 {
                     for (Object each : (Object[]) data)
                     {
-                        pipeline.onCompleted(each, runnerMode);
+                        pipeline.onNext(each, runnerMode);
                     }
                 }
             }
             
             @Override
             public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
+            @Override
+            public void onComplete(Object result, RunnerMode runnerMode)
             {
                 ;
             }
@@ -425,11 +443,17 @@ public class DefaultPipeline extends BasePipeline
             @Override
             public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
             {
-                pipeline.onCompleted(mapOp.map((E) data), runnerMode);
+                pipeline.onNext(mapOp.map((E) data), runnerMode);
             }
             
             @Override
             public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
+            @Override
+            public void onComplete(Object result, RunnerMode runnerMode)
             {
                 ;
             }
@@ -473,6 +497,12 @@ public class DefaultPipeline extends BasePipeline
                 ;
             }
             
+            @Override
+            public void onComplete(Object result, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
         };
         return (Pipeline) internalAdd(operator);
     }
@@ -487,12 +517,18 @@ public class DefaultPipeline extends BasePipeline
             {
                 if (filterOp.prevent(data) == false)
                 {
-                    pipeline.onCompleted(data, runnerMode);
+                    pipeline.onNext(data, runnerMode);
                 }
             }
             
             @Override
             public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
+            @Override
+            public void onComplete(Object result, RunnerMode runnerMode)
             {
                 ;
             }
@@ -527,6 +563,12 @@ public class DefaultPipeline extends BasePipeline
                         ;
                     }
                     
+                    @Override
+                    public void onComplete(Object result, RunnerMode runnerMode)
+                    {
+                        ;
+                    }
+                    
                 };
                 return (Pipeline) internalAdd(operator);
         }
@@ -557,6 +599,12 @@ public class DefaultPipeline extends BasePipeline
             
             @Override
             public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+            
+            @Override
+            public void onComplete(Object result, RunnerMode runnerMode)
             {
                 ;
             }

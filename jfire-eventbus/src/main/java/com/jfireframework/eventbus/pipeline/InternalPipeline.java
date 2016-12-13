@@ -15,11 +15,18 @@ public interface InternalPipeline
     public void work(Object upstreamResult, RunnerMode runnerMode);
     
     /**
-     * 本节点逻辑任务完成后被调用，并且传入本节点的结果对象
+     * 本节点的完成方法.一样会调用到后续节点的相同方法
      * 
      * @param result
      */
     public void onCompleted(Object result, RunnerMode runnerMode);
+    
+    /**
+     * 本节点逻辑任务完成后会调用该方法,将上游结果传递到下方
+     * 
+     * @param result
+     */
+    public void onNext(Object result, RunnerMode runnerMode);
     
     /**
      * 本节点发生异常后调用

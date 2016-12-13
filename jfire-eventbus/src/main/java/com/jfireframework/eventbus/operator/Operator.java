@@ -21,4 +21,12 @@ public interface Operator
      * @param runnerMode
      */
     public void onError(Throwable e, RunnerMode runnerMode);
+    
+    /**
+     * 当本节点完成时被调用的方法
+     * 
+     * @param result
+     * @param runnerMode
+     */
+    public void onComplete(Object result, RunnerMode runnerMode);
 }

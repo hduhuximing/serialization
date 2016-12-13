@@ -8,6 +8,7 @@
 		<artifactId>framework-parent</artifactId>
 		<version>1.0</version>
 	</parent>
+	<version>1.0.1-SNAPSHOT</version>
 	<artifactId>jfire-jnet2</artifactId>
 	<name>jnet2</name>
 	<description>
@@ -20,7 +21,7 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-eventbus</artifactId>
-			<version>1.0</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jfireframework</groupId>
