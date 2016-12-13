@@ -17,6 +17,7 @@ import com.jfireframework.eventbus.operator.TransferOp;
 import com.jfireframework.eventbus.operator.impl.FilterOp;
 import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.pipeline.Pipeline;
+import com.jfireframework.eventbus.pipeline.RowKeyFetcher;
 import com.jfireframework.eventbus.util.EventHelper;
 import com.jfireframework.eventbus.util.RunnerMode;
 import com.jfireframework.eventbus.util.RunnerMode.ThreadMode;
@@ -53,6 +54,11 @@ public class DefaultPipeline extends BasePipeline
                 {
                     eventContext = new RowEventContextProxy(pipeline, runnerMode, data, data, handler, EventHelper.findExecutor(event));
                 }
+                else if (rowKey instanceof RowKeyFetcher)
+                {
+                    RowKeyFetcher fetcher = (RowKeyFetcher) rowKey;
+                    eventContext = new RowEventContextProxy(pipeline, runnerMode, data, fetcher.getRowKey(data), handler, EventHelper.findExecutor(event));
+                }
                 else
                 {
                     eventContext = new RowEventContextProxy(pipeline, runnerMode, data, rowKey, handler, EventHelper.findExecutor(event));
@@ -68,6 +74,11 @@ public class DefaultPipeline extends BasePipeline
                 if (rowKey == InternalPipeline.USE_UPSTREAM_RESULT)
                 {
                     eventContext = new RowEventContextProxy(pipeline, runnerMode, data, data, handler, EventHelper.findExecutor(event));
+                }
+                else if (rowKey instanceof RowKeyFetcher)
+                {
+                    RowKeyFetcher fetcher = (RowKeyFetcher) rowKey;
+                    eventContext = new RowEventContextProxy(pipeline, runnerMode, data, fetcher.getRowKey(data), handler, EventHelper.findExecutor(event));
                 }
                 else
                 {
@@ -171,7 +182,7 @@ public class DefaultPipeline extends BasePipeline
                     data = eventData;
                 }
                 EventContext<?> eventContext = proxy(pipeline, runnerMode, event, handler, data, rowKey);
-                eventContext.executor().handle(eventContext, runnerMode);
+                eventContext.run();
             }
             
             @Override
@@ -526,5 +537,36 @@ public class DefaultPipeline extends BasePipeline
     public Pipeline compose(TransferOp transferOp)
     {
         return transferOp.transfer(this);
+    }
+    
+    @Override
+    public Pipeline next(final Enum<? extends EventConfig> event, final EventHandler<?> handler, final Object eventData, final RowKeyFetcher rowKeyFetcher)
+    {
+        Operator operator = new Operator() {
+            
+            @Override
+            public void work(Object data, InternalPipeline pipeline, RunnerMode runnerMode)
+            {
+                if (eventData != InternalPipeline.USE_UPSTREAM_RESULT)
+                {
+                    data = eventData;
+                }
+                EventContext<?> eventContext = proxy(pipeline, runnerMode, event, handler, data, rowKeyFetcher);
+                eventContext.run();
+            }
+            
+            @Override
+            public void onError(Throwable e, RunnerMode runnerMode)
+            {
+                ;
+            }
+        };
+        return (Pipeline) internalAdd(operator);
+    }
+    
+    @Override
+    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, RowKeyFetcher fetcher)
+    {
+        return next(event, handler, InternalPipeline.USE_UPSTREAM_RESULT, fetcher);
     }
 }

@@ -106,7 +106,7 @@ public class OracleDAO<T> extends BaseDAO<T>
                 for (Object entity : entitys)
                 {
                     int index = 1;
-                    for (MapField field : insertInfo.getFields())
+                    for (MapField field : seqInsertInfo.getFields())
                     {
                         field.setStatementValue(pStat, entity, index);
                         index++;

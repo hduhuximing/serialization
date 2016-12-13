@@ -22,7 +22,11 @@ public interface Pipeline
     
     public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData);
     
+    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, Object eventData, RowKeyFetcher rowKeyFetcher);
+    
     public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler);
+    
+    public Pipeline next(Enum<? extends EventConfig> event, EventHandler<?> handler, RowKeyFetcher fetcher);
     
     public Pipeline next(EventHandler<?> handler);
     
