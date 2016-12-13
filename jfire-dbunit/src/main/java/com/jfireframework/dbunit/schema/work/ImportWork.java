@@ -46,10 +46,14 @@ public class ImportWork
                 }
                 String insertSql = SqlUtil.insertSqlForTable(nameData, each.getTableName());
                 PreparedStatement ps = importConn.prepareStatement(insertSql);
-                int rowLength = sheet.getPhysicalNumberOfRows();
+                int rowLength = sheet.getLastRowNum();
                 for (int i = 1; i < rowLength; i++)
                 {
                     Row row = sheet.getRow(i);
+                    if (row == null)
+                    {
+                        continue;
+                    }
                     String[] rowData = new String[colLength];
                     for (int j = 0; j < colLength; j++)
                     {

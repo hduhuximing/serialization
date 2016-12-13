@@ -6,8 +6,9 @@
 	<parent>
 		<groupId>com.jfireframework</groupId>
 		<artifactId>framework-parent</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0</version>
 	</parent>
+	<version>1.0-SNAPSHOT</version>
 	<artifactId>jfire-dbunit</artifactId>
 	<name>dbunit</name>
 	<description>
