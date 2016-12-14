@@ -4,6 +4,7 @@ import com.jfireframework.eventbus.event.EventConfig;
 import com.jfireframework.eventbus.event.EventHandler;
 import com.jfireframework.eventbus.pipeline.InternalPipeline;
 import com.jfireframework.eventbus.pipeline.RowKeyFetcher;
+import com.jfireframework.eventbus.util.DefaultEvent;
 
 public class OperatorData
 {
@@ -41,6 +42,11 @@ public class OperatorData
     public OperatorData(Enum<? extends EventConfig> event, EventHandler<?> handler, RowKeyFetcher<?> rowKeyFetcher)
     {
         this(event, handler, InternalPipeline.USE_UPSTREAM_RESULT, rowKeyFetcher);
+    }
+    
+    public OperatorData(EventHandler<?> handler)
+    {
+        this(DefaultEvent.JUST_PAEALLEL_EVENT, handler, InternalPipeline.USE_UPSTREAM_RESULT, InternalPipeline.USE_UPSTREAM_RESULT);
     }
     
     public Object getEventData()
