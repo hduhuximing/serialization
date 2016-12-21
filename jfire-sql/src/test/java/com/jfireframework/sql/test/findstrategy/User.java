@@ -11,17 +11,18 @@ public class User
     
     @Id
     @FindByStrategy("test2")
+    @StrategyBind("test3")
     private Integer id;
     @StrategyBind("test1,test2")
     private String  name;
-    @StrategyBind("test1")
+    @StrategyBind("test1,test3")
     private String  password;
-    @StrategyBind("test1,test2")
+    @StrategyBind("test1,test2,test3")
     @FindByStrategy("test1")
     private Integer age;
     @StrategyBind("test2")
     private String  birthday;
-    @FindByStrategy("test1")
+    @FindByStrategy("test1,test3")
     private boolean boy;
     
     public boolean isBoy()

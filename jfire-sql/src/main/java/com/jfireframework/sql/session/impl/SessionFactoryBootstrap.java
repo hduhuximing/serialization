@@ -31,7 +31,7 @@ import com.jfireframework.sql.interceptor.SqlInterceptor;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.MetaContext;
 import com.jfireframework.sql.metadata.TableMetaData;
-import com.jfireframework.sql.page.MysqlParse;
+import com.jfireframework.sql.page.StandardParse;
 import com.jfireframework.sql.page.OracleParse;
 import com.jfireframework.sql.page.PageParse;
 import com.jfireframework.sql.session.SessionFactory;
@@ -131,11 +131,15 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
             productName = md.getDatabaseProductName().toLowerCase();
             if (productName.equals("mariadb") || "mysql".equals(productName))
             {
-                return new MysqlParse();
+                return new StandardParse();
             }
             else if (productName.equals("oracle"))
             {
                 return new OracleParse();
+            }
+            else if (productName.contains("hsql"))
+            {
+                return new StandardParse();
             }
             else
             {

@@ -27,6 +27,7 @@ import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.TableMetaData;
 import com.jfireframework.sql.metadata.TableMetaData.FieldInfo;
 import com.jfireframework.sql.page.Page;
+import com.jfireframework.sql.page.PageParse;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 import com.jfireframework.sql.resultsettransfer.field.MapFieldBuilder;
 import sun.misc.Unsafe;
@@ -521,9 +522,9 @@ public abstract class BaseDAO<T> implements Dao<T>
     }
     
     @Override
-    public List<T> findPage(Connection connection, T param, String strategyName, Page page)
+    public List<T> findPage(Connection connection, T param, String strategyName, Page page, PageParse pageParse)
     {
-        return findStrategy.findPage(connection, param, strategyName, page);
+        return findStrategy.findPage(connection, param, strategyName, page, pageParse);
     }
     
 }

@@ -1,9 +1,11 @@
 package com.jfireframework.sql.test;
 
+import java.util.List;
 import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.session.SqlSession;
 import com.jfireframework.sql.session.impl.SessionFactoryImpl;
@@ -62,14 +64,53 @@ public class FindStrategyTest
         User user = new User();
         user.setAge(5);
         user.setBoy(false);
-        User result = session.FindByStrategy(user, "test1");
+        User result = session.FindOneByStrategy(user, "test1");
         Assert.assertEquals("test-5", result.getName());
         Assert.assertEquals("pass-5", result.getPassword());
         Assert.assertNull(user.getBirthday());
         user = new User();
         user.setId(5);
-        result = session.FindByStrategy(user, "test2");
+        result = session.FindOneByStrategy(user, "test2");
         Assert.assertNull(result.getPassword());
-        Assert.assertEquals("2016-10-04", result.getBirthday());
+        Assert.assertEquals("2016-10-06", result.getBirthday());
+    }
+    
+    @Test
+    public void test1()
+    {
+        SqlSession session = sessionFactory.openSession();
+        User user = new User();
+        user.setBoy(false);
+        List<User> result = session.findAllByStrategy(user, "test3");
+        for (int i = 1; i <= 5; i++)
+        {
+            User one = result.get(i - 1);
+            Assert.assertEquals("pass-" + (i * 2 - 1), one.getPassword());
+            Assert.assertEquals((i - 1) * 2, one.getId().intValue());
+            Assert.assertNull(one.getBirthday());
+            Assert.assertEquals(i * 2 - 1, one.getAge().intValue());
+        }
+    }
+    
+    @Test
+    public void test2()
+    {
+        Page page = new Page();
+        page.setPage(1);
+        page.setPageSize(2);
+        SqlSession session = sessionFactory.openSession();
+        User user = new User();
+        user.setBoy(false);
+        List<User> result = session.findPageByStrategy(user, "test3", page);
+        for (int i = 1; i <= 2; i++)
+        {
+            User one = result.get(i - 1);
+            Assert.assertEquals("pass-" + (i * 2 - 1), one.getPassword());
+            Assert.assertEquals((i - 1) * 2, one.getId().intValue());
+            Assert.assertNull(one.getBirthday());
+            Assert.assertEquals(i * 2 - 1, one.getAge().intValue());
+        }
+        Assert.assertEquals(2, page.getData().size());
+        Assert.assertEquals(5, page.getTotal());
     }
 }

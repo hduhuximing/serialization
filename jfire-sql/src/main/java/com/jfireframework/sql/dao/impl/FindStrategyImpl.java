@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,6 +23,9 @@ import com.jfireframework.sql.dao.FindStrategy;
 import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.page.Page;
+import com.jfireframework.sql.page.PageParse;
+import com.jfireframework.sql.resultsettransfer.FixBeanTransfer;
+import com.jfireframework.sql.resultsettransfer.ResultSetTransfer;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 import com.jfireframework.sql.resultsettransfer.field.MapFieldBuilder;
 
@@ -37,9 +41,11 @@ public class FindStrategyImpl<T> implements FindStrategy<T>
     private Map<String, FindStrategySql> strategyMap = new HashMap<String, FindStrategyImpl<T>.FindStrategySql>();
     private final SqlPreInterceptor[]    preInterceptors;
     private final Class<T>               ckass;
+    private final ResultSetTransfer<T>   resultSetTransfer;
     
     public FindStrategyImpl(Class<T> ckass, ColNameStrategy colNameStrategy, SqlPreInterceptor[] preInterceptors)
     {
+        resultSetTransfer = new FixBeanTransfer<T>(ckass);
         this.ckass = ckass;
         this.preInterceptors = preInterceptors;
         String tableName = ckass.getAnnotation(TableEntity.class).name();
@@ -200,15 +206,69 @@ public class FindStrategyImpl<T> implements FindStrategy<T>
     @Override
     public List<T> findAll(Connection connection, T param, String strategyName)
     {
-        // TODO Auto-generated method stub
-        return null;
+        List<T> list = new ArrayList<T>();
+        FindStrategySql findStrategySql = strategyMap.get(strategyName);
+        String sql = findStrategySql.sql;
+        for (SqlPreInterceptor each : preInterceptors)
+        {
+            each.preIntercept(sql, param);
+        }
+        PreparedStatement pstat = null;
+        try
+        {
+            pstat = connection.prepareStatement(sql);
+            int index = 1;
+            for (MapField each : findStrategySql.whereFields)
+            {
+                each.setStatementValue(pstat, param, index);
+                index += 1;
+            }
+            ResultSet resultSet = pstat.executeQuery();
+            while (resultSet.next())
+            {
+                T entity = ckass.newInstance();
+                for (MapField each : findStrategySql.selectFields)
+                {
+                    each.setEntityValue(entity, resultSet);
+                }
+                list.add(entity);
+            }
+            return list;
+        }
+        catch (Exception e)
+        {
+            throw new JustThrowException(e);
+        }
+        finally
+        {
+            if (pstat != null)
+            {
+                try
+                {
+                    pstat.close();
+                }
+                catch (SQLException e)
+                {
+                    throw new JustThrowException(e);
+                }
+            }
+        }
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public List<T> findPage(Connection connection, T param, String strategyName, Page page)
+    public List<T> findPage(Connection connection, T param, String strategyName, Page page, PageParse pageParse)
     {
-        // TODO Auto-generated method stub
-        return null;
+        FindStrategySql findStrategySql = strategyMap.get(strategyName);
+        try
+        {
+            pageParse.doQuery(param, findStrategySql.whereFields, connection, findStrategySql.sql, resultSetTransfer, page);
+        }
+        catch (SQLException e)
+        {
+            throw new JustThrowException(e);
+        }
+        return (List<T>) page.getData();
     }
     
 }

@@ -400,9 +400,23 @@ public class SqlSessionImpl implements SqlSession
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T FindByStrategy(T entity, String strategyName)
+    public <T> T FindOneByStrategy(T entity, String strategyName)
     {
         return sessionFactory.getDao((Class<T>) entity.getClass()).findOne(connection, entity, strategyName);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> List<T> findAllByStrategy(T entity, String steategyName)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findAll(connection, entity, steategyName);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> List<T> findPageByStrategy(T entity, String steategyName, Page page)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findPage(connection, entity, steategyName, page, pageParse);
     }
     
 }
