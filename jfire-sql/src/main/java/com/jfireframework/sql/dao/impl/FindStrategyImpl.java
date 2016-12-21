@@ -1,6 +1,7 @@
 package com.jfireframework.sql.dao.impl;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,7 +17,9 @@ import java.util.Set;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
+import com.jfireframework.sql.annotation.FindBy;
 import com.jfireframework.sql.annotation.FindByStrategy;
+import com.jfireframework.sql.annotation.SqlIgnore;
 import com.jfireframework.sql.annotation.StrategyBind;
 import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.dao.FindStrategy;
@@ -42,6 +45,8 @@ public class FindStrategyImpl<T> implements FindStrategy<T>
     private final SqlPreInterceptor[]    preInterceptors;
     private final Class<T>               ckass;
     private final ResultSetTransfer<T>   resultSetTransfer;
+    private final Map<String, String>    findByMap   = new HashMap<String, String>();
+    private final MapField[]             mapFields;
     
     public FindStrategyImpl(Class<T> ckass, ColNameStrategy colNameStrategy, SqlPreInterceptor[] preInterceptors)
     {
@@ -52,8 +57,20 @@ public class FindStrategyImpl<T> implements FindStrategy<T>
         Map<String, Set<Field>> fieldStrategyMap = new HashMap<String, Set<Field>>();
         Map<String, Set<Field>> findStrategyMap = new HashMap<String, Set<Field>>();
         Field[] fields = ReflectUtil.getAllFields(ckass);
+        List<MapField> list = new LinkedList<MapField>();
         for (Field each : fields)
         {
+            if (
+                each.isAnnotationPresent(SqlIgnore.class) //
+                        || Map.class.isAssignableFrom(each.getType())//
+                        || List.class.isAssignableFrom(each.getType())//
+                        || each.getType().isInterface()//
+                        || Modifier.isStatic(each.getModifiers())
+            )
+            {
+                continue;
+            }
+            
             if (each.isAnnotationPresent(StrategyBind.class))
             {
                 StrategyBind bind = each.getAnnotation(StrategyBind.class);
@@ -73,7 +90,24 @@ public class FindStrategyImpl<T> implements FindStrategy<T>
                     addFieldStrategy(name, each, fieldStrategyMap);
                 }
             }
+            MapField mapField = null;
+            try
+            {
+                mapField = MapFieldBuilder.buildMapField(each, colNameStrategy);
+            }
+            catch (Exception e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            list.add(mapField);
+            if (each.isAnnotationPresent(FindBy.class))
+            {
+                String sql = "select * from " + tableName + " where " + mapField.getColName() + " = ?";
+                findByMap.put(mapField.getFieldName(), sql);
+            }
         }
+        mapFields = list.toArray(new MapField[list.size()]);
         for (Entry<String, Set<Field>> entry : findStrategyMap.entrySet())
         {
             StringCache cache = new StringCache();
@@ -269,6 +303,62 @@ public class FindStrategyImpl<T> implements FindStrategy<T>
             throw new JustThrowException(e);
         }
         return (List<T>) page.getData();
+    }
+    
+    @Override
+    public T findBy(Connection connection, Object param, String name)
+    {
+        String findBy = findByMap.get(name);
+        if (findBy == null)
+        {
+            throw new NullPointerException("没有对应条件的findBy");
+        }
+        for (SqlPreInterceptor each : preInterceptors)
+        {
+            each.preIntercept(findBy, param);
+        }
+        PreparedStatement pStat = null;
+        try
+        {
+            pStat = connection.prepareStatement(findBy);
+            pStat.setObject(1, param);
+            ResultSet resultSet = pStat.executeQuery();
+            if (resultSet.next())
+            {
+                T entity = ckass.newInstance();
+                for (MapField each : mapFields)
+                {
+                    each.setEntityValue(entity, resultSet);
+                }
+                if (resultSet.next())
+                {
+                    throw new IllegalArgumentException("查询存在两个或以上的数据，不符合要求");
+                }
+                return entity;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new JustThrowException(e);
+        }
+        finally
+        {
+            if (pStat != null)
+            {
+                try
+                {
+                    pStat.close();
+                }
+                catch (SQLException e)
+                {
+                    throw new JustThrowException(e);
+                }
+            }
+        }
     }
     
 }

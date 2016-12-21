@@ -9,5 +9,5 @@ import com.jfireframework.sql.page.Page;
 public interface UserOp
 {
     @Sql(sql = "select * from User", paramNames = "")
-    public List<User> find(Page page);
+    public List<User12> find(Page page);
 }

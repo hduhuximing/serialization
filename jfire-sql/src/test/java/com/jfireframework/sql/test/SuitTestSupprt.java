@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
         FieldTest.class, //
         InterfaceTest.class, //
         TxManagerTest.class, //
+        FindStrategyTest.class, //
         TxTest.class//
 })
 public class SuitTestSupprt

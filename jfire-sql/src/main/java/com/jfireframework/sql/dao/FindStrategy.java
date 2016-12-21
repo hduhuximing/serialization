@@ -7,6 +7,8 @@ import com.jfireframework.sql.page.PageParse;
 
 public interface FindStrategy<T>
 {
+    public T findBy(Connection connection, Object param, String name);
+    
     public T findOne(Connection connection, T entity, String strategyName);
     
     public List<T> findAll(Connection connection, T param, String strategyName);

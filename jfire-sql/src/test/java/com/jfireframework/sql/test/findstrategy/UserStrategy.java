@@ -5,8 +5,8 @@ import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.StrategyBind;
 import com.jfireframework.sql.annotation.TableEntity;
 
-@TableEntity(name = "user")
-public class User
+@TableEntity(name = "userstrategy")
+public class UserStrategy
 {
     
     @Id

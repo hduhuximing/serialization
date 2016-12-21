@@ -5,7 +5,7 @@ import com.jfireframework.sql.annotation.SeqId;
 import com.jfireframework.sql.annotation.TableEntity;
 
 @TableEntity(name = "user12")
-public class User
+public class User12
 {
     @Id
     @SeqId("testseq")

@@ -48,15 +48,6 @@ public interface Dao<T> extends FindStrategy<T>
     public int delete(T entity, Connection connection);
     
     /**
-     * 使用对应的查询条件查询出来该对象的一个唯一值
-     * 
-     * @param param
-     * @param connection
-     * @return
-     */
-    public T findBy(String name, Object param, Connection connection);
-    
-    /**
      * 在数据库该表中，使用主键查询并且返回对象
      * 
      * @param

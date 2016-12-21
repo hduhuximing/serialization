@@ -9,7 +9,7 @@ import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.session.SqlSession;
 import com.jfireframework.sql.session.impl.SessionFactoryImpl;
-import com.jfireframework.sql.test.findstrategy.User;
+import com.jfireframework.sql.test.findstrategy.UserStrategy;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class FindStrategyTest
@@ -45,7 +45,7 @@ public class FindStrategyTest
         session.beginTransAction(0);
         for (int i = 1; i < 10; i++)
         {
-            User user = new User();
+            UserStrategy user = new UserStrategy();
             user.setAge(i);
             user.setBirthday("2016-10-0" + i);
             user.setBoy(i % 2 == 0);
@@ -61,14 +61,14 @@ public class FindStrategyTest
     public void test()
     {
         SqlSession session = sessionFactory.openSession();
-        User user = new User();
+        UserStrategy user = new UserStrategy();
         user.setAge(5);
         user.setBoy(false);
-        User result = session.FindOneByStrategy(user, "test1");
+        UserStrategy result = session.FindOneByStrategy(user, "test1");
         Assert.assertEquals("test-5", result.getName());
         Assert.assertEquals("pass-5", result.getPassword());
         Assert.assertNull(user.getBirthday());
-        user = new User();
+        user = new UserStrategy();
         user.setId(5);
         result = session.FindOneByStrategy(user, "test2");
         Assert.assertNull(result.getPassword());
@@ -79,12 +79,12 @@ public class FindStrategyTest
     public void test1()
     {
         SqlSession session = sessionFactory.openSession();
-        User user = new User();
+        UserStrategy user = new UserStrategy();
         user.setBoy(false);
-        List<User> result = session.findAllByStrategy(user, "test3");
+        List<UserStrategy> result = session.findAllByStrategy(user, "test3");
         for (int i = 1; i <= 5; i++)
         {
-            User one = result.get(i - 1);
+            UserStrategy one = result.get(i - 1);
             Assert.assertEquals("pass-" + (i * 2 - 1), one.getPassword());
             Assert.assertEquals((i - 1) * 2, one.getId().intValue());
             Assert.assertNull(one.getBirthday());
@@ -99,12 +99,12 @@ public class FindStrategyTest
         page.setPage(1);
         page.setPageSize(2);
         SqlSession session = sessionFactory.openSession();
-        User user = new User();
+        UserStrategy user = new UserStrategy();
         user.setBoy(false);
-        List<User> result = session.findPageByStrategy(user, "test3", page);
+        List<UserStrategy> result = session.findPageByStrategy(user, "test3", page);
         for (int i = 1; i <= 2; i++)
         {
-            User one = result.get(i - 1);
+            UserStrategy one = result.get(i - 1);
             Assert.assertEquals("pass-" + (i * 2 - 1), one.getPassword());
             Assert.assertEquals((i - 1) * 2, one.getId().intValue());
             Assert.assertNull(one.getBirthday());

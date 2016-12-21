@@ -8,7 +8,7 @@ import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.session.impl.SessionFactoryBootstrap;
 import com.jfireframework.sql.session.impl.SessionFactoryImpl;
-import com.jfireframework.sql.test.oracle.User;
+import com.jfireframework.sql.test.oracle.User12;
 import com.jfireframework.sql.test.oracle.UserOp;
 import com.zaxxer.hikari.HikariDataSource;
 import oracle.net.aso.p;
