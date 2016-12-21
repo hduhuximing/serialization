@@ -139,38 +139,36 @@ public class OracleDAO<T> extends BaseDAO<T>
     @Override
     protected void useForSelf(MapField[] fields, MapField idField)
     {
+        List<MapField> insertFields = new LinkedList<MapField>();
+        StringCache cache = new StringCache();
+        /******** 生成insertSql *******/
+        cache.append("insert into ").append(tableName).append(" ( ");
+        cache.append(idField.getColName()).appendComma();
+        insertFields.add(idField);
+        int count = 1;
+        for (MapField each : fields)
         {
-            List<MapField> insertFields = new LinkedList<MapField>();
-            StringCache cache = new StringCache();
-            /******** 生成insertSql *******/
-            cache.append("insert into ").append(tableName).append(" ( ");
-            cache.append(idField.getColName()).appendComma();
-            insertFields.add(idField);
-            int count = 1;
-            for (MapField each : fields)
+            if (each == idField || each.saveIgnore())
             {
-                if (each == idField || each.saveIgnore())
-                {
-                    continue;
-                }
-                count++;
-                insertFields.add(each);
-                cache.append(each.getColName()).append(',');
+                continue;
             }
-            cache.deleteLast().append(") values (");
-            cache.appendStrsByComma("?", count);
-            cache.append(')');
-            insertInfo = new SqlAndFields(cache.toString(), insertFields.toArray(new MapField[insertFields.size()]));
-            LOGGER.debug("为表{},类{}创建的插入语句是{}", tableName, entityClass.getName(), insertInfo.getSql());
+            count++;
+            insertFields.add(each);
+            cache.append(each.getColName()).append(',');
         }
+        cache.deleteLast().append(") values (");
+        cache.appendStrsByComma("?", count);
+        cache.append(')');
+        insertInfo = new SqlAndFields(cache.toString(), insertFields.toArray(new MapField[insertFields.size()]));
+        LOGGER.debug("为表{},类{}创建的插入语句是{}", tableName, entityClass.getName(), insertInfo.getSql());
         if (idField.getField().isAnnotationPresent(SeqId.class))
         {
-            List<MapField> insertFields = new LinkedList<MapField>();
-            StringCache cache = new StringCache();
+            insertFields.clear();
+            cache.clear();
             /******** 生成insertSql *******/
             cache.append("insert into ").append(tableName).append(" ( ");
             cache.append(idField.getColName()).appendComma();
-            int count = 0;
+            count = 0;
             for (MapField each : fields)
             {
                 if (each == idField || each.saveIgnore())
@@ -184,6 +182,10 @@ public class OracleDAO<T> extends BaseDAO<T>
             String seqName = idField.getField().getAnnotation(SeqId.class).value();
             cache.deleteLast().append(") values (").append(seqName).append(".nextval,");
             cache.appendStrsByComma("?", count);
+            if (cache.isCommaLast())
+            {
+                cache.deleteLast();
+            }
             cache.append(')');
             seqInsertInfo = new SqlAndFields(cache.toString(), insertFields.toArray(new MapField[insertFields.size()]));
             LOGGER.debug("为表{},类{}创建的插入语句是{}", tableName, entityClass.getName(), seqInsertInfo.getSql());

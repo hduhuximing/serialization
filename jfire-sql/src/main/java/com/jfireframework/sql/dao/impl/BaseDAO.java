@@ -20,11 +20,13 @@ import com.jfireframework.sql.annotation.FindBy;
 import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.dao.Dao;
+import com.jfireframework.sql.dao.FindStrategy;
 import com.jfireframework.sql.dao.LockMode;
 import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.TableMetaData;
 import com.jfireframework.sql.metadata.TableMetaData.FieldInfo;
+import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 import com.jfireframework.sql.resultsettransfer.field.MapFieldBuilder;
 import sun.misc.Unsafe;
@@ -71,6 +73,7 @@ public abstract class BaseDAO<T> implements Dao<T>
     protected final SqlPreInterceptor[] preInterceptors;
     protected final Uid                 uid;
     protected final boolean             useUid;
+    protected final FindStrategy<T>     findStrategy;
     
     enum IdType
     {
@@ -111,6 +114,7 @@ public abstract class BaseDAO<T> implements Dao<T>
         useForSelf(allMapFields, idField);
         deleteSql = "delete from " + tableName + " where " + idField.getColName() + "=?";
         logSql();
+        findStrategy = new FindStrategyImpl<T>(entityClass, nameStrategy, preInterceptors);
     }
     
     protected abstract void useForSelf(MapField[] fields, MapField idField);
@@ -317,7 +321,7 @@ public abstract class BaseDAO<T> implements Dao<T>
         }
         catch (Exception e)
         {
-            throw new RuntimeException(e);
+            throw new JustThrowException(e);
         }
         finally
         {
@@ -503,4 +507,23 @@ public abstract class BaseDAO<T> implements Dao<T>
             }
         }
     }
+    
+    @Override
+    public T findOne(Connection connection, T param, String strategyName)
+    {
+        return findStrategy.findOne(connection, param, strategyName);
+    }
+    
+    @Override
+    public List<T> findAll(Connection connection, T param, String strategyName)
+    {
+        return findStrategy.findAll(connection, param, strategyName);
+    }
+    
+    @Override
+    public List<T> findPage(Connection connection, T param, String strategyName, Page page)
+    {
+        return findStrategy.findPage(connection, param, strategyName, page);
+    }
+    
 }

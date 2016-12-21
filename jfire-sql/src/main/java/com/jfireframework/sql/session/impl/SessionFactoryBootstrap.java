@@ -21,8 +21,10 @@ import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.sql.annotation.Sql;
 import com.jfireframework.sql.dao.Dao;
+import com.jfireframework.sql.dao.impl.HsqlDAO;
 import com.jfireframework.sql.dao.impl.MysqlDAO;
 import com.jfireframework.sql.dao.impl.OracleDAO;
+import com.jfireframework.sql.dbstructure.HsqlDBStructure;
 import com.jfireframework.sql.dbstructure.MariaDBStructure;
 import com.jfireframework.sql.dbstructure.Structure;
 import com.jfireframework.sql.interceptor.SqlInterceptor;
@@ -221,6 +223,10 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
         {
             return new MariaDBStructure();
         }
+        else if (productName.contains("hsql"))
+        {
+            return new HsqlDBStructure();
+        }
         else
         {
             throw new IllegalArgumentException("暂不支持的数据库结构类型新建或者修改,当前支持：mysql,MariaDB");
@@ -270,6 +276,10 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
                     else if (productName.equals("oracle"))
                     {
                         daos.put(each.getEntityClass(), new OracleDAO(each, preInterceptors, uid));
+                    }
+                    else if (productName.contains("hsql"))
+                    {
+                        daos.put(each.getEntityClass(), new HsqlDAO(each, preInterceptors, uid));
                     }
                     else
                     {

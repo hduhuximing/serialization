@@ -1,5 +1,6 @@
 package com.jfireframework.sql.session.sqloperation;
 
+import com.jfireframework.sql.annotation.FindByStrategy;
 import com.jfireframework.sql.dao.LockMode;
 
 public interface GetOperator
@@ -31,4 +32,6 @@ public interface GetOperator
      * @return 代表该行记录的对象实例
      */
     public <T> T get(Class<T> entityClass, Object pk, LockMode mode);
+    
+    public <T> T FindByStrategy(T entity, String strategyName);
 }

@@ -398,4 +398,11 @@ public class SqlSessionImpl implements SqlSession
         }
     }
     
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T FindByStrategy(T entity, String strategyName)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findOne(connection, entity, strategyName);
+    }
+    
 }
