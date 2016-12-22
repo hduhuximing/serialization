@@ -12,7 +12,7 @@ import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 import com.jfireframework.sql.test.findstrategy.UserStrategy;
 import com.zaxxer.hikari.HikariDataSource;
 
-public class FindStrategyTest
+public class StrategyTest
 {
     private DataSource         dataSource;
     private SessionFactoryImpl sessionFactory;
@@ -112,5 +112,17 @@ public class FindStrategyTest
         }
         Assert.assertEquals(2, page.getData().size());
         Assert.assertEquals(5, page.getTotal());
+    }
+    
+    @Test
+    public void test3()
+    {
+        SqlSession session = sessionFactory.openSession();
+        UserStrategy user = new UserStrategy();
+        user.setAge(5);
+        user.setPassword("tttt");
+        session.updateByStrategy(user, "test4");
+        UserStrategy query = session.get(UserStrategy.class, 4);
+        Assert.assertEquals("tttt", query.getPassword());
     }
 }

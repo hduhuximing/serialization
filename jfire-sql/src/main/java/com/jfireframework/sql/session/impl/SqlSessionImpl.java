@@ -419,4 +419,11 @@ public class SqlSessionImpl implements SqlSession
         return sessionFactory.getDao((Class<T>) entity.getClass()).findPage(connection, entity, steategyName, page, pageParse);
     }
     
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> int updateByStrategy(T entity, String strategyName)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).update(entity, connection, strategyName);
+    }
+    
 }

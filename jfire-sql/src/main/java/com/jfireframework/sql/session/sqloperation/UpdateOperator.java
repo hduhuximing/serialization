@@ -13,4 +13,5 @@ public interface UpdateOperator
      */
     public <T> int delete(T entity);
     
+    public <T> int updateByStrategy(T entity, String strategyName);
 }

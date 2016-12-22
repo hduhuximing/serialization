@@ -4,6 +4,7 @@ import com.jfireframework.sql.annotation.FindByStrategy;
 import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.StrategyBind;
 import com.jfireframework.sql.annotation.TableEntity;
+import com.jfireframework.sql.annotation.UpdateByStrategy;
 
 @TableEntity(name = "userstrategy")
 public class UserStrategy
@@ -15,10 +16,11 @@ public class UserStrategy
     private Integer id;
     @StrategyBind("test1,test2")
     private String  name;
-    @StrategyBind("test1,test3")
+    @StrategyBind("test1,test3,test4")
     private String  password;
     @StrategyBind("test1,test2,test3")
     @FindByStrategy("test1")
+    @UpdateByStrategy("test4")
     private Integer age;
     @StrategyBind("test2")
     private String  birthday;

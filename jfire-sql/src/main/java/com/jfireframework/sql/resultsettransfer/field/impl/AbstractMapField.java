@@ -98,4 +98,16 @@ public abstract class AbstractMapField implements MapField
     {
         return field;
     }
+    
+    @Override
+    public int hashCode()
+    {
+        return field.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object o)
+    {
+        return field.equals(o);
+    }
 }

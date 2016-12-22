@@ -22,6 +22,7 @@ import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.dao.Dao;
 import com.jfireframework.sql.dao.FindStrategy;
 import com.jfireframework.sql.dao.LockMode;
+import com.jfireframework.sql.dao.UpdateStrategy;
 import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.TableMetaData;
@@ -74,6 +75,7 @@ public abstract class BaseDAO<T> implements Dao<T>
     protected final Uid                 uid;
     protected final boolean             useUid;
     protected final FindStrategy<T>     findStrategy;
+    protected final UpdateStrategy<T>   updateStrategy;
     
     enum IdType
     {
@@ -110,6 +112,7 @@ public abstract class BaseDAO<T> implements Dao<T>
         deleteSql = "delete from " + tableName + " where " + idField.getColName() + "=?";
         logSql();
         findStrategy = new FindStrategyImpl<T>(entityClass, nameStrategy, preInterceptors);
+        updateStrategy = new UpdateStrategyImpl<T>(entityClass, nameStrategy, preInterceptors);
     }
     
     protected abstract void useForSelf(MapField[] fields, MapField idField);
@@ -468,6 +471,12 @@ public abstract class BaseDAO<T> implements Dao<T>
     public List<T> findPage(Connection connection, T param, String strategyName, Page page, PageParse pageParse)
     {
         return findStrategy.findPage(connection, param, strategyName, page, pageParse);
+    }
+    
+    @Override
+    public int update(T param, Connection connection, String strategyName)
+    {
+        return updateStrategy.update(param, connection, strategyName);
     }
     
 }

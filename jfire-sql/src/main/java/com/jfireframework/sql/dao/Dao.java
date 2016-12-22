@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.util.List;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 
-public interface Dao<T> extends FindStrategy<T>
+public interface Dao<T> extends FindStrategy<T>, UpdateStrategy<T>
 {
     
     /**
