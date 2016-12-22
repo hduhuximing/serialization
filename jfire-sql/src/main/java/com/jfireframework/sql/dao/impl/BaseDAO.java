@@ -20,11 +20,15 @@ import com.jfireframework.sql.annotation.FindBy;
 import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.dao.Dao;
+import com.jfireframework.sql.dao.FindStrategy;
 import com.jfireframework.sql.dao.LockMode;
+import com.jfireframework.sql.dao.UpdateStrategy;
 import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.TableMetaData;
 import com.jfireframework.sql.metadata.TableMetaData.FieldInfo;
+import com.jfireframework.sql.page.Page;
+import com.jfireframework.sql.page.PageParse;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 import com.jfireframework.sql.resultsettransfer.field.MapFieldBuilder;
 import sun.misc.Unsafe;
@@ -55,22 +59,23 @@ public abstract class BaseDAO<T> implements Dao<T>
     }
     
     protected final Class<T>            entityClass;
-    protected final Map<String, String> findBySqlMap = new HashMap<String, String>();
     // 代表数据库主键id的field
     protected final MapField            idField;
     protected final long                idOffset;
     protected final IdType              idType;
-    protected final static Unsafe       unsafe       = ReflectUtil.getUnsafe();
+    protected final static Unsafe       unsafe = ReflectUtil.getUnsafe();
     protected final String              tableName;
     protected final SqlAndFields        getInfo;
     protected final SqlAndFields        getInShareInfo;
     protected final SqlAndFields        getForUpdateInfo;
     protected final SqlAndFields        updateInfo;
     protected final String              deleteSql;
-    protected static final Logger       LOGGER       = ConsoleLogFactory.getLogger();
+    protected static final Logger       LOGGER = ConsoleLogFactory.getLogger();
     protected final SqlPreInterceptor[] preInterceptors;
     protected final Uid                 uid;
     protected final boolean             useUid;
+    protected final FindStrategy<T>     findStrategy;
+    protected final UpdateStrategy<T>   updateStrategy;
     
     enum IdType
     {
@@ -89,11 +94,6 @@ public abstract class BaseDAO<T> implements Dao<T>
         MapField t_id = null;
         for (MapField mapField : allMapFields)
         {
-            if (mapField.getField().isAnnotationPresent(FindBy.class))
-            {
-                String sql = "select * from " + tableName + " where " + mapField.getColName() + " = ?";
-                findBySqlMap.put(mapField.getFieldName(), sql);
-            }
             if (mapField.getField().isAnnotationPresent(Id.class))
             {
                 t_id = mapField;
@@ -111,6 +111,8 @@ public abstract class BaseDAO<T> implements Dao<T>
         useForSelf(allMapFields, idField);
         deleteSql = "delete from " + tableName + " where " + idField.getColName() + "=?";
         logSql();
+        findStrategy = new FindStrategyImpl<T>(entityClass, nameStrategy, preInterceptors);
+        updateStrategy = new UpdateStrategyImpl<T>(entityClass, nameStrategy, preInterceptors);
     }
     
     protected abstract void useForSelf(MapField[] fields, MapField idField);
@@ -317,7 +319,7 @@ public abstract class BaseDAO<T> implements Dao<T>
         }
         catch (Exception e)
         {
-            throw new RuntimeException(e);
+            throw new JustThrowException(e);
         }
         finally
         {
@@ -448,59 +450,33 @@ public abstract class BaseDAO<T> implements Dao<T>
     }
     
     @Override
-    public T findBy(String name, Object param, Connection connection)
+    public T findBy(Connection connection, Object param, String name)
     {
-        String findBy = findBySqlMap.get(name);
-        if (findBy == null)
-        {
-            throw new NullPointerException("没有对应条件的findBy");
-        }
-        for (SqlPreInterceptor each : preInterceptors)
-        {
-            each.preIntercept(findBy, param);
-        }
-        PreparedStatement pStat = null;
-        try
-        {
-            pStat = connection.prepareStatement(findBy);
-            pStat.setObject(1, param);
-            ResultSet resultSet = pStat.executeQuery();
-            if (resultSet.next())
-            {
-                T entity = entityClass.newInstance();
-                for (MapField each : getInfo.getFields())
-                {
-                    each.setEntityValue(entity, resultSet);
-                }
-                idField.setEntityValue(entity, resultSet);
-                if (resultSet.next())
-                {
-                    throw new IllegalArgumentException("查询存在两个或以上的数据，不符合要求");
-                }
-                return entity;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        catch (Exception e)
-        {
-            throw new JustThrowException(e);
-        }
-        finally
-        {
-            if (pStat != null)
-            {
-                try
-                {
-                    pStat.close();
-                }
-                catch (SQLException e)
-                {
-                    throw new JustThrowException(e);
-                }
-            }
-        }
+        return findStrategy.findBy(connection, param, name);
     }
+    
+    @Override
+    public T findOne(Connection connection, T param, String strategyName)
+    {
+        return findStrategy.findOne(connection, param, strategyName);
+    }
+    
+    @Override
+    public List<T> findAll(Connection connection, T param, String strategyName)
+    {
+        return findStrategy.findAll(connection, param, strategyName);
+    }
+    
+    @Override
+    public List<T> findPage(Connection connection, T param, String strategyName, Page page, PageParse pageParse)
+    {
+        return findStrategy.findPage(connection, param, strategyName, page, pageParse);
+    }
+    
+    @Override
+    public int update(T param, Connection connection, String strategyName)
+    {
+        return updateStrategy.update(param, connection, strategyName);
+    }
+    
 }

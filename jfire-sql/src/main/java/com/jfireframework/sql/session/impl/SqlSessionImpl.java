@@ -197,7 +197,7 @@ public class SqlSessionImpl implements SqlSession
     @Override
     public <T> T findBy(Class<T> entityClass, String name, Object param)
     {
-        return sessionFactory.getDao(entityClass).findBy(name, param, connection);
+        return sessionFactory.getDao(entityClass).findBy(connection, param, name);
     }
     
     @Override
@@ -396,6 +396,34 @@ public class SqlSessionImpl implements SqlSession
                 throw new JustThrowException(e);
             }
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T FindOneByStrategy(T entity, String strategyName)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findOne(connection, entity, strategyName);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> List<T> findAllByStrategy(T entity, String steategyName)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findAll(connection, entity, steategyName);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> List<T> findPageByStrategy(T entity, String steategyName, Page page)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findPage(connection, entity, steategyName, page, pageParse);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> int updateByStrategy(T entity, String strategyName)
+    {
+        return sessionFactory.getDao((Class<T>) entity.getClass()).update(entity, connection, strategyName);
     }
     
 }
