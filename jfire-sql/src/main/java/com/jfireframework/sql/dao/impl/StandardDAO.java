@@ -16,12 +16,12 @@ import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.TableMetaData;
 import com.jfireframework.sql.resultsettransfer.field.MapField;
 
-public class HsqlDAO<T> extends BaseDAO<T>
+public class StandardDAO<T> extends BaseDAO<T>
 {
     protected SqlAndFields insertInfo;
     private SqlAndFields   identityInsertInfo;
     
-    public HsqlDAO(TableMetaData metaData, SqlPreInterceptor[] preInterceptors, Uid uid)
+    public StandardDAO(TableMetaData metaData, SqlPreInterceptor[] preInterceptors, Uid uid)
     {
         super(metaData, preInterceptors, uid);
     }

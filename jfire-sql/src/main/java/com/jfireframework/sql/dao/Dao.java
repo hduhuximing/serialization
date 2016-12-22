@@ -68,4 +68,6 @@ public interface Dao<T> extends FindStrategy<T>, UpdateStrategy<T>
      */
     public T getById(Object pk, Connection connection, LockMode mode);
     
+    public int deleteAll(Connection connection);
+    
 }

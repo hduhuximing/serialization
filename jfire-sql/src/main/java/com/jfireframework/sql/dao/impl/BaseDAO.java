@@ -479,4 +479,33 @@ public abstract class BaseDAO<T> implements Dao<T>
         return updateStrategy.update(param, connection, strategyName);
     }
     
+    @Override
+    public int deleteAll(Connection connection)
+    {
+        PreparedStatement preparedStatement = null;
+        try
+        {
+            preparedStatement = connection.prepareStatement("delete from " + tableName);
+            return preparedStatement.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            throw new JustThrowException(e);
+        }
+        finally
+        {
+            if (preparedStatement != null)
+            {
+                try
+                {
+                    preparedStatement.close();
+                }
+                catch (SQLException e)
+                {
+                    throw new JustThrowException(e);
+                }
+            }
+        }
+    }
+    
 }

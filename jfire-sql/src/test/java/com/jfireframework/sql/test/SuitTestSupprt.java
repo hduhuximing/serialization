@@ -10,6 +10,7 @@ import org.junit.runners.Suite;
         InterfaceTest.class, //
         TxManagerTest.class, //
         StrategyTest.class, //
+        H2Test.class, //
         TxTest.class//
 })
 public class SuitTestSupprt

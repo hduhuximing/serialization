@@ -56,4 +56,9 @@ public interface SessionFactory
      */
     public void setCurrentSession(SqlSession session);
     
+    /**
+     * 删除所有的数据
+     */
+    public void cleanAllData();
+    
 }

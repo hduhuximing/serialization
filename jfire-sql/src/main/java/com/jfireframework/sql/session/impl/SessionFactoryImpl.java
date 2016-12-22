@@ -1,5 +1,6 @@
 package com.jfireframework.sql.session.impl;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import com.jfireframework.baseutil.exception.JustThrowException;
@@ -56,6 +57,7 @@ public class SessionFactoryImpl extends SessionFactoryBootstrap
         sessionLocal.set(session);
     }
     
+    @Override
     public void setScanPackage(String scanPackage)
     {
         this.scanPackage = scanPackage;
@@ -97,6 +99,20 @@ public class SessionFactoryImpl extends SessionFactoryBootstrap
     public <T> Dao<T> getDao(Class<T> ckass)
     {
         return (Dao<T>) daos.get(ckass);
+    }
+    
+    @Override
+    public void cleanAllData()
+    {
+        SqlSession session = getOrCreateCurrentSession();
+        session.beginTransAction(0);
+        Connection connection = session.getConnection();
+        for (Dao<?> dao : daos.values())
+        {
+            dao.deleteAll(connection);
+        }
+        session.commit();
+        session.close();
     }
     
 }

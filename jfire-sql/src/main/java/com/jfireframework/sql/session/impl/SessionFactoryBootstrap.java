@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import org.apache.poi.ss.formula.EvaluationWorkbook;
 import com.jfireframework.baseutil.PackageScan;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
@@ -21,9 +22,10 @@ import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.sql.annotation.Sql;
 import com.jfireframework.sql.dao.Dao;
-import com.jfireframework.sql.dao.impl.HsqlDAO;
+import com.jfireframework.sql.dao.impl.StandardDAO;
 import com.jfireframework.sql.dao.impl.MysqlDAO;
 import com.jfireframework.sql.dao.impl.OracleDAO;
+import com.jfireframework.sql.dbstructure.H2DBStructure;
 import com.jfireframework.sql.dbstructure.HsqlDBStructure;
 import com.jfireframework.sql.dbstructure.MariaDBStructure;
 import com.jfireframework.sql.dbstructure.Structure;
@@ -141,6 +143,10 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
             {
                 return new StandardParse();
             }
+            else if (productName.equals("h2"))
+            {
+                return new StandardParse();
+            }
             else
             {
                 logger.error("不支持分页的数据库类型：{}", productName);
@@ -231,9 +237,13 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
         {
             return new HsqlDBStructure();
         }
+        else if (productName.equals("h2"))
+        {
+            return new H2DBStructure();
+        }
         else
         {
-            throw new IllegalArgumentException("暂不支持的数据库结构类型新建或者修改,当前支持：mysql,MariaDB");
+            throw new IllegalArgumentException("暂不支持" + productName + "数据库结构类型新建或者修改,当前支持：mysql,MariaDB");
         }
     }
     
@@ -283,7 +293,11 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
                     }
                     else if (productName.contains("hsql"))
                     {
-                        daos.put(each.getEntityClass(), new HsqlDAO(each, preInterceptors, uid));
+                        daos.put(each.getEntityClass(), new StandardDAO(each, preInterceptors, uid));
+                    }
+                    else if (productName.equals("h2"))
+                    {
+                        daos.put(each.getEntityClass(), new StandardDAO(each, preInterceptors, uid));
                     }
                     else
                     {

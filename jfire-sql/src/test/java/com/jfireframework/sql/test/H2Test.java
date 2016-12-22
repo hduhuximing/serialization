@@ -1,37 +1,33 @@
 package com.jfireframework.sql.test;
 
 import java.util.List;
-import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.jfireframework.sql.page.Page;
-import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.session.SqlSession;
 import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 import com.jfireframework.sql.test.findstrategy.UserStrategy;
 import com.zaxxer.hikari.HikariDataSource;
 
-public class StrategyTest
+public class H2Test
 {
-    private DataSource         dataSource;
-    private SessionFactoryImpl sessionFactory;
+    SessionFactoryImpl sessionFactory;
     
     @Before
     public void before()
     {
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:hsqldb:mem:mymemdb");
+        dataSource.setJdbcUrl("jdbc:h2:mem:test");
         // dataSource.setJdbcUrl("jdbc:oracle:thin:@192.168.10.21:1521/orcl");
         // dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-        dataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
+        dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUsername("SA");
         dataSource.setPassword("");
         // dataSource.setUsername("test8");
         // dataSource.setPassword("bs");
         dataSource.setMaximumPoolSize(150);
         dataSource.setConnectionTimeout(1500);
-        this.dataSource = dataSource;
         sessionFactory = new SessionFactoryImpl(dataSource);
         sessionFactory.setScanPackage("com.jfireframework.sql.test.findstrategy");
         sessionFactory.setTableMode("create");
