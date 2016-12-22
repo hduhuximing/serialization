@@ -400,7 +400,7 @@ public class SqlSessionImpl implements SqlSession
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T FindOneByStrategy(T entity, String strategyName)
+    public <T> T findOneByStrategy(T entity, String strategyName)
     {
         return sessionFactory.getDao((Class<T>) entity.getClass()).findOne(connection, entity, strategyName);
     }

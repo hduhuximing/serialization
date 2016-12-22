@@ -60,13 +60,13 @@ public class H2Test
         UserStrategy user = new UserStrategy();
         user.setAge(5);
         user.setBoy(false);
-        UserStrategy result = session.FindOneByStrategy(user, "test1");
+        UserStrategy result = session.findOneByStrategy(user, "test1");
         Assert.assertEquals("test-5", result.getName());
         Assert.assertEquals("pass-5", result.getPassword());
         Assert.assertNull(user.getBirthday());
         user = new UserStrategy();
         user.setId(5);
-        result = session.FindOneByStrategy(user, "test2");
+        result = session.findOneByStrategy(user, "test2");
         Assert.assertNull(result.getPassword());
         Assert.assertEquals("2016-10-05", result.getBirthday());
     }
