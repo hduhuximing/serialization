@@ -127,7 +127,7 @@ public class H2DBStructure implements Structure
                 Class<?> returnType = handlerClass.getDeclaredMethod("getValue", Enum.class).getReturnType();
                 if (returnType == Integer.class || returnType == Long.class || returnType == Short.class)
                 {
-                    return new TypeAndLength("int", 9);
+                    return new TypeAndLength("integer", 0);
                 }
                 else if (returnType == Float.class)
                 {
@@ -139,7 +139,7 @@ public class H2DBStructure implements Structure
                 }
                 else if (returnType == Boolean.class)
                 {
-                    return new TypeAndLength("tinyint", 1);
+                    return new TypeAndLength("tinyint", 0);
                 }
                 else if (returnType == String.class)
                 {
