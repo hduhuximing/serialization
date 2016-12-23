@@ -45,6 +45,7 @@ public class DispathServletHelper
                 if ("true".equals(properties.getProperty("hotswap")))
                 {
                     preHandler = new HotswapPreHandler(properties);
+                    preHandler.preHandle();
                 }
                 else
                 {
