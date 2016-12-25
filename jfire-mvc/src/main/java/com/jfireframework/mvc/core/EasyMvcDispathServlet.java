@@ -33,23 +33,30 @@ public class EasyMvcDispathServlet extends HttpServlet
     private Logger               logger                = ConsoleLogFactory.getLogger();
     private DispathServletHelper helper;
     private static final String  DEFAULT_METHOD_PREFIX = "_method";
+    private String               encode;
     
     @Override
     public void init(ServletConfig servletConfig) throws ServletException
     {
         logger.debug("初始化Context-mvc Servlet");
         helper = new DispathServletHelper(servletConfig.getServletContext());
+        encode = helper.getExtraConfig().getEncode();
+        
     }
     
     @Override
     public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException
     {
         helper.preHandle();
+        req.setCharacterEncoding(encode);
+        res.setCharacterEncoding(encode);
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
-        if (request.getMethod().equals("POST") && StringUtil.isNotBlank(request.getParameter(DEFAULT_METHOD_PREFIX)))
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        if (request.getMethod().equals("POST") && StringUtil.isNotBlank(request.getHeader(DEFAULT_METHOD_PREFIX)))
         {
-            String method = request.getParameter(DEFAULT_METHOD_PREFIX).toUpperCase();
+            String method = request.getHeader(DEFAULT_METHOD_PREFIX).toUpperCase();
             request = new ChangeMethodRequest(method, request);
         }
         Action action = helper.getAction(request);

@@ -2,6 +2,8 @@ package com.jfireframework.boot;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebFilter;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
@@ -43,7 +45,8 @@ public class BootStarter
                                     .addMapping("/*")//
                                     .setEnabled(true)//
                                     .setLoadOnStartup(1)//
-                                    .setAsyncSupported(true)
+                                    .setAsyncSupported(true)//
+                                    .setMultipartConfig(new MultipartConfigElement(EasyMvcDispathServlet.class.getAnnotation(MultipartConfig.class)))
                     );
             servletBuilder.setResourceManager(resourceManager);
             for (Class<? extends Filter> each : filterClasses)
@@ -52,10 +55,13 @@ public class BootStarter
                 {
                     WebFilter webFilter = each.getAnnotation(WebFilter.class);
                     FilterInfo filterInfo = new FilterInfo(webFilter.filterName(), each);
+                    filterInfo.setAsyncSupported(webFilter.asyncSupported());
                     servletBuilder.addFilter(filterInfo);
                     for (String url : webFilter.value())
                     {
                         servletBuilder.addFilterUrlMapping(webFilter.filterName(), url, DispatcherType.FORWARD);
+                        servletBuilder.addFilterUrlMapping(webFilter.filterName(), url, DispatcherType.INCLUDE);
+                        servletBuilder.addFilterUrlMapping(webFilter.filterName(), url, DispatcherType.REQUEST);
                     }
                 }
             }

@@ -112,19 +112,9 @@ public class FindStrategyImpl<T> implements FindStrategy<T>
         {
             StringCache cache = new StringCache();
             List<MapField> selectFields = new LinkedList<MapField>();
-            if (fieldStrategyMap.containsKey(entry.getKey()))
+            for (Field each : fieldStrategyMap.get(entry.getKey()))
             {
-                for (Field each : fieldStrategyMap.get(entry.getKey()))
-                {
-                    selectFields.add(MapFieldBuilder.buildMapField(each, colNameStrategy));
-                }
-            }
-            else
-            {
-                for (Field each : fields)
-                {
-                    selectFields.add(MapFieldBuilder.buildMapField(each, colNameStrategy));
-                }
+                selectFields.add(MapFieldBuilder.buildMapField(each, colNameStrategy));
             }
             cache.append("select ");
             for (MapField each : selectFields)

@@ -11,6 +11,7 @@ import javax.servlet.http.Part;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.context.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.binder.UploadItem;
 import com.jfireframework.mvc.core.action.Action;
 import com.jfireframework.mvc.interceptor.ActionInterceptor;
@@ -22,6 +23,8 @@ public class UploadInterceptor implements ActionInterceptor
     private static final Logger logger         = ConsoleLogFactory.getLogger();
     @Resource(name = "servletContext")
     private ServletContext      servletContext;
+    @PropertyRead("encode")
+    private String              encode         = "UTF-8";
     private float               version;
     
     @PostConstruct
@@ -48,11 +51,12 @@ public class UploadInterceptor implements ActionInterceptor
              * 在这里必须要有这样的一句。这样可以保证如果对request进行编码设置可以生效。如果请求是multipart/form-
              * data类型， 也不会干扰对流的读取，所以是安全的。
              */
-            request.getParameter("");
+            request.setCharacterEncoding(encode);
+            response.setCharacterEncoding(encode);
             String contentType = request.getContentType();
             if (StringUtil.isNotBlank(contentType) && contentType.startsWith("multipart/form-data"))
             {
-                if (version == 3.0)
+                if (version == 3.0f)
                 {
                     List<UploadItem> list = new ArrayList<UploadItem>();
                     for (Part part : request.getParts())
@@ -69,7 +73,7 @@ public class UploadInterceptor implements ActionInterceptor
                     request.setAttribute(UploadInterceptor.uploadFileList, list);
                     return true;
                 }
-                else if (version == 3.1)
+                else if (version == 3.1f)
                 {
                     List<UploadItem> list = new ArrayList<UploadItem>();
                     for (Part part : request.getParts())

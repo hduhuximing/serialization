@@ -1,11 +1,8 @@
 package com.jfireframework.mvc.core;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -19,66 +16,32 @@ import com.jfireframework.mvc.config.MvcStaticConfig;
 import com.jfireframework.mvc.core.action.Action;
 import com.jfireframework.mvc.core.action.ActionCenter;
 import com.jfireframework.mvc.core.action.ActionCenterBulder;
+import com.jfireframework.mvc.util.ExtraConfig;
 import com.jfireframework.mvc.util.FileChangeDetect;
 
 public class DispathServletHelper
 {
-    private static final Logger     logger          = ConsoleLogFactory.getLogger();
+    private static final Logger     logger = ConsoleLogFactory.getLogger();
     private ActionCenter            actionCenter;
     private final ServletContext    servletContext;
     private final RequestDispatcher staticResourceDispatcher;
-    private static final String     hotswapFileName = "hotswap.properties";
     private final PreHandler        preHandler;
+    private final ExtraConfig       extraConfig;
     
     public DispathServletHelper(ServletContext servletContext)
     {
         this.servletContext = servletContext;
         staticResourceDispatcher = getStaticResourceDispatcher();
-        if (DispathServletHelper.class.getClassLoader().getResource(hotswapFileName) != null)
+        actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext);
+        extraConfig = actionCenter.getExtraConfig();
+        if (extraConfig.isHotswap())
         {
-            InputStream inputStream = null;
-            try
-            {
-                inputStream = DispathServletHelper.class.getClassLoader().getResourceAsStream(hotswapFileName);
-                Properties properties = new Properties();
-                properties.load(inputStream);
-                if ("true".equals(properties.getProperty("hotswap")))
-                {
-                    preHandler = new HotswapPreHandler(properties);
-                    preHandler.preHandle();
-                }
-                else
-                {
-                    preHandler = new NopPreHandler();
-                    actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext);
-                }
-            }
-            catch (IOException e)
-            {
-                throw new JustThrowException(e);
-            }
-            finally
-            {
-                if (inputStream != null)
-                {
-                    try
-                    {
-                        inputStream.close();
-                    }
-                    catch (IOException e)
-                    {
-                        throw new JustThrowException(e);
-                    }
-                }
-            }
-            
+            preHandler = new HotswapPreHandler(extraConfig);
         }
         else
         {
             preHandler = new NopPreHandler();
-            actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext);
         }
-        
     }
     
     private RequestDispatcher getStaticResourceDispatcher()
@@ -120,6 +83,11 @@ public class DispathServletHelper
         }
     }
     
+    public ExtraConfig getExtraConfig()
+    {
+        return extraConfig;
+    }
+    
     public void preHandle()
     {
         preHandler.preHandle();
@@ -147,18 +115,17 @@ public class DispathServletHelper
         private final String           reloadPackages;
         private final String           excludePackages;
         
-        public HotswapPreHandler(Properties hotswapProperties)
+        public HotswapPreHandler(ExtraConfig extraConfig)
         {
-            String monitorPath = hotswapProperties.getProperty("monitorPath");
             List<File> roots = new LinkedList<File>();
-            for (String each : monitorPath.split(","))
+            for (String each : extraConfig.getMonitorPath().split(","))
             {
                 roots.add(new File(each));
             }
             detect = new FileChangeDetect(roots.toArray(new File[roots.size()]));
-            reloadPath = hotswapProperties.getProperty("reloadPath");
-            reloadPackages = hotswapProperties.getProperty("reloadPackages");
-            excludePackages = hotswapProperties.getProperty("excludePackages");
+            reloadPath = extraConfig.getReloadPath();
+            reloadPackages = extraConfig.getReloadPackages();
+            excludePackages = extraConfig.getExcludePackages();
         }
         
         @Override

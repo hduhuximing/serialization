@@ -1,13 +1,11 @@
 package com.jfireframework.mvc.interceptor.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Map.Entry;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.context.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.binder.DataBinder;
 import com.jfireframework.mvc.binder.node.TreeValueNode;
 import com.jfireframework.mvc.core.action.Action;
@@ -16,8 +14,6 @@ import com.jfireframework.mvc.interceptor.ActionInterceptor;
 @Resource
 public class DataBinderInterceptor implements ActionInterceptor
 {
-    @PropertyRead("encode")
-    private String                                  encode        = "UTF-8";
     public static final String                      DATABINDERKEY = "databinder_key" + System.currentTimeMillis();
     private static final ThreadLocal<TreeValueNode> nodeLocal     = new ThreadLocal<TreeValueNode>() {
                                                                       @Override
@@ -36,15 +32,6 @@ public class DataBinderInterceptor implements ActionInterceptor
     @Override
     public boolean interceptor(HttpServletRequest request, HttpServletResponse response, Action action)
     {
-        try
-        {
-            request.setCharacterEncoding(encode);
-            response.setCharacterEncoding(encode);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new JustThrowException(e);
-        }
         TreeValueNode node = nodeLocal.get();
         node.clear();
         if (action.isReadStream() == false)

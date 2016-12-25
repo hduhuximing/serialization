@@ -10,6 +10,7 @@ public class FileChangeDetect
     public FileChangeDetect(File[] roots)
     {
         this.roots = roots;
+        detectChange();
     }
     
     private long calculateModitySum(File file)
