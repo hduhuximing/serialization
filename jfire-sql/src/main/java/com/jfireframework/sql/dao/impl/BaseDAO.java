@@ -20,9 +20,9 @@ import com.jfireframework.sql.annotation.FindBy;
 import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.dao.Dao;
-import com.jfireframework.sql.dao.FindStrategy;
+import com.jfireframework.sql.dao.FindByStrategy;
 import com.jfireframework.sql.dao.LockMode;
-import com.jfireframework.sql.dao.UpdateStrategy;
+import com.jfireframework.sql.dao.UpdateByStrategy;
 import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.TableMetaData;
@@ -63,19 +63,20 @@ public abstract class BaseDAO<T> implements Dao<T>
     protected final MapField            idField;
     protected final long                idOffset;
     protected final IdType              idType;
-    protected final static Unsafe       unsafe = ReflectUtil.getUnsafe();
+    protected final static Unsafe       unsafe    = ReflectUtil.getUnsafe();
     protected final String              tableName;
     protected final SqlAndFields        getInfo;
     protected final SqlAndFields        getInShareInfo;
     protected final SqlAndFields        getForUpdateInfo;
     protected final SqlAndFields        updateInfo;
     protected final String              deleteSql;
-    protected static final Logger       LOGGER = ConsoleLogFactory.getLogger();
+    protected static final Logger       LOGGER    = ConsoleLogFactory.getLogger();
     protected final SqlPreInterceptor[] preInterceptors;
     protected final Uid                 uid;
     protected final boolean             useUid;
-    protected final FindStrategy<T>     findStrategy;
-    protected final UpdateStrategy<T>   updateStrategy;
+    protected final FindByStrategy<T>   findStrategy;
+    protected final UpdateByStrategy<T> updateStrategy;
+    protected final Map<String, String> findByMap = new HashMap<String, String>();
     
     enum IdType
     {
@@ -98,6 +99,11 @@ public abstract class BaseDAO<T> implements Dao<T>
             {
                 t_id = mapField;
             }
+            if (mapField.getField().isAnnotationPresent(FindBy.class))
+            {
+                String sql = "select * from " + tableName + " where " + mapField.getColName() + " = ?";
+                findByMap.put(mapField.getFieldName(), sql);
+            }
         }
         Field t_idField = t_id.getField();
         useUid = t_idField.getAnnotation(Id.class).useUid();
@@ -111,8 +117,8 @@ public abstract class BaseDAO<T> implements Dao<T>
         useForSelf(allMapFields, idField);
         deleteSql = "delete from " + tableName + " where " + idField.getColName() + "=?";
         logSql();
-        findStrategy = new FindStrategyImpl<T>(entityClass, nameStrategy, preInterceptors);
-        updateStrategy = new UpdateStrategyImpl<T>(entityClass, nameStrategy, preInterceptors);
+        findStrategy = new FindByStrategyImpl<T>(entityClass, allMapFields, preInterceptors);
+        updateStrategy = new UpdateByStrategyImpl<T>(entityClass, allMapFields, preInterceptors);
     }
     
     protected abstract void useForSelf(MapField[] fields, MapField idField);
@@ -452,7 +458,58 @@ public abstract class BaseDAO<T> implements Dao<T>
     @Override
     public T findBy(Connection connection, Object param, String name)
     {
-        return findStrategy.findBy(connection, param, name);
+        String sql = findByMap.get(name);
+        if (sql == null)
+        {
+            throw new NullPointerException("没有属性:" + name + "的findBy注解,请检查类:" + entityClass.getName());
+        }
+        for (SqlPreInterceptor each : preInterceptors)
+        {
+            each.preIntercept(sql, param);
+        }
+        PreparedStatement pStat = null;
+        try
+        {
+            pStat = connection.prepareStatement(sql);
+            pStat.setObject(1, param);
+            ResultSet resultSet = pStat.executeQuery();
+            if (resultSet.next())
+            {
+                T entity = entityClass.newInstance();
+                for (MapField each : getInfo.getFields())
+                {
+                    each.setEntityValue(entity, resultSet);
+                }
+                if (resultSet.next())
+                {
+                    throw new IllegalArgumentException("查询存在两个或以上的数据，不符合要求");
+                }
+                return entity;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new JustThrowException(e);
+        }
+        finally
+        {
+            if (pStat != null)
+            {
+                try
+                {
+                    pStat.close();
+                }
+                catch (SQLException e)
+                {
+                    throw new JustThrowException(e);
+                }
+            }
+        }
+        
     }
     
     @Override

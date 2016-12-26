@@ -1,7 +1,6 @@
 package com.jfireframework.sql.session.sqloperation;
 
 import java.util.List;
-import com.jfireframework.sql.annotation.FindByStrategy;
 import com.jfireframework.sql.dao.LockMode;
 import com.jfireframework.sql.page.Page;
 

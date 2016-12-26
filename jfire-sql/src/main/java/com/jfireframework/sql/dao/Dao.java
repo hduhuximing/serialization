@@ -2,9 +2,8 @@ package com.jfireframework.sql.dao;
 
 import java.sql.Connection;
 import java.util.List;
-import com.jfireframework.sql.resultsettransfer.field.MapField;
 
-public interface Dao<T> extends FindStrategy<T>, UpdateStrategy<T>
+public interface Dao<T> extends FindByStrategy<T>, UpdateByStrategy<T>
 {
     
     /**
@@ -70,4 +69,5 @@ public interface Dao<T> extends FindStrategy<T>, UpdateStrategy<T>
     
     public int deleteAll(Connection connection);
     
+    public T findBy(Connection connection, Object param, String name);
 }
