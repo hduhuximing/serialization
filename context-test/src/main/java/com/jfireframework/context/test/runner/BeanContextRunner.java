@@ -1,4 +1,4 @@
-package com.jfire.test.runner;
+package com.jfireframework.context.test.runner;
 
 import java.io.File;
 import java.net.URISyntaxException;

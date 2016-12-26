@@ -9,7 +9,7 @@
 		<version>1.0</version>
 	</parent>
 	<artifactId>jfire-mvc</artifactId>
-	<version>1.0.201612-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>mvc</name>
 	<description>
 	Jfire - MVC MVC framework is a fast and efficient. Support the rest style urls. Transparent simple file upload, data binding function to access web parameters become very easy. Supports multiple views at the same time. Includes regular HTML, json, templates, etc
@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-context</artifactId>
-			<version>1.0</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

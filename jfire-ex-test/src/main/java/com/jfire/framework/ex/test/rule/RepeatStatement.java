@@ -1,4 +1,4 @@
-package com.jfire.test.rule;
+package com.jfire.framework.ex.test.rule;
 
 import org.junit.runners.model.Statement;
 

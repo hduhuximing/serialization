@@ -9,17 +9,15 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import com.jfire.test.rule.CustomRule;
+import com.jfire.framework.ex.test.rule.CustomRule;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.collection.buffer.HeapByteBuf;
-import com.jfireframework.baseutil.collection.buffer.HeapByteBufPool;
 import com.jfireframework.baseutil.encrypt.AesUtil;
 import com.jfireframework.licp.InternalLicp;
 import com.jframework.licp.test.basetest.data.ArrayData;
 import com.jframework.licp.test.basetest.data.BaseData;
 import com.jframework.licp.test.basetest.data.LongData;
-import com.jframework.licp.test.basetest.data.NewBaseData;
 import com.jframework.licp.test.basetest.data.Person;
 import com.jframework.licp.test.basetest.data.WrapData;
 

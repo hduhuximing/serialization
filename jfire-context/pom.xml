@@ -8,7 +8,7 @@
 		<artifactId>framework-parent</artifactId>
 		<version>1.0</version>
 	</parent>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<artifactId>jfire-context</artifactId>
 	<name>context</name>
 	<description> 
@@ -21,12 +21,12 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-codejson</artifactId>
-			<version>1.1</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-baseutil</artifactId>
-			<version>1.0</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>redis.clients</groupId>
@@ -37,13 +37,13 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-licp</artifactId>
-			<version>1.2</version>
+			<version>1.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-eventbus</artifactId>
-			<version>1.0</version>
+			<version>1.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>

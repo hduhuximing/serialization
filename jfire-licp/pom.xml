@@ -8,7 +8,7 @@
 	</parent>
 	<packaging>jar</packaging>
 	<artifactId>jfire-licp</artifactId>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>licp</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-baseutil</artifactId>
-			<version>1.0</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.esotericsoftware</groupId>
@@ -28,7 +28,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.jfireframework</groupId>
-			<artifactId>jfire-test</artifactId>
+			<artifactId>jfire-ex-test</artifactId>
 			<version>1.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>

@@ -1,4 +1,4 @@
-package com.jfire.test.runner;
+package com.jfireframework.context.test.runner;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

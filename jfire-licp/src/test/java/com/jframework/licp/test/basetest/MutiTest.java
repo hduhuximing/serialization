@@ -2,8 +2,8 @@ package com.jframework.licp.test.basetest;
 
 import org.junit.Rule;
 import org.junit.Test;
-import com.jfire.test.rule.CustomRule;
-import com.jfire.test.rule.MutiThreadTest;
+import com.jfire.framework.ex.test.rule.CustomRule;
+import com.jfire.framework.ex.test.rule.MutiThreadTest;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.collection.buffer.HeapByteBufPool;
 import com.jfireframework.licp.InternalLicp;

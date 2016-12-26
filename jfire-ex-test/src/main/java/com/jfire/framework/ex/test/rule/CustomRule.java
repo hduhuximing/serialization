@@ -1,4 +1,4 @@
-package com.jfire.test.rule;
+package com.jfire.framework.ex.test.rule;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;

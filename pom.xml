@@ -11,18 +11,6 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<modules>
-		<module>jfire-baseutil</module>
-		<module>jfire-codejson</module>
-		<module>jfire-context</module>
-		<module>jfire-sql</module>
-		<module>jfire-mvc</module>
-		<module>jfire-jnet2</module>
-		<module>jfire-eventbus</module>
-		<module>jfire-schedule</module>
-		<module>jfire-boot</module>
-		<module>jfire-licp</module>
-	</modules>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -123,4 +111,19 @@
 			</distributionManagement>
 		</profile>
 	</profiles>
+	<modules>
+		<module>jfire-baseutil</module>
+		<module>jfire-boot</module>
+		<module>jfire-codejson</module>
+		<module>jfire-context</module>
+		<module>jfire-dbunit</module>
+		<module>jfire-eventbus</module>
+		<module>jfire-ex-test</module>
+		<module>jfire-jnet2</module>
+		<module>jfire-licp</module>
+		<module>jfire-mvc</module>
+		<module>jfire-schedule</module>
+		<module>jfire-sql</module>
+		<module>context-test</module>
+	</modules>
 </project>

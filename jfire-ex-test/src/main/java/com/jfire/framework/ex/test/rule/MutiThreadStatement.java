@@ -1,4 +1,4 @@
-package com.jfire.test.rule;
+package com.jfire.framework.ex.test.rule;
 
 import java.util.LinkedList;
 import java.util.List;
