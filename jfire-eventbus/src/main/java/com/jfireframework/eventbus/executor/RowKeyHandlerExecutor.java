@@ -85,10 +85,8 @@ public class RowKeyHandlerExecutor implements EventExecutor
         do
         {
             status = rowBucket.status;
-            if (
-                (status == RowBucket.END_OF_WORK && rowBucket.takeControlOfSendingLeft()) //
-                        || (status == RowBucket.END_OF_SENDING && rowBucket.eventQueue.isEmpty() == false && rowBucket.takeControlOfSendingLeft())
-            )
+            if ((status == RowBucket.END_OF_WORK && rowBucket.takeControlOfSendingLeft()) //
+                    || (status == RowBucket.END_OF_SENDING && rowBucket.eventQueue.isEmpty() == false && rowBucket.takeControlOfSendingLeft()))
             {
                 EventBus eventBus;
                 if (runnerMode.getEventBus() != null)
@@ -112,6 +110,10 @@ public class RowKeyHandlerExecutor implements EventExecutor
                 {
                     continue;
                 }
+            }
+            else
+            {
+                break;
             }
         } while (true);
     }
