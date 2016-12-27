@@ -9,8 +9,8 @@
 		<version>1.0</version>
 	</parent>
 	<version>1.0-SNAPSHOT</version>
-	<artifactId>jfire-eventbus</artifactId>
-	<name>jfire-eventbus</name>
+	<artifactId>jfire-coordinator</artifactId>
+	<name>coordinator</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
