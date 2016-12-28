@@ -5,7 +5,7 @@ import org.junit.Test;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 import com.jfireframework.context.config.BeanInfo;
-import com.jfireframework.context.event.EventRegisterHelper;
+import com.jfireframework.context.event.CoordinatorRegisterHelper;
 
 public class EventTest
 {
@@ -14,7 +14,7 @@ public class EventTest
     {
         JfireContext jfireContext = new JfireContextImpl();
         jfireContext.addBean(HaftHandler.class);
-        jfireContext.addBean("eventregisterhelper", false, EventRegisterHelper.class);
+        jfireContext.addBean("eventregisterhelper", false, CoordinatorRegisterHelper.class);
         BeanInfo beanInfo = new BeanInfo();
         beanInfo.setBeanName("eventregisterhelper");
         HashMap<String, String> params = new HashMap<String, String>();

@@ -3,21 +3,22 @@ package com.jfireframework.eventbus.pipeline;
 import java.util.Queue;
 import org.junit.Assert;
 import org.junit.Test;
-import com.jfireframework.eventbus.bus.EventBus;
-import com.jfireframework.eventbus.bus.impl.ComputationEventBus;
-import com.jfireframework.eventbus.event.EventHandler;
-import com.jfireframework.eventbus.operator.MapOp;
-import com.jfireframework.eventbus.operator.OperatorData;
-import com.jfireframework.eventbus.operator.TransferOp;
-import com.jfireframework.eventbus.operator.impl.NumberReduceOp;
-import com.jfireframework.eventbus.operator.impl.SingleAwaitOp;
-import com.jfireframework.eventbus.pipeline.impl.DefaultPipeline;
-import com.jfireframework.eventbus.util.EventHelper;
-import com.jfireframework.eventbus.util.RunnerMode;
+import com.jfireframework.coordinator.api.CoordinatorHandler;
+import com.jfireframework.coordinator.bus.CoordinatorBus;
+import com.jfireframework.coordinator.bus.impl.ComputationCoordinatorBus;
+import com.jfireframework.coordinator.operator.MapOp;
+import com.jfireframework.coordinator.operator.OperatorData;
+import com.jfireframework.coordinator.operator.TransferOp;
+import com.jfireframework.coordinator.operator.impl.NumberReduceOp;
+import com.jfireframework.coordinator.operator.impl.SingleAwaitOp;
+import com.jfireframework.coordinator.pipeline.Pipeline;
+import com.jfireframework.coordinator.pipeline.impl.DefaultPipeline;
+import com.jfireframework.coordinator.util.CoordinatorHelper;
+import com.jfireframework.coordinator.util.RunnerMode;
 
 public class PipeLineTest
 {
-    EventHandler<String> handler = new EventHandler<String>() {
+    CoordinatorHandler<String> handler = new CoordinatorHandler<String>() {
                                      @Override
                                      public Object handle(String data, RunnerMode runnerMode)
                                      {
@@ -34,7 +35,7 @@ public class PipeLineTest
                                          return data;
                                      }
                                  };
-    EventHandler<String> handle2 = new EventHandler<String>() {
+    CoordinatorHandler<String> handle2 = new CoordinatorHandler<String>() {
                                      
                                      @Override
                                      public Object handle(String data, RunnerMode runnerMode)
@@ -47,8 +48,8 @@ public class PipeLineTest
     @Test
     public void test()
     {
-        EventBus eventBus = new ComputationEventBus();
-        EventHelper.register(PipeLineEvent.class);
+        CoordinatorBus eventBus = new ComputationCoordinatorBus();
+        CoordinatorHelper.register(PipeLineEvent.class);
         SingleAwaitOp singleAwaitOp = new SingleAwaitOp();
         Pipeline pipeLine = eventBus.pipeline()//
                 .next(PipeLineEvent.one, handler, "one")//
@@ -63,8 +64,8 @@ public class PipeLineTest
     @Test
     public void test2()
     {
-        EventBus eventBus = new ComputationEventBus();
-        EventHelper.register(PipeLineEvent.class);
+        CoordinatorBus eventBus = new ComputationCoordinatorBus();
+        CoordinatorHelper.register(PipeLineEvent.class);
         SingleAwaitOp singleAwaitOp = new SingleAwaitOp();
         Pipeline pipeLine = eventBus.pipeline()//
                 .next(PipeLineEvent.one, handler, "one")//
@@ -81,12 +82,12 @@ public class PipeLineTest
     @Test
     public void test3()
     {
-        EventBus eventBus = new ComputationEventBus();
-        EventHelper.register(PipeLineEvent.class);
+        CoordinatorBus eventBus = new ComputationCoordinatorBus();
+        CoordinatorHelper.register(PipeLineEvent.class);
         SingleAwaitOp op = new SingleAwaitOp();
         Pipeline pipeline = eventBus.pipeline()//
                 .next(
-                        PipeLineEvent.one, new EventHandler<String>() {
+                        PipeLineEvent.one, new CoordinatorHandler<String>() {
                             
                             @Override
                             public Object handle(String data, RunnerMode runnerMode)
@@ -106,7 +107,7 @@ public class PipeLineTest
                             }
                         }
                 ).next(
-                        PipeLineEvent.one, new EventHandler<Integer>() {
+                        PipeLineEvent.one, new CoordinatorHandler<Integer>() {
                             
                             @Override
                             public Object handle(Integer data, RunnerMode runnerMode)
@@ -126,8 +127,8 @@ public class PipeLineTest
     @Test
     public void test4()
     {
-        EventBus eventBus = new ComputationEventBus();
-        EventHelper.register(PipeLineEvent.class);
+        CoordinatorBus eventBus = new ComputationCoordinatorBus();
+        CoordinatorHelper.register(PipeLineEvent.class);
         SingleAwaitOp op = new SingleAwaitOp();
         Pipeline pipeline = DefaultPipeline.from(new String[] { "1", "2" }) // 从数组遍历，每一个数组元素作为下一个环节的数据提供
                 .switchTo(eventBus)// 投递一个字符串数组
@@ -144,7 +145,7 @@ public class PipeLineTest
                 )// 将收到的字符串数据转化为数字提供给下一个处理器
                 .add(new NumberReduceOp(2))// 将收到的Integer类型数据存储在并发的Queue中，如果被调用两次后，将Queue中的数据传递下一个处理器
                 .next(
-                        PipeLineEvent.one, new EventHandler<Queue<Integer>>() {
+                        PipeLineEvent.one, new CoordinatorHandler<Queue<Integer>>() {
                             
                             @Override
                             public Object handle(Queue<Integer> data, RunnerMode runnerMode)
@@ -169,12 +170,12 @@ public class PipeLineTest
     @Test
     public void test5()
     {
-        EventBus eventBus = new ComputationEventBus();
-        EventHelper.register(PipeLineEvent.class);
+        CoordinatorBus eventBus = new ComputationCoordinatorBus();
+        CoordinatorHelper.register(PipeLineEvent.class);
         SingleAwaitOp op = new SingleAwaitOp();
         Pipeline pipeline = eventBus.pipeline()//
                 .next(
-                        PipeLineEvent.one, new EventHandler<Void>() {
+                        PipeLineEvent.one, new CoordinatorHandler<Void>() {
                             
                             @Override
                             public Object handle(Void data, RunnerMode runnerMode)
@@ -186,7 +187,7 @@ public class PipeLineTest
                 
                 ).distribute(
                         new OperatorData(
-                                PipeLineEvent.one, new EventHandler<String>() {
+                                PipeLineEvent.one, new CoordinatorHandler<String>() {
                                     
                                     @Override
                                     public Object handle(String data, RunnerMode runnerMode)
@@ -205,7 +206,7 @@ public class PipeLineTest
                                     }
                                 }
                         ), new OperatorData(
-                                PipeLineEvent.one, new EventHandler<String>() {
+                                PipeLineEvent.one, new CoordinatorHandler<String>() {
                                     
                                     @Override
                                     public Object handle(String data, RunnerMode runnerMode)
@@ -225,7 +226,7 @@ public class PipeLineTest
                                 }
                         )
                 ).next(
-                        PipeLineEvent.one, new EventHandler<Object>() {
+                        PipeLineEvent.one, new CoordinatorHandler<Object>() {
                                     
                             @Override
                             public Object handle(Object data, RunnerMode runnerMode)
@@ -260,7 +261,7 @@ public class PipeLineTest
             public Pipeline transfer(Pipeline pipeline)
             {
                 return pipeline.next(
-                        new EventHandler<String>() {
+                        new CoordinatorHandler<String>() {
                             
                             @Override
                             public Object handle(String data, RunnerMode runnerMode)
@@ -271,7 +272,7 @@ public class PipeLineTest
                         }
                 )//
                         .next(
-                                new EventHandler<Integer>() {
+                                new CoordinatorHandler<Integer>() {
                                     
                                     @Override
                                     public Object handle(Integer data, RunnerMode runnerMode)
@@ -285,7 +286,7 @@ public class PipeLineTest
         };
         DefaultPipeline.create()//
                 .next(
-                        new EventHandler<String>() {
+                        new CoordinatorHandler<String>() {
                             
                             @Override
                             public Object handle(String data, RunnerMode runnerMode)
@@ -296,7 +297,7 @@ public class PipeLineTest
                 )//
                 .compose(op).start();
         DefaultPipeline.create().next(
-                new EventHandler<String>() {
+                new CoordinatorHandler<String>() {
                     
                     @Override
                     public Object handle(String data, RunnerMode runnerMode)

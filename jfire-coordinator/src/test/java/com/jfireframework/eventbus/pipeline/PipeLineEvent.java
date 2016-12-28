@@ -1,9 +1,9 @@
 package com.jfireframework.eventbus.pipeline;
 
-import com.jfireframework.eventbus.event.EventConfig;
-import com.jfireframework.eventbus.event.ParallelLevel;
+import com.jfireframework.coordinator.api.CoordinatorConfig;
+import com.jfireframework.coordinator.api.ParallelLevel;
 
-public enum PipeLineEvent implements EventConfig
+public enum PipeLineEvent implements CoordinatorConfig
 {
     one, two, three, four;
     

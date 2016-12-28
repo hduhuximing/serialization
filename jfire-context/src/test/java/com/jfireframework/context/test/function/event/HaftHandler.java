@@ -2,16 +2,16 @@ package com.jfireframework.context.test.function.event;
 
 import javax.annotation.Resource;
 import com.jfireframework.context.ContextInitFinish;
-import com.jfireframework.context.event.EventRegisterHelper;
-import com.jfireframework.eventbus.bus.EventBuses;
-import com.jfireframework.eventbus.event.EventHandler;
-import com.jfireframework.eventbus.util.RunnerMode;
+import com.jfireframework.context.event.CoordinatorRegisterHelper;
+import com.jfireframework.coordinator.api.CoordinatorHandler;
+import com.jfireframework.coordinator.bus.CoordinatorBuses;
+import com.jfireframework.coordinator.util.RunnerMode;
 
 @Resource
-public class HaftHandler implements EventHandler<UserPhone>, ContextInitFinish
+public class HaftHandler implements CoordinatorHandler<UserPhone>, ContextInitFinish
 {
     @Resource
-    private EventRegisterHelper publisher;
+    private CoordinatorRegisterHelper publisher;
     
     @Override
     public Object handle(UserPhone myEvent, RunnerMode runnerMode)
@@ -32,7 +32,7 @@ public class HaftHandler implements EventHandler<UserPhone>, ContextInitFinish
     {
         UserPhone phone = new UserPhone();
         phone.setPhone("1775032");
-        EventBuses.computation().post(SmsEvent.halt, this, phone).await();
+        CoordinatorBuses.computation().post(SmsEvent.halt, this, phone).await();
     }
     
 }

@@ -1,19 +1,15 @@
-package com.jfireframework.context.test.function.event;
+package com.jfireframework.coordinator.util;
 
 import com.jfireframework.coordinator.api.CoordinatorConfig;
 import com.jfireframework.coordinator.api.ParallelLevel;
 
-public enum SmsEvent implements CoordinatorConfig
+public enum DefaultCoordinator implements CoordinatorConfig
 {
-    // 欠费
-    Arrearage,
-    // 停机
-    halt;
+    SWITCH, JUST_PAEALLEL_EVENT;
     
     @Override
     public ParallelLevel parallelLevel()
     {
         return ParallelLevel.PAEALLEL;
     }
-    
 }
