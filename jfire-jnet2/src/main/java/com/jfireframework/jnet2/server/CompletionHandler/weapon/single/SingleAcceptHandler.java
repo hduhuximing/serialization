@@ -6,9 +6,9 @@ import java.nio.channels.ClosedChannelException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.baseutil.verify.Verify;
-import com.jfireframework.eventbus.bus.EventBus;
-import com.jfireframework.eventbus.bus.EventBuses;
-import com.jfireframework.eventbus.util.EventHelper;
+import com.jfireframework.coordinator.bus.CoordinatorBus;
+import com.jfireframework.coordinator.bus.CoordinatorBuses;
+import com.jfireframework.coordinator.util.CoordinatorHelper;
 import com.jfireframework.jnet2.common.channel.ChannelInitListener;
 import com.jfireframework.jnet2.common.channel.impl.ServerChannel;
 import com.jfireframework.jnet2.server.AioServer;
@@ -24,12 +24,12 @@ import com.jfireframework.jnet2.server.util.WorkMode;
 
 public class SingleAcceptHandler implements AcceptHandler
 {
-    private AioServer           aioServer;
-    private Logger              logger   = ConsoleLogFactory.getLogger();
-    private ChannelInitListener initListener;
-    private final PushMode      pushMode;
-    private final WorkMode      workMode;
-    private final EventBus      eventBus = EventBuses.computation();
+    private AioServer            aioServer;
+    private Logger               logger   = ConsoleLogFactory.getLogger();
+    private ChannelInitListener  initListener;
+    private final PushMode       pushMode;
+    private final WorkMode       workMode;
+    private final CoordinatorBus eventBus = CoordinatorBuses.computation();
     
     public SingleAcceptHandler(AioServer aioServer, ServerConfig serverConfig)
     {
@@ -41,7 +41,7 @@ public class SingleAcceptHandler implements AcceptHandler
         initListener = serverConfig.getInitListener();
         if (workMode == WorkMode.ASYNC)
         {
-            EventHelper.register(Message.class);
+            CoordinatorHelper.register(Message.class);
         }
         else
         {

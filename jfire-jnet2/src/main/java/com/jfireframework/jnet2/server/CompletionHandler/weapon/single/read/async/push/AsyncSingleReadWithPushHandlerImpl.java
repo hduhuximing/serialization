@@ -2,7 +2,7 @@ package com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.asy
 
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.concurrent.CpuCachePadingInt;
-import com.jfireframework.eventbus.bus.EventBus;
+import com.jfireframework.coordinator.bus.CoordinatorBus;
 import com.jfireframework.jnet2.common.channel.impl.ServerChannel;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.AbstractAsyncSingleReadHandler;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.write.push.SyncSingleWriteAndPushHandlerImpl;
@@ -14,7 +14,7 @@ public class AsyncSingleReadWithPushHandlerImpl extends AbstractAsyncSingleReadH
     private final static int        WORK      = 2;
     private final CpuCachePadingInt readState = new CpuCachePadingInt(0);
     
-    public AsyncSingleReadWithPushHandlerImpl(ServerChannel serverChannel, EventBus eventBus)
+    public AsyncSingleReadWithPushHandlerImpl(ServerChannel serverChannel, CoordinatorBus eventBus)
     {
         super(serverChannel, eventBus);
         writeHandler = new SyncSingleWriteAndPushHandlerImpl(serverChannel, this);

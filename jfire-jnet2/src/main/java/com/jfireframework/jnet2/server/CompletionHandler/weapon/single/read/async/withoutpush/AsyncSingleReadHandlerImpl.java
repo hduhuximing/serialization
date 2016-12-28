@@ -1,14 +1,14 @@
 package com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.withoutpush;
 
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
-import com.jfireframework.eventbus.bus.EventBus;
+import com.jfireframework.coordinator.bus.CoordinatorBus;
 import com.jfireframework.jnet2.common.channel.impl.ServerChannel;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.read.async.AbstractAsyncSingleReadHandler;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.write.withoutpush.SyncSingleWriteHandlerImpl;
 
 public class AsyncSingleReadHandlerImpl extends AbstractAsyncSingleReadHandler
 {
-    public AsyncSingleReadHandlerImpl(ServerChannel serverChannel, EventBus eventBus)
+    public AsyncSingleReadHandlerImpl(ServerChannel serverChannel, CoordinatorBus eventBus)
     {
         super(serverChannel, eventBus);
         writeHandler = new SyncSingleWriteHandlerImpl(serverChannel, this);
