@@ -51,6 +51,25 @@ public class CpuCachePadingLong extends value
         return unsafe.compareAndSwapLong(this, offset, expectedValue, newValue);
     }
     
+    public long add(long added)
+    {
+        long current = value;
+        long newed = current + 1;
+        if (unsafe.compareAndSwapLong(this, offset, current, newed))
+        {
+            return newed;
+        }
+        for (;;)
+        {
+            current = value;
+            newed = current + 1;
+            if (unsafe.compareAndSwapLong(this, offset, current, newed))
+            {
+                return newed;
+            }
+        }
+    }
+    
     public long getAndSet(int newValue)
     {
         while (true)

@@ -5,7 +5,7 @@ import org.junit.Test;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 import com.jfireframework.context.config.BeanInfo;
-import com.jfireframework.context.event.CoordinatorRegisterHelper;
+import com.jfireframework.context.coordinator.CoordinatorRegisterHelper;
 
 public class EventTest
 {

@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -22,6 +23,7 @@ import com.jfireframework.mvc.binder.impl.HttpServletResponseBinder;
 import com.jfireframework.mvc.binder.impl.HttpSessionBinder;
 import com.jfireframework.mvc.binder.impl.ListBinder;
 import com.jfireframework.mvc.binder.impl.ListUploadBinder;
+import com.jfireframework.mvc.binder.impl.MapBinder;
 import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
 import com.jfireframework.mvc.binder.impl.SqlDateBinder;
 import com.jfireframework.mvc.binder.impl.StringBinder;
@@ -62,8 +64,7 @@ public class BinderFactory
                     || target == Double.class //
                     || target == Boolean.class //
                     || target == Byte.class //
-                    || target == Character.class
-            )
+                    || target == Character.class)
             {
                 binders.add(new WrapperBinder(target, prefixName, annotations));
             }
@@ -98,6 +99,10 @@ public class BinderFactory
             else if (target.isArray())
             {
                 binders.add(ArrayBinder.valueOf(target, prefixName, annotations));
+            }
+            else if (Map.class.isAssignableFrom(target))
+            {
+                binders.add(new MapBinder(prefixName));
             }
             else if (List.class.isAssignableFrom(target))
             {

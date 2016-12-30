@@ -93,7 +93,7 @@ public class CoordinatorHelper
         EventExecutor executor = executorMap.get(event);
         if (executor == null)
         {
-            throw new NullPointerException();
+            throw new NullPointerException("协调者配置:" + event.getClass().getName() + "不存在对应的执行器");
         }
         return executor;
     }

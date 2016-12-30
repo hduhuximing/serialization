@@ -65,7 +65,10 @@ public class PackageScan
                     getClassNamesByJar(url, resourceName, classNames);
                 }
             }
-            getClassNameByJars(((URLClassLoader) loader).getURLs(), packageName, classNames);
+            if (loader instanceof URLClassLoader)
+            {
+                getClassNameByJars(((URLClassLoader) loader).getURLs(), packageName, classNames);
+            }
         }
         catch (IOException e1)
         {

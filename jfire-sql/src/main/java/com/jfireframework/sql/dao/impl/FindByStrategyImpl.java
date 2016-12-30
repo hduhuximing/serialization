@@ -56,18 +56,18 @@ public class FindByStrategyImpl<T> implements FindByStrategy<T>
                     cache.append("select ");
                     for (String selectField : each.selectFields().split(","))
                     {
-                        cache.append(selectField).appendComma();
+                        cache.append(map.get(selectField).getColName()).appendComma();
                         selectFields.add(map.get(selectField));
                     }
                     for (String whereField : each.whereFields().split(","))
                     {
-                        cache.append(whereField).appendComma();
+                        cache.append(map.get(whereField).getColName()).appendComma();
                         selectFields.add(map.get(whereField));
                     }
                     cache.deleteLast().append(" from ").append(tableName).append(" where ");
                     for (String whereField : each.whereFields().split(","))
                     {
-                        cache.append(whereField).append("=? and ");
+                        cache.append(map.get(whereField).getColName()).append("=? and ");
                         whereFields.add(map.get(whereField));
                     }
                     cache.deleteEnds(4);

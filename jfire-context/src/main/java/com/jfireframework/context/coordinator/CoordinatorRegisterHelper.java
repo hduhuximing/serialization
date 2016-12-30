@@ -1,4 +1,4 @@
-package com.jfireframework.context.event;
+package com.jfireframework.context.coordinator;
 
 import javax.annotation.PostConstruct;
 import com.jfireframework.baseutil.PackageScan;
@@ -8,14 +8,14 @@ import com.jfireframework.coordinator.util.CoordinatorHelper;
 
 public class CoordinatorRegisterHelper
 {
-    protected String eventPath;
+    protected String path;
     
     @SuppressWarnings("unchecked")
     @PostConstruct
     public void init()
     {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        String[] events = PackageScan.scan(eventPath);
+        String[] events = PackageScan.scan(path);
         for (String each : events)
         {
             try

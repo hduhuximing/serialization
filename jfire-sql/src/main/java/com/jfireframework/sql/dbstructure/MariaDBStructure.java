@@ -154,17 +154,10 @@ public class MariaDBStructure implements Structure
                 }
             }
             TypeAndLength typeAndLength = dbTypeMap.get(field.getType());
-            if (field.isAnnotationPresent(Column.class) && field.getAnnotation(Column.class).length() != -1)
+            if (field.isAnnotationPresent(Column.class) && field.getAnnotation(Column.class).type().equals("") == false)
             {
-                int length = field.getAnnotation(Column.class).length();
-                if (field.getType() == String.class && length > 3000)
-                {
-                    result = new TypeAndLength("text", 3000);
-                }
-                else
-                {
-                    result = new TypeAndLength("varchar", length);
-                }
+                Column column = field.getAnnotation(Column.class);
+                result = new TypeAndLength(column.type(), column.length());
             }
             else
             {

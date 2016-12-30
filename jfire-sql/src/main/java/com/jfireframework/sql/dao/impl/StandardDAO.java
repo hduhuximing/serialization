@@ -123,6 +123,7 @@ public class StandardDAO<T> extends BaseDAO<T>
                             break;
                         case LONG:
                             unsafe.putObject(entity, idOffset, resultSet.getLong(1));
+                            break;
                         case STRING:
                             unsafe.putObject(entity, idOffset, resultSet.getString(1));
                             break;

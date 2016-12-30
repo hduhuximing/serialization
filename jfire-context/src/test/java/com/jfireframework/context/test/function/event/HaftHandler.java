@@ -2,7 +2,7 @@ package com.jfireframework.context.test.function.event;
 
 import javax.annotation.Resource;
 import com.jfireframework.context.ContextInitFinish;
-import com.jfireframework.context.event.CoordinatorRegisterHelper;
+import com.jfireframework.context.coordinator.CoordinatorRegisterHelper;
 import com.jfireframework.coordinator.api.CoordinatorHandler;
 import com.jfireframework.coordinator.bus.CoordinatorBuses;
 import com.jfireframework.coordinator.util.RunnerMode;

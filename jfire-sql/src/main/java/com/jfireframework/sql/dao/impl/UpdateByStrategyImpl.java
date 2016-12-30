@@ -45,13 +45,13 @@ public class UpdateByStrategyImpl<T> implements UpdateByStrategy<T>
                     cache.append("update ").append(tableName).append(" set ");
                     for (String setField : each.setFields().split(","))
                     {
-                        cache.append(setField).append("=?,");
+                        cache.append(map.get(setField).getColName()).append("=?,");
                         fields.add(map.get(setField));
                     }
                     cache.deleteLast().append(" where ");
                     for (String whereField : each.whereFields().split(","))
                     {
-                        cache.append(whereField).append("=? and ");
+                        cache.append(map.get(whereField).getColName()).append("=? and ");
                         fields.add(map.get(whereField));
                     }
                     cache.deleteEnds(4);

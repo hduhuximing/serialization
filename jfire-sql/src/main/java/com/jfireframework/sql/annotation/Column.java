@@ -37,5 +37,7 @@ public @interface Column
      */
     public boolean loadIgnore() default false;
     
+    public String type() default "";
+    
     public int length() default -1;
 }
