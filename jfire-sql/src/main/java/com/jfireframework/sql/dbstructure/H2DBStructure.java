@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.collection.StringCache;
+import com.jfireframework.baseutil.collection.buffer.HeapByteBuf;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
@@ -45,6 +46,7 @@ public class H2DBStructure implements Structure
         dbTypeMap.put(boolean.class, new TypeAndLength("tinyint", 0));
         dbTypeMap.put(Boolean.class, new TypeAndLength("tinyint", 0));
         dbTypeMap.put(byte[].class, new TypeAndLength("blob", 0));
+        dbTypeMap.put(HeapByteBuf.class, new TypeAndLength("blob", 0));
     }
     
     @Override
@@ -154,10 +156,9 @@ public class H2DBStructure implements Structure
                 }
             }
             TypeAndLength typeAndLength = dbTypeMap.get(field.getType());
-            if (field.isAnnotationPresent(Column.class) && field.getAnnotation(Column.class).type().equals("") == false)
+            if (field.getType() == String.class && field.isAnnotationPresent(Column.class) && field.getAnnotation(Column.class).type().equals("text"))
             {
-                Column column = field.getAnnotation(Column.class);
-                result = new TypeAndLength(column.type(), column.length());
+                result = new TypeAndLength("text", 0);
             }
             else
             {

@@ -23,6 +23,7 @@ public class ByteArrayField extends AbstractMapField
         if (blob != null)
         {
             byte[] array = blob.getBytes(1, (int) blob.length());
+            blob.free();
             unsafe.putObject(entity, offset, array);
         }
         else

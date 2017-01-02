@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import com.jfireframework.baseutil.collection.buffer.HeapByteBuf;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.verify.Verify;
 import com.jfireframework.sql.dbstructure.ColNameStrategy;
@@ -18,6 +19,7 @@ import com.jfireframework.sql.resultsettransfer.field.impl.DateField;
 import com.jfireframework.sql.resultsettransfer.field.impl.DoubleField;
 import com.jfireframework.sql.resultsettransfer.field.impl.EnumField;
 import com.jfireframework.sql.resultsettransfer.field.impl.FloatField;
+import com.jfireframework.sql.resultsettransfer.field.impl.HeapByteBufField;
 import com.jfireframework.sql.resultsettransfer.field.impl.IntField;
 import com.jfireframework.sql.resultsettransfer.field.impl.IntegerField;
 import com.jfireframework.sql.resultsettransfer.field.impl.LongField;
@@ -53,6 +55,7 @@ public class MapFieldBuilder
             fieldMap.put(Integer.class, IntegerField.class.getConstructor(Field.class, ColNameStrategy.class));
             fieldMap.put(Long.class, WLongField.class.getConstructor(Field.class, ColNameStrategy.class));
             fieldMap.put(byte[].class, ByteArrayField.class.getConstructor(Field.class, ColNameStrategy.class));
+            fieldMap.put(HeapByteBuf.class, HeapByteBufField.class.getConstructor(Field.class, ColNameStrategy.class));
         }
         catch (Exception e)
         {

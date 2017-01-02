@@ -3,7 +3,6 @@ package com.jfireframework.baseutil.collection.buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Queue;
-
 import com.jfireframework.baseutil.code.CodeLocation;
 import com.jfireframework.baseutil.collection.ByteCache;
 import com.jfireframework.baseutil.collection.StringCache;
@@ -342,6 +341,7 @@ public abstract class ByteBuf<T>
     /**
      * 返回一个字符串描述当前的cache状态
      */
+    @Override
     public String toString()
     {
         return new StringCache("readIndex:").append(readIndex).appendComma().append("writeIndex:").append(writeIndex).appendComma().append("capacity:").append(capacity).toString();

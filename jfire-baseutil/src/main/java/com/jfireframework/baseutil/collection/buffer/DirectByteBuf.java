@@ -3,12 +3,10 @@ package com.jfireframework.baseutil.collection.buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Queue;
-
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.verify.Verify;
-
 import sun.misc.Unsafe;
 
 public class DirectByteBuf extends ByteBuf<ByteBuffer>
@@ -345,6 +343,7 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
         return cache.toString();
     }
     
+    @Override
     public void writePositive(int positive)
     {
         if (positive < 0)
@@ -394,6 +393,7 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
         }
     }
     
+    @Override
     public int readPositive()
     {
         changeToReadState();
@@ -768,4 +768,5 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
         }
         return new String(src);
     }
+    
 }

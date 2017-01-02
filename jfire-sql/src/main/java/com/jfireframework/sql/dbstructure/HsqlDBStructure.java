@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.collection.StringCache;
+import com.jfireframework.baseutil.collection.buffer.HeapByteBuf;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
@@ -45,6 +46,7 @@ public class HsqlDBStructure implements Structure
         dbTypeMap.put(boolean.class, new TypeAndLength("tinyint", 0));
         dbTypeMap.put(Boolean.class, new TypeAndLength("tinyint", 0));
         dbTypeMap.put(byte[].class, new TypeAndLength("blob", 0));
+        dbTypeMap.put(HeapByteBuf.class, new TypeAndLength("blob", 0));
     }
     
     @Override

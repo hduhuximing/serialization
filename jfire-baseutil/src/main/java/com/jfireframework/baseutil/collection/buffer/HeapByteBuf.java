@@ -3,7 +3,6 @@ package com.jfireframework.baseutil.collection.buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Queue;
-
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.verify.Verify;
@@ -29,6 +28,7 @@ public class HeapByteBuf extends ByteBuf<byte[]>
     {
     }
     
+    @Override
     protected void _expend(int size)
     {
         cachedNioBuffer = null;
@@ -296,6 +296,7 @@ public class HeapByteBuf extends ByteBuf<byte[]>
         return cache.toString();
     }
     
+    @Override
     public void writePositive(int positive)
     {
         if (positive < 0)
@@ -344,6 +345,7 @@ public class HeapByteBuf extends ByteBuf<byte[]>
         }
     }
     
+    @Override
     public int readPositive()
     {
         int length = memory[readIndex++] & 0xff;
@@ -479,6 +481,7 @@ public class HeapByteBuf extends ByteBuf<byte[]>
         }
     }
     
+    @Override
     public HeapByteBuf writeVarLong(long i)
     {
         if (i >= -112 && i <= 127)
@@ -581,6 +584,7 @@ public class HeapByteBuf extends ByteBuf<byte[]>
         return this;
     }
     
+    @Override
     public long readVarLong()
     {
         byte b = memory[readIndex++];
@@ -715,5 +719,17 @@ public class HeapByteBuf extends ByteBuf<byte[]>
             src[i] = readVarChar();
         }
         return new String(src);
+    }
+    
+    public byte[] directArray()
+    {
+        return memory;
+    }
+    
+    public static ByteBuf<byte[]> wrap(byte[] t)
+    {
+        HeapByteBuf buf = new HeapByteBuf(t, null, null);
+        buf.writeIndex(t.length);
+        return buf;
     }
 }
