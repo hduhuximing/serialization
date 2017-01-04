@@ -2,6 +2,7 @@ package com.jfireframework.context.test.runner;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.Properties;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
 import com.jfireframework.context.JfireContext;
@@ -9,7 +10,7 @@ import com.jfireframework.context.JfireContextImpl;
 
 public class BeanContextRunner extends BlockJUnit4ClassRunner
 {
-    private Class<?>    klass;
+    private Class<?>     klass;
     private JfireContext beanContext;
     
     public BeanContextRunner(Class<?> klass) throws InitializationError, URISyntaxException
@@ -44,6 +45,17 @@ public class BeanContextRunner extends BlockJUnit4ClassRunner
         }
         beanContext.readConfig(config);
         beanContext.addBean(klass.getName(), false, klass);
+        if (klass.isAnnotationPresent(PropertyAdd.class))
+        {
+            Properties properties = new Properties();
+            PropertyAdd add = klass.getAnnotation(PropertyAdd.class);
+            for (String each : add.value().split(","))
+            {
+                String[] tmp = each.split("=");
+                properties.put(tmp[0], tmp[1]);
+            }
+            beanContext.addProperties(properties);
+        }
         beanContext.initContext();
     }
     
