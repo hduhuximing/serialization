@@ -3,7 +3,7 @@ package com.jfireframework.sql.dao;
 import java.sql.Connection;
 import java.util.List;
 
-public interface Dao<T> extends FindByStrategy<T>, UpdateByStrategy<T>
+public interface Dao<T> extends StrategyOperation<T>
 {
     
     /**

@@ -15,7 +15,7 @@ public class FixTest
     @Test
     public void test()
     {
-        Timer timer = new FixedCapacityWheelTimer(16, new SimpleExpireHandler(), 500, TimeUnit.MILLISECONDS);
+        Timer timer = new FixedCapacityWheelTimer(1024, new SimpleExpireHandler(), 10, TimeUnit.MILLISECONDS);
         timer.add(
                 new RepeatDelayTrigger(
                         new Timetask() {

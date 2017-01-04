@@ -8,10 +8,11 @@ import java.util.List;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.sql.annotation.SqlStrategy;
 import com.jfireframework.sql.dao.LockMode;
 import com.jfireframework.sql.interceptor.SqlInterceptor;
-import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.interceptor.SqlInterceptor.InterceptorContext;
+import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.page.PageParse;
 import com.jfireframework.sql.resultsettransfer.ResultSetTransfer;
@@ -400,30 +401,30 @@ public class SqlSessionImpl implements SqlSession
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T findOneByStrategy(T entity, String strategyName)
+    public <T> T findOneByStrategy(T entity, SqlStrategy strategy)
     {
-        return sessionFactory.getDao((Class<T>) entity.getClass()).findOne(connection, entity, strategyName);
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findOne(connection, entity, strategy);
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> List<T> findAllByStrategy(T entity, String steategyName)
+    public <T> List<T> findAllByStrategy(T entity, SqlStrategy strategy)
     {
-        return sessionFactory.getDao((Class<T>) entity.getClass()).findAll(connection, entity, steategyName);
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findAll(connection, entity, strategy);
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> List<T> findPageByStrategy(T entity, String steategyName, Page page)
+    public <T> List<T> findPageByStrategy(T entity, Page page, SqlStrategy strategy)
     {
-        return sessionFactory.getDao((Class<T>) entity.getClass()).findPage(connection, entity, steategyName, page, pageParse);
+        return sessionFactory.getDao((Class<T>) entity.getClass()).findPage(connection, entity, page, pageParse, strategy);
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T> int updateByStrategy(T entity, String strategyName)
+    public <T> int updateByStrategy(T entity, SqlStrategy strategy)
     {
-        return sessionFactory.getDao((Class<T>) entity.getClass()).update(entity, connection, strategyName);
+        return sessionFactory.getDao((Class<T>) entity.getClass()).update(connection, entity, strategy);
     }
     
 }

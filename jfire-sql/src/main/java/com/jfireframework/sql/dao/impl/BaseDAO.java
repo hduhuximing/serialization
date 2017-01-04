@@ -18,11 +18,11 @@ import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.sql.annotation.FindBy;
 import com.jfireframework.sql.annotation.Id;
+import com.jfireframework.sql.annotation.SqlStrategy;
 import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.dao.Dao;
-import com.jfireframework.sql.dao.FindByStrategy;
 import com.jfireframework.sql.dao.LockMode;
-import com.jfireframework.sql.dao.UpdateByStrategy;
+import com.jfireframework.sql.dao.StrategyOperation;
 import com.jfireframework.sql.dbstructure.ColNameStrategy;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
 import com.jfireframework.sql.metadata.TableMetaData;
@@ -58,25 +58,24 @@ public abstract class BaseDAO<T> implements Dao<T>
         
     }
     
-    protected final Class<T>            entityClass;
+    protected final Class<T>             entityClass;
     // 代表数据库主键id的field
-    protected final MapField            idField;
-    protected final long                idOffset;
-    protected final IdType              idType;
-    protected final static Unsafe       unsafe    = ReflectUtil.getUnsafe();
-    protected final String              tableName;
-    protected final SqlAndFields        getInfo;
-    protected final SqlAndFields        getInShareInfo;
-    protected final SqlAndFields        getForUpdateInfo;
-    protected final SqlAndFields        updateInfo;
-    protected final String              deleteSql;
-    protected static final Logger       LOGGER    = ConsoleLogFactory.getLogger();
-    protected final SqlPreInterceptor[] preInterceptors;
-    protected final Uid                 uid;
-    protected final boolean             useUid;
-    protected final FindByStrategy<T>   findStrategy;
-    protected final UpdateByStrategy<T> updateStrategy;
-    protected final Map<String, String> findByMap = new HashMap<String, String>();
+    protected final MapField             idField;
+    protected final long                 idOffset;
+    protected final IdType               idType;
+    protected final static Unsafe        unsafe    = ReflectUtil.getUnsafe();
+    protected final String               tableName;
+    protected final SqlAndFields         getInfo;
+    protected final SqlAndFields         getInShareInfo;
+    protected final SqlAndFields         getForUpdateInfo;
+    protected final SqlAndFields         updateInfo;
+    protected final String               deleteSql;
+    protected static final Logger        LOGGER    = ConsoleLogFactory.getLogger();
+    protected final SqlPreInterceptor[]  preInterceptors;
+    protected final Uid                  uid;
+    protected final boolean              useUid;
+    protected final StrategyOperation<T> strategyOperation;
+    protected final Map<String, String>  findByMap = new HashMap<String, String>();
     
     enum IdType
     {
@@ -117,8 +116,7 @@ public abstract class BaseDAO<T> implements Dao<T>
         useForSelf(allMapFields, idField);
         deleteSql = "delete from " + tableName + " where " + idField.getColName() + "=?";
         logSql();
-        findStrategy = new FindByStrategyImpl<T>(entityClass, allMapFields, preInterceptors);
-        updateStrategy = new UpdateByStrategyImpl<T>(entityClass, allMapFields, preInterceptors);
+        strategyOperation = new StrategyOperationImpl<T>(entityClass, allMapFields, preInterceptors);
     }
     
     protected abstract void useForSelf(MapField[] fields, MapField idField);
@@ -513,30 +511,6 @@ public abstract class BaseDAO<T> implements Dao<T>
     }
     
     @Override
-    public T findOne(Connection connection, T param, String strategyName)
-    {
-        return findStrategy.findOne(connection, param, strategyName);
-    }
-    
-    @Override
-    public List<T> findAll(Connection connection, T param, String strategyName)
-    {
-        return findStrategy.findAll(connection, param, strategyName);
-    }
-    
-    @Override
-    public List<T> findPage(Connection connection, T param, String strategyName, Page page, PageParse pageParse)
-    {
-        return findStrategy.findPage(connection, param, strategyName, page, pageParse);
-    }
-    
-    @Override
-    public int update(T param, Connection connection, String strategyName)
-    {
-        return updateStrategy.update(param, connection, strategyName);
-    }
-    
-    @Override
     public int deleteAll(Connection connection)
     {
         PreparedStatement preparedStatement = null;
@@ -563,6 +537,30 @@ public abstract class BaseDAO<T> implements Dao<T>
                 }
             }
         }
+    }
+    
+    @Override
+    public int update(Connection connection, T param, SqlStrategy sqlStrategy)
+    {
+        return strategyOperation.update(connection, param, sqlStrategy);
+    }
+    
+    @Override
+    public T findOne(Connection connection, T entity, SqlStrategy strategy)
+    {
+        return strategyOperation.findOne(connection, entity, strategy);
+    }
+    
+    @Override
+    public List<T> findAll(Connection connection, T param, SqlStrategy strategy)
+    {
+        return strategyOperation.findAll(connection, param, strategy);
+    }
+    
+    @Override
+    public List<T> findPage(Connection connection, T param, Page page, PageParse pageParse, SqlStrategy strategy)
+    {
+        return strategyOperation.findPage(connection, param, page, pageParse, strategy);
     }
     
 }

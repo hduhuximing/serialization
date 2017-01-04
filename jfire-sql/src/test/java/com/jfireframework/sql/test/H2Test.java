@@ -8,6 +8,7 @@ import com.jfireframework.sql.page.Page;
 import com.jfireframework.sql.session.SqlSession;
 import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 import com.jfireframework.sql.test.findstrategy.UserStrategy;
+import com.jfireframework.sql.test.findstrategy.UserStrategy.SS;
 import com.zaxxer.hikari.HikariDataSource;
 
 public class H2Test
@@ -60,13 +61,13 @@ public class H2Test
         UserStrategy user = new UserStrategy();
         user.setAge(5);
         user.setBoy(false);
-        UserStrategy result = session.findOneByStrategy(user, "test1");
+        UserStrategy result = session.findOneByStrategy(user, SS.test1);
         Assert.assertEquals("test-5", result.getName());
         Assert.assertEquals("pass-5", result.getPassword());
         Assert.assertNull(user.getBirthday());
         user = new UserStrategy();
         user.setId(5);
-        result = session.findOneByStrategy(user, "test2");
+        result = session.findOneByStrategy(user, SS.test2);
         Assert.assertNull(result.getPassword());
         Assert.assertEquals("2016-10-05", result.getBirthday());
     }
@@ -77,7 +78,7 @@ public class H2Test
         SqlSession session = sessionFactory.openSession();
         UserStrategy user = new UserStrategy();
         user.setBoy(false);
-        List<UserStrategy> result = session.findAllByStrategy(user, "test3");
+        List<UserStrategy> result = session.findAllByStrategy(user, SS.test3);
         for (int i = 1; i <= 5; i++)
         {
             UserStrategy one = result.get(i - 1);
@@ -97,7 +98,7 @@ public class H2Test
         SqlSession session = sessionFactory.openSession();
         UserStrategy user = new UserStrategy();
         user.setBoy(false);
-        List<UserStrategy> result = session.findPageByStrategy(user, "test3", page);
+        List<UserStrategy> result = session.findPageByStrategy(user, page, SS.test3);
         for (int i = 1; i <= 2; i++)
         {
             UserStrategy one = result.get(i - 1);
@@ -117,7 +118,7 @@ public class H2Test
         UserStrategy user = new UserStrategy();
         user.setAge(5);
         user.setPassword("tttt");
-        session.updateByStrategy(user, "test4");
+        session.updateByStrategy(user, SS.test4);
         UserStrategy query = session.get(UserStrategy.class, 5);
         Assert.assertEquals("tttt", query.getPassword());
     }
