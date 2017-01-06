@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
@@ -91,6 +92,10 @@ public abstract class AbstractParamField implements ParamField
         else if (fieldType == File.class)
         {
             return new FileField(field, value);
+        }
+        else if (Enum.class.isAssignableFrom(fieldType))
+        {
+            return new EnumField(field, value);
         }
         else
         {
@@ -361,6 +366,35 @@ public abstract class AbstractParamField implements ParamField
         {
             super(field, value);
             this.value = new File(value);
+        }
+        
+    }
+    
+    static class EnumField extends AbstractParamField
+    {
+        
+        @SuppressWarnings("unchecked")
+        public EnumField(Field field, String value)
+        {
+            super(field, value);
+            Map<String, ? extends Enum<?>> map = ReflectUtil.getAllEnumInstances((Class<? extends Enum<?>>) field.getType());
+            try
+            {
+                int intValue = Integer.parseInt(value);
+                for (Enum<?> each : map.values())
+                {
+                    if (each.ordinal() == intValue)
+                    {
+                        this.value = each;
+                        break;
+                    }
+                }
+            }
+            catch (NumberFormatException e)
+            {
+                Enum<?> instance = map.get(value);
+                this.value = instance;
+            }
         }
         
     }
