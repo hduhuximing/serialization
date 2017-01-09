@@ -259,6 +259,7 @@ public class DefaultPipeline extends BasePipeline
     @Override
     public Pipeline from()
     {
+        final RunnerMode newRunnerMode = new RunnerMode(ThreadMode.currentEventbus, CoordinatorBuses.io());
         Operator operator = new Operator() {
             
             @SuppressWarnings("rawtypes")
@@ -269,70 +270,80 @@ public class DefaultPipeline extends BasePipeline
                 {
                     for (int i : (int[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof byte[])
                 {
                     for (byte i : (byte[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof short[])
                 {
                     for (short i : (short[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof long[])
                 {
                     for (long i : (long[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof float[])
                 {
                     for (float i : (float[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof double[])
                 {
                     for (double i : (double[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof boolean[])
                 {
                     for (boolean i : (boolean[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof char[])
                 {
                     for (char i : (char[]) data)
                     {
-                        pipeline.onNext(i, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, i, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else if (data instanceof Iterable)
                 {
                     for (Object each : (Iterable) data)
                     {
-                        pipeline.onNext(each, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, each, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
                 else
                 {
                     for (Object each : (Object[]) data)
                     {
-                        pipeline.onNext(each, runnerMode);
+                        CoordinatorContext<?> eventContext = new NormalEventContextProxy<Object>(pipeline, newRunnerMode, each, switchHandler, CoordinatorHelper.findExecutor(DefaultCoordinator.SWITCH));
+                        CoordinatorBuses.io().post(eventContext);
                     }
                 }
             }
@@ -356,82 +367,18 @@ public class DefaultPipeline extends BasePipeline
     public static Pipeline from(final Object data)
     {
         return new HeadPipeline() {
-            @SuppressWarnings("rawtypes")
             @Override
-            public void work(Object upstreamData, RunnerMode runnerMode)
+            public void internalStart()
             {
-                if (data instanceof int[])
-                {
-                    for (int i : (int[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof byte[])
-                {
-                    for (byte i : (byte[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof short[])
-                {
-                    for (short i : (short[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof long[])
-                {
-                    for (long i : (long[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof float[])
-                {
-                    for (float i : (float[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof double[])
-                {
-                    for (double i : (double[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof boolean[])
-                {
-                    for (boolean i : (boolean[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof char[])
-                {
-                    for (char i : (char[]) data)
-                    {
-                        onCompleted(i, runnerMode);
-                    }
-                }
-                else if (data instanceof Iterable)
-                {
-                    for (Object each : (Iterable) data)
-                    {
-                        onCompleted(each, runnerMode);
-                    }
-                }
-                else
-                {
-                    for (Object each : (Object[]) data)
-                    {
-                        onCompleted(each, runnerMode);
-                    }
-                }
-            };
-        };
+                work(data, new RunnerMode(ThreadMode.currentThread, null));
+            }
+            
+            @Override
+            public void internalStart(Object initParam)
+            {
+                work(data, new RunnerMode(ThreadMode.currentThread, null));
+            }
+        }.from();
     }
     
     @Override
