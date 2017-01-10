@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import javax.annotation.Resource;
 import com.jfireframework.baseutil.PackageScan;
 import com.jfireframework.baseutil.StringUtil;
@@ -30,11 +30,12 @@ import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
-import com.jfireframework.context.bean.JfireConfiger;
 import com.jfireframework.context.bean.annotation.config.ActiveProfile;
+import com.jfireframework.context.bean.annotation.config.Beans;
 import com.jfireframework.context.bean.annotation.config.Import;
 import com.jfireframework.context.bean.annotation.config.OutterProperties;
 import com.jfireframework.context.bean.annotation.config.PackageNames;
+import com.jfireframework.context.bean.annotation.config.ProfileName;
 import com.jfireframework.context.bean.annotation.config.PropertyPaths;
 import com.jfireframework.context.bean.field.FieldFactory;
 import com.jfireframework.context.bean.field.param.ParamField;
@@ -72,48 +73,127 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     
     private void readConfigFromClass(Class<?> ckass)
     {
+        Profile profile = null;
+        if (AnnotationUtil.isPresent(ProfileName.class, ckass))
+        {
+            profile = new Profile();
+            profile.setName(AnnotationUtil.getAnnotation(ProfileName.class, ckass).value());
+        }
+        String[] packageNames = null;
+        Map<String, String> outterProperties = null;
+        String[] propertyPaths = null;
+        BeanInfo[] infos = null;
         if (AnnotationUtil.isPresent(PackageNames.class, ckass))
         {
-            PackageNames packageNames = AnnotationUtil.getAnnotation(PackageNames.class, ckass);
-            addPackageNames(packageNames.value());
+            packageNames = AnnotationUtil.getAnnotation(PackageNames.class, ckass).value();
         }
         if (AnnotationUtil.isPresent(com.jfireframework.context.bean.annotation.config.OutterProperties.class, ckass))
         {
-            OutterProperties outterProperties = AnnotationUtil.getAnnotation(OutterProperties.class, ckass);
-            Map<String, String> map = new HashMap<String, String>();
-            for (String each : outterProperties.value())
+            outterProperties = new HashMap<String, String>();
+            for (String each : AnnotationUtil.getAnnotation(OutterProperties.class, ckass).value())
             {
                 String[] tmp = each.split("=");
-                map.put(tmp[0], tmp[1]);
+                outterProperties.put(tmp[0], tmp[1]);
             }
-            this.properties.putAll(map);
         }
         if (AnnotationUtil.isPresent(PropertyPaths.class, ckass))
         {
-            PropertyPaths propertyPaths = AnnotationUtil.getAnnotation(PropertyPaths.class, ckass);
-            readProperties(propertyPaths.value());
+            propertyPaths = AnnotationUtil.getAnnotation(PropertyPaths.class, ckass).value();
         }
         if (AnnotationUtil.isPresent(ActiveProfile.class, ckass))
         {
             ActiveProfile activeProfile = AnnotationUtil.getAnnotation(ActiveProfile.class, ckass);
             this.activeProfile = activeProfile.value();
         }
-        if (JfireConfiger.class.isAssignableFrom(ckass))
+        if (AnnotationUtil.isPresent(Beans.class, ckass))
         {
-            try
+            Beans beans = AnnotationUtil.getAnnotation(Beans.class, ckass);
+            List<BeanInfo> list = new LinkedList<BeanInfo>();
+            for (com.jfireframework.context.bean.annotation.config.BeanInfo each : beans.value())
             {
-                JfireConfiger configer = (JfireConfiger) ckass.newInstance();
-                BeanInfo[] infos = configer.infos();
-                handleBeanInfos(infos);
-                Profile[] profiles = configer.profiles();
-                Profile[] tmp = new Profile[this.profiles.length + profiles.length];
-                System.arraycopy(this.profiles, 0, tmp, 0, this.profiles.length);
-                System.arraycopy(profiles, 0, tmp, this.profiles.length, profiles.length);
+                BeanInfo beanInfo = new BeanInfo();
+                beanInfo.setBeanName(beanInfo.getBeanName());
+                beanInfo.setPrototype(each.prototype());
+                if (StringUtil.isNotBlank(each.className()))
+                {
+                    beanInfo.setClassName(each.className());
+                }
+                if (StringUtil.isNotBlank(each.postConstructMethod()))
+                {
+                    beanInfo.setPostConstructMethod(each.postConstructMethod());
+                }
+                if (each.dependencies().length != 0)
+                {
+                    Map<String, String> map = new HashMap<String, String>();
+                    for (String depend : each.dependencies())
+                    {
+                        String[] tmp = depend.split("=");
+                        map.put(tmp[0], tmp[1]);
+                    }
+                    beanInfo.setDependencies(map);
+                }
+                if (each.params().length != 0)
+                {
+                    Map<String, String> map = new HashMap<String, String>();
+                    for (String param : each.params())
+                    {
+                        String[] tmp = param.split("=");
+                        map.put(tmp[0], tmp[1]);
+                    }
+                    beanInfo.setParams(map);
+                }
+                list.add(beanInfo);
             }
-            catch (Exception e)
+            infos = list.toArray(new BeanInfo[list.size()]);
+        }
+        if (profile == null)
+        {
+            if (packageNames != null)
             {
-                throw new JustThrowException(e);
+                addPackageNames(packageNames);
             }
+            if (outterProperties != null)
+            {
+                properties.putAll(outterProperties);
+            }
+            if (propertyPaths != null)
+            {
+                readProperties(propertyPaths);
+            }
+            if (infos != null)
+            {
+                try
+                {
+                    handleBeanInfos(infos);
+                }
+                catch (Exception e)
+                {
+                    throw new JustThrowException(e);
+                }
+            }
+        }
+        else
+        {
+            if (packageNames != null)
+            {
+                profile.setPackageNames(packageNames);
+            }
+            if (outterProperties != null)
+            {
+                profile.setProperties(outterProperties);
+            }
+            if (propertyPaths != null)
+            {
+                profile.setPropertyPaths(propertyPaths);
+            }
+            if (infos != null)
+            {
+                profile.setBeans(infos);
+            }
+            Profile[] tmp = new Profile[this.profiles.length + 1];
+            System.arraycopy(profiles, 0, tmp, 0, profiles.length);
+            tmp[tmp.length - 1] = profile;
+            profiles = tmp;
         }
         if (AnnotationUtil.isPresent(Import.class, ckass))
         {

@@ -18,7 +18,7 @@ public class EventTest
         BeanInfo beanInfo = new BeanInfo();
         beanInfo.setBeanName("eventregisterhelper");
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("eventPath", "com.jfireframework.context.test.function.event");
+        params.put("path", "com.jfireframework.context.test.function.event");
         beanInfo.setParams(params);
         jfireContext.addBeanInfo(beanInfo);
         jfireContext.initContext();
