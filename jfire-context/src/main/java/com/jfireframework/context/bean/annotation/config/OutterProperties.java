@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.TYPE)
 @Documented
-public @interface Properties
+public @interface OutterProperties
 {
     public String[] value();
 }

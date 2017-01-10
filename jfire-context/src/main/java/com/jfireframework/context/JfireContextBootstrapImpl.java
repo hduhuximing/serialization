@@ -33,6 +33,7 @@ import com.jfireframework.context.bean.Bean;
 import com.jfireframework.context.bean.JfireConfiger;
 import com.jfireframework.context.bean.annotation.config.ActiveProfile;
 import com.jfireframework.context.bean.annotation.config.Import;
+import com.jfireframework.context.bean.annotation.config.OutterProperties;
 import com.jfireframework.context.bean.annotation.config.PackageNames;
 import com.jfireframework.context.bean.annotation.config.PropertyPaths;
 import com.jfireframework.context.bean.field.FieldFactory;
@@ -76,11 +77,11 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             PackageNames packageNames = AnnotationUtil.getAnnotation(PackageNames.class, ckass);
             addPackageNames(packageNames.value());
         }
-        if (AnnotationUtil.isPresent(com.jfireframework.context.bean.annotation.config.Properties.class, ckass))
+        if (AnnotationUtil.isPresent(com.jfireframework.context.bean.annotation.config.OutterProperties.class, ckass))
         {
-            com.jfireframework.context.bean.annotation.config.Properties properties = AnnotationUtil.getAnnotation(com.jfireframework.context.bean.annotation.config.Properties.class, ckass);
+            OutterProperties outterProperties = AnnotationUtil.getAnnotation(OutterProperties.class, ckass);
             Map<String, String> map = new HashMap<String, String>();
-            for (String each : properties.value())
+            for (String each : outterProperties.value())
             {
                 String[] tmp = each.split("=");
                 map.put(tmp[0], tmp[1]);
