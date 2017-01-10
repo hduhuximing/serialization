@@ -112,7 +112,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             for (com.jfireframework.context.bean.annotation.config.BeanInfo each : beans.value())
             {
                 BeanInfo beanInfo = new BeanInfo();
-                beanInfo.setBeanName(beanInfo.getBeanName());
+                beanInfo.setBeanName(each.beanName());
                 beanInfo.setPrototype(each.prototype());
                 if (StringUtil.isNotBlank(each.className()))
                 {
