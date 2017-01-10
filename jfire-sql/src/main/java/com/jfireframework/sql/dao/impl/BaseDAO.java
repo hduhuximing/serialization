@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import javax.print.attribute.standard.MediaSize.NA;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
@@ -540,27 +541,27 @@ public abstract class BaseDAO<T> implements Dao<T>
     }
     
     @Override
-    public int update(Connection connection, T param, SqlStrategy sqlStrategy)
+    public int update(Connection connection, T param, String strategyName)
     {
-        return strategyOperation.update(connection, param, sqlStrategy);
+        return strategyOperation.update(connection, param, strategyName);
     }
     
     @Override
-    public T findOne(Connection connection, T entity, SqlStrategy strategy)
+    public T findOne(Connection connection, T entity, String strategyName)
     {
-        return strategyOperation.findOne(connection, entity, strategy);
+        return strategyOperation.findOne(connection, entity, strategyName);
     }
     
     @Override
-    public List<T> findAll(Connection connection, T param, SqlStrategy strategy)
+    public List<T> findAll(Connection connection, T param, String strategyName)
     {
-        return strategyOperation.findAll(connection, param, strategy);
+        return strategyOperation.findAll(connection, param, strategyName);
     }
     
     @Override
-    public List<T> findPage(Connection connection, T param, Page page, PageParse pageParse, SqlStrategy strategy)
+    public List<T> findPage(Connection connection, T param, Page page, PageParse pageParse, String strategyName)
     {
-        return strategyOperation.findPage(connection, param, page, pageParse, strategy);
+        return strategyOperation.findPage(connection, param, page, pageParse, strategyName);
     }
     
 }
