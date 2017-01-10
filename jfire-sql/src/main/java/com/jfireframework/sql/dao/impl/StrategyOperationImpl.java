@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.h2.util.New;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.sql.annotation.SqlStrategy;
@@ -62,8 +61,11 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
                 String fields = each.fields();
                 FindStrategySql findStrategySql = buildFind(fields);
                 findMap.put(name, findStrategySql);
-                UpdateStrategySql updateStrategySql = buildUpdate(fields);
-                updateMap.put(name, updateStrategySql);
+                if (fields.charAt(0) != '*')
+                {
+                    UpdateStrategySql updateStrategySql = buildUpdate(fields);
+                    updateMap.put(name, updateStrategySql);
+                }
             }
         }
     }
@@ -87,15 +89,26 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
         String[] tmp = fields.split("\\|");
         String t_valueFields = tmp[0];
         String t_whereFields = tmp[1];
-        for (String selectField : t_valueFields.split(","))
+        if (t_valueFields.equals("*"))
         {
-            cache.append(mapFields.get(selectField).getColName()).appendComma();
-            selectFields.add(mapFields.get(selectField));
+            for (MapField each : mapFields.values())
+            {
+                cache.append(each.getColName()).appendComma();
+                selectFields.add(each);
+            }
         }
-        for (String whereField : t_whereFields.split(","))
+        else
         {
-            cache.append(mapFields.get(whereField).getColName()).appendComma();
-            selectFields.add(mapFields.get(whereField));
+            for (String selectField : t_valueFields.split(","))
+            {
+                cache.append(mapFields.get(selectField).getColName()).appendComma();
+                selectFields.add(mapFields.get(selectField));
+            }
+            for (String whereField : t_whereFields.split(","))
+            {
+                cache.append(mapFields.get(whereField).getColName()).appendComma();
+                selectFields.add(mapFields.get(whereField));
+            }
         }
         cache.deleteLast().append(" from ").append(tableName).append(" where ");
         for (String whereField : t_whereFields.split(","))
