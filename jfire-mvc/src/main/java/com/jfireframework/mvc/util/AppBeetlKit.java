@@ -23,7 +23,7 @@ public class AppBeetlKit
     @Resource
     private ServletContext servletContext;
     @PropertyRead(value = "jfire.mvc.classpathPrefix")
-    private String         classpathPrefix = "";
+    private String         classpathPrefix = "web";
     @PropertyRead("jfire.mvc.mode")
     private String         mode            = "webapp";
     

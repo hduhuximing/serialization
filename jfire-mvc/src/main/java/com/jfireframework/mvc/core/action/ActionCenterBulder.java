@@ -5,9 +5,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import javax.servlet.ServletContext;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.codejson.JsonTool;
@@ -17,6 +19,7 @@ import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.mvc.annotation.Controller;
 import com.jfireframework.mvc.annotation.RequestMapping;
+import com.jfireframework.mvc.core.EasyMvcDispathServlet;
 import com.jfireframework.mvc.interceptor.impl.DataBinderInterceptor;
 import com.jfireframework.mvc.interceptor.impl.UploadInterceptor;
 import com.jfireframework.mvc.util.AppBeetlKit;
@@ -35,14 +38,42 @@ public class ActionCenterBulder
     
     public static ActionCenter generate(ClassLoader classLoader, ServletContext servletContext)
     {
-        JsonObject config = (JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("mvc.json", Charset.forName("utf8")));
         JfireContext jfireContext = new JfireContextImpl();
+        if (servletContext.getAttribute(EasyMvcDispathServlet.RUN_IN_JAR_MODE) != null)
+        {
+            // 先使用默认值填充,这样后面如果配置文件有值的话可以覆盖
+            Properties properties = new Properties();
+            properties.put("jfire.mvc.mode", "jar_mode");
+            jfireContext.addProperties(properties);
+        }
+        if (servletContext.getAttribute(EasyMvcDispathServlet.CONFIG_CLASS_NAME) != null)
+        {
+            String name = (String) servletContext.getAttribute(EasyMvcDispathServlet.CONFIG_CLASS_NAME);
+            try
+            {
+                Class<?> configClass = classLoader.loadClass(name);
+                jfireContext.readConfig(configClass);
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new JustThrowException(e);
+            }
+        }
+        if (servletContext.getAttribute(EasyMvcDispathServlet.SACAN_PACKAGENAME) != null)
+        {
+            String packageName = (String) servletContext.getAttribute(EasyMvcDispathServlet.SACAN_PACKAGENAME);
+            jfireContext.addPackageNames(packageName);
+        }
+        if (classLoader.getResource("mvc.json") != null)
+        {
+            JsonObject config = (JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("mvc.json", Charset.forName("utf8")));
+            jfireContext.readConfig(config);
+        }
         jfireContext.addSingletonEntity(classLoader.getClass().getName(), classLoader);
         jfireContext.setClassLoader(classLoader);
         AopUtil.initClassPool(classLoader);
         JsonTool.initClassPool(classLoader);
         addViewRender(jfireContext);
-        jfireContext.readConfig(config);
         jfireContext.addSingletonEntity("servletContext", servletContext);
         jfireContext.addBean(DataBinderInterceptor.class);
         jfireContext.addBean(UploadInterceptor.class);

@@ -1,8 +1,12 @@
 package com.jfireframework.context.test.runner;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Properties;
 import org.junit.rules.RunRules;
@@ -11,6 +15,10 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import com.jfireframework.baseutil.StringUtil;
+import com.jfireframework.baseutil.exception.JustThrowException;
+import com.jfireframework.codejson.JsonObject;
+import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 
@@ -76,30 +84,39 @@ public class EachMethodEachContextRunner extends BlockJUnit4ClassRunner
     protected Object createTest(Method method)
     {
         JfireContext beanContext = new JfireContextImpl();
-        File config = null;
         if (path.startsWith("classpath:"))
         {
-            try
-            {
-                config = new File(this.getClass().getClassLoader().getResource(path.substring(10)).toURI());
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("文件无法找到", e);
-            }
+            beanContext.readConfig((JsonObject) JsonTool.fromString(StringUtil.readFromClasspath(path.substring(10), Charset.forName("utf8"))));
         }
         else if (path.startsWith("file:"))
         {
+            InputStream inputStream = null;
             try
             {
-                config = new File(path.substring(5));
+                inputStream = new FileInputStream(new File(path.substring(5)));
+                byte[] src = new byte[inputStream.available()];
+                inputStream.read(src);
+                beanContext.readConfig((JsonObject) JsonTool.fromString(new String(src, Charset.forName("utf8"))));
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                throw new RuntimeException("文件无法找到", e);
+                throw new JustThrowException(e);
+            }
+            finally
+            {
+                if (inputStream != null)
+                {
+                    try
+                    {
+                        inputStream.close();
+                    }
+                    catch (IOException e)
+                    {
+                        throw new JustThrowException(e);
+                    }
+                }
             }
         }
-        beanContext.readConfig(config);
         beanContext.addBean(klass.getName(), false, klass);
         if (method.isAnnotationPresent(PropertyAdd.class))
         {

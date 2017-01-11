@@ -19,11 +19,6 @@ public class JfireContextImpl extends JfireContextBootstrapImpl implements Jfire
         addPackageNames(packageNames);
     }
     
-    public JfireContextImpl(Class<?> ckass)
-    {
-        super(ckass);
-    }
-    
     @Override
     public Object getBean(String name)
     {

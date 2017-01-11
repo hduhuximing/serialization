@@ -1,6 +1,5 @@
 package com.jfireframework.context;
 
-import java.io.File;
 import java.util.Properties;
 import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.context.config.BeanInfo;
@@ -10,11 +9,11 @@ public interface JfireContextBootstrap
     public void addProperties(Properties... properties);
     
     /**
-     * 读取配置文件中的信息，如果配置文件中配置了PackageNames，则向容器中增加包信息。 如果配置了beans，则向容器增加bean信息
+     * 读取类上面的注解配置信息
      * 
-     * @param configFile
+     * @param ckass
      */
-    public void readConfig(File configFile);
+    public void readConfig(Class<?> ckass);
     
     /**
      * 读取一个包含了配置信息的json对象

@@ -15,6 +15,7 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
+import io.undertow.servlet.api.ServletInfo;
 
 public class BootStarter
 {
@@ -33,21 +34,32 @@ public class BootStarter
     
     public void start()
     {
+        String configClassName = Thread.currentThread().getStackTrace()[2].getClassName();
+        int index = configClassName.lastIndexOf('.');
+        String packageName = null;
+        if (index != -1)
+        {
+            packageName = configClassName.substring(0, index);
+        }
         try
         {
+            ServletInfo servletInfo = Servlets.servlet("EasyMvcDispathServlet", EasyMvcDispathServlet.class)//
+                    .addMapping("/*")//
+                    .addInitParam(EasyMvcDispathServlet.RUN_IN_JAR_MODE, "")//
+                    .addInitParam(EasyMvcDispathServlet.CONFIG_CLASS_NAME, configClassName)//
+                    .setEnabled(true)//
+                    .setLoadOnStartup(1)//
+                    .setAsyncSupported(true)//
+                    .setMultipartConfig(new MultipartConfigElement(EasyMvcDispathServlet.class.getAnnotation(MultipartConfig.class)));
+            if (packageName != null)
+            {
+                servletInfo = servletInfo.addInitParam(EasyMvcDispathServlet.SACAN_PACKAGENAME, packageName);
+            }
             DeploymentInfo servletBuilder = Servlets.deployment()//
                     .setClassLoader(BootStarter.class.getClassLoader())//
                     .setContextPath(appName)//
                     .setDeploymentName("bootstarter")//
-                    .addServlets(
-                            //
-                            Servlets.servlet("EasyMvcDispathServlet", EasyMvcDispathServlet.class)//
-                                    .addMapping("/*")//
-                                    .setEnabled(true)//
-                                    .setLoadOnStartup(1)//
-                                    .setAsyncSupported(true)//
-                                    .setMultipartConfig(new MultipartConfigElement(EasyMvcDispathServlet.class.getAnnotation(MultipartConfig.class)))
-                    );
+                    .addServlets(servletInfo);
             servletBuilder.setResourceManager(resourceManager);
             for (Class<? extends Filter> each : filterClasses)
             {

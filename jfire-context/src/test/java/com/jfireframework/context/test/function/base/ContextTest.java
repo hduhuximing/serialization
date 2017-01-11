@@ -2,12 +2,15 @@ package com.jfireframework.context.test.function.base;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import java.io.File;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import javax.annotation.Resource;
 import org.junit.Test;
+import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.codejson.JsonObject;
+import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.ContextInitFinish;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
@@ -123,10 +126,7 @@ public class ContextTest
     public void testConfig() throws URISyntaxException
     {
         JfireContext jfireContext = new JfireContextImpl();
-        jfireContext.readConfig(new File(this.getClass().getClassLoader().getResource("config.json").toURI()));
-        // Properties properties = new Properties();
-        // properties.setProperty("age", "26");
-        // jfireContext.addProperties(properties);
+        jfireContext.readConfig((JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("config.json", Charset.forName("utf8"))));
         baseTest(jfireContext);
         testParam(jfireContext);
     }
@@ -135,7 +135,7 @@ public class ContextTest
     public void testConfig2() throws URISyntaxException
     {
         JfireContext jfireContext = new JfireContextImpl();
-        jfireContext.readConfig(new File(this.getClass().getClassLoader().getResource("config2.json").toURI()));
+        jfireContext.readConfig((JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("config2.json", Charset.forName("utf8"))));
         baseTest(jfireContext);
         testParam(jfireContext);
     }
