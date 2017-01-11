@@ -1,15 +1,16 @@
 package com.jfireframework.context.config;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class BeanInfo
 {
-    private String                  beanName;
-    private String                  className;
-    private boolean                 prototype    = false;
-    private HashMap<String, String> params       = new HashMap<String, String>();
-    private HashMap<String, String> dependencies = new HashMap<String, String>();
-    private String                  postConstructMethod;
+    private String              beanName;
+    private String              className;
+    private boolean             prototype    = false;
+    private Map<String, String> params       = new HashMap<String, String>();
+    private Map<String, String> dependencies = new HashMap<String, String>();
+    private String              postConstructMethod;
     
     public String getBeanName()
     {
@@ -41,22 +42,22 @@ public class BeanInfo
         this.prototype = prototype;
     }
     
-    public HashMap<String, String> getParams()
+    public Map<String, String> getParams()
     {
         return params;
     }
     
-    public void setParams(HashMap<String, String> params)
+    public void setParams(Map<String, String> params)
     {
         this.params = params;
     }
     
-    public HashMap<String, String> getDependencies()
+    public Map<String, String> getDependencies()
     {
         return dependencies;
     }
     
-    public void setDependencies(HashMap<String, String> dependencies)
+    public void setDependencies(Map<String, String> dependencies)
     {
         this.dependencies = dependencies;
     }

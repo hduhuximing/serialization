@@ -1,9 +1,12 @@
 package com.jfireframework.context.test.function.initmethod;
 
-import java.io.File;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import org.junit.Assert;
 import org.junit.Test;
+import com.jfireframework.baseutil.StringUtil;
+import com.jfireframework.codejson.JsonObject;
+import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 import com.jfireframework.context.config.BeanInfo;
@@ -37,7 +40,7 @@ public class InitMethodTest
     public void testfilecfg() throws URISyntaxException
     {
         JfireContext jfireContext = new JfireContextImpl("com.jfireframework.context.test.function.initmethod");
-        jfireContext.readConfig(new File(this.getClass().getClassLoader().getResource("init.json").toURI()));
+        jfireContext.readConfig((JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("init.json", Charset.forName("utf8"))));
         Person2 person2 = jfireContext.getBean(Person2.class);
         Assert.assertEquals(12, person2.getAge());
     }

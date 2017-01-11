@@ -2,6 +2,7 @@ package com.jfireframework.mvc.core;
 
 import java.io.IOException;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.baseutil.uniqueid.AutumnId;
 import com.jfireframework.mvc.core.action.Action;
 import com.jfireframework.mvc.util.ChangeMethodRequest;
 
@@ -34,14 +36,36 @@ public class EasyMvcDispathServlet extends HttpServlet
     private DispathServletHelper helper;
     private static final String  DEFAULT_METHOD_PREFIX = "_method";
     private String               encode;
+    public static final String   RUN_IN_JAR_MODE       = AutumnId.instance().generate();
+    public static final String   CONFIG_CLASS_NAME     = AutumnId.instance().generate();
+    public static final String   SACAN_PACKAGENAME     = AutumnId.instance().generate();
     
     @Override
     public void init(ServletConfig servletConfig) throws ServletException
     {
         logger.debug("初始化Context-mvc Servlet");
-        helper = new DispathServletHelper(servletConfig.getServletContext());
+        ServletContext servletContext = servletConfig.getServletContext();
+        // 运行在jar模式下
+        if (servletConfig.getInitParameter(RUN_IN_JAR_MODE) != null)
+        {
+            logger.debug("检测发现运行在jar模式下");
+            servletContext.setAttribute(RUN_IN_JAR_MODE, "");
+            if (servletConfig.getInitParameter(CONFIG_CLASS_NAME) != null)
+            {
+                servletContext.setAttribute(CONFIG_CLASS_NAME, servletConfig.getInitParameter(CONFIG_CLASS_NAME));
+            }
+            if (servletConfig.getInitParameter(SACAN_PACKAGENAME) != null)
+            {
+                servletContext.setAttribute(SACAN_PACKAGENAME, servletConfig.getInitParameter(SACAN_PACKAGENAME));
+            }
+        }
+        // 运行在传统的war模式下,在容器之中被展开
+        else
+        {
+            logger.debug("检测发现运行在外部容器环境中");
+        }
+        helper = new DispathServletHelper(servletContext);
         encode = helper.getExtraConfig().getEncode();
-        
     }
     
     @Override

@@ -4,9 +4,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public interface SqlStrategy
+public @interface SqlStrategy
 {
-    public String valueFields();
+    public String name();
     
-    public String whereFields();
+    public String fields();
 }

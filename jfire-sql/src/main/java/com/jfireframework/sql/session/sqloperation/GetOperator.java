@@ -35,9 +35,9 @@ public interface GetOperator
      */
     public <T> T get(Class<T> entityClass, Object pk, LockMode mode);
     
-    public <T> T findOneByStrategy(T entity, SqlStrategy findStrategy);
+    public <T> T findOneByStrategy(T entity, String strategyName);
     
-    public <T> List<T> findAllByStrategy(T entity, SqlStrategy findStrategy);
+    public <T> List<T> findAllByStrategy(T entity, String strategyName);
     
-    public <T> List<T> findPageByStrategy(T entity, Page page, SqlStrategy findStrategy);
+    public <T> List<T> findPageByStrategy(T entity, Page page, String strategyName);
 }

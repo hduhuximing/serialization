@@ -480,7 +480,7 @@ public class WriterContext
         }
         try
         {
-            CtClass implClass = classPool.makeClass("JsonWriter_" + targetClass.getSimpleName() + "_" + System.currentTimeMillis());
+            CtClass implClass = classPool.makeClass("JsonWriter_" + count.getAndIncrement());
             implClass.setSuperclass(classPool.get(WriterAdapter.class.getName()));
             if (strategy != null)
             {

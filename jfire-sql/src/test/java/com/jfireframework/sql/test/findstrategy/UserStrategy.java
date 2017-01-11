@@ -2,39 +2,18 @@ package com.jfireframework.sql.test.findstrategy;
 
 import com.jfireframework.sql.annotation.Id;
 import com.jfireframework.sql.annotation.SqlStrategy;
+import com.jfireframework.sql.annotation.Sqlstrategies;
 import com.jfireframework.sql.annotation.TableEntity;
 
 @TableEntity(name = "userstrategy")
+@Sqlstrategies({ //
+        @SqlStrategy(name = "test1", fields = "name,password|age,boy"), //
+        @SqlStrategy(name = "test2", fields = "name,age,birthday|id"), //
+        @SqlStrategy(name = "test3", fields = "id,password,age|boy"), //
+        @SqlStrategy(name = "test4", fields = "password,age|age")
+})
 public class UserStrategy
 {
-    public static enum SS implements SqlStrategy
-    {
-        test1("name,password", "age,boy"), //
-        test2("name,age,birthday", "id"), //
-        test3("id,password,age", "boy"), //
-        test4("password,age", "age");
-        private final String valueFields;
-        private final String whereFields;
-        
-        private SS(String selectFields, String whereFields)
-        {
-            this.valueFields = selectFields;
-            this.whereFields = whereFields;
-        }
-        
-        @Override
-        public String valueFields()
-        {
-            return valueFields;
-        }
-        
-        @Override
-        public String whereFields()
-        {
-            return whereFields;
-        }
-        
-    }
     
     @Id
     private Integer id;

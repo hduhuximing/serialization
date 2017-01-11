@@ -1,21 +1,22 @@
 package com.jfireframework.context.config;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Profile
 {
-    private String                  name;
-    private String[]                packageNames  = new String[0];
-    private BeanInfo[]              beans         = new BeanInfo[0];
-    private String[]                propertyPaths = new String[0];
-    private HashMap<String, String> properties    = new HashMap<String, String>();
+    private String              name;
+    private String[]            packageNames  = new String[0];
+    private BeanInfo[]          beans         = new BeanInfo[0];
+    private String[]            propertyPaths = new String[0];
+    private Map<String, String> properties    = new HashMap<String, String>();
     
-    public HashMap<String, String> getProperties()
+    public Map<String, String> getProperties()
     {
         return properties;
     }
     
-    public void setProperties(HashMap<String, String> properties)
+    public void setProperties(Map<String, String> properties)
     {
         this.properties = properties;
     }

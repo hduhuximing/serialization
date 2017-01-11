@@ -1,10 +1,18 @@
 package com.jfireframework.context.test.runner;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Properties;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
+import com.jfireframework.baseutil.StringUtil;
+import com.jfireframework.baseutil.exception.JustThrowException;
+import com.jfireframework.codejson.JsonObject;
+import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
 
@@ -20,30 +28,39 @@ public class BeanContextRunner extends BlockJUnit4ClassRunner
         ConfigPath path = klass.getAnnotation(ConfigPath.class);
         String value = path.value();
         beanContext = new JfireContextImpl();
-        File config = null;
         if (value.startsWith("classpath:"))
         {
-            try
-            {
-                config = new File(this.getClass().getClassLoader().getResource(value.substring(10)).toURI());
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("文件无法找到", e);
-            }
+            beanContext.readConfig((JsonObject) JsonTool.fromString(StringUtil.readFromClasspath(value.substring(10), Charset.forName("utf8"))));
         }
         else if (value.startsWith("file:"))
         {
+            InputStream inputStream = null;
             try
             {
-                config = new File(value.substring(5));
+                inputStream = new FileInputStream(new File(value.substring(5)));
+                byte[] src = new byte[inputStream.available()];
+                inputStream.read(src);
+                beanContext.readConfig((JsonObject) JsonTool.fromString(new String(src, Charset.forName("utf8"))));
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                throw new RuntimeException("文件无法找到", e);
+                throw new JustThrowException(e);
+            }
+            finally
+            {
+                if (inputStream != null)
+                {
+                    try
+                    {
+                        inputStream.close();
+                    }
+                    catch (IOException e)
+                    {
+                        throw new JustThrowException(e);
+                    }
+                }
             }
         }
-        beanContext.readConfig(config);
         beanContext.addBean(klass.getName(), false, klass);
         if (klass.isAnnotationPresent(PropertyAdd.class))
         {
