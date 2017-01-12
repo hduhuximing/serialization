@@ -3,9 +3,11 @@ package com.jfireframework.mvc.core.action;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
@@ -36,19 +38,12 @@ import com.jfireframework.mvc.viewrender.impl.StringRender;
 public class ActionCenterBulder
 {
     
-    public static ActionCenter generate(ClassLoader classLoader, ServletContext servletContext)
+    public static ActionCenter generate(ClassLoader classLoader, ServletContext servletContext, ServletConfig servletConfig)
     {
         JfireContext jfireContext = new JfireContextImpl();
-        if (servletContext.getAttribute(EasyMvcDispathServlet.RUN_IN_JAR_MODE) != null)
+        if (servletConfig.getInitParameter(EasyMvcDispathServlet.CONFIG_CLASS_NAME) != null)
         {
-            // 先使用默认值填充,这样后面如果配置文件有值的话可以覆盖
-            Properties properties = new Properties();
-            properties.put("jfire.mvc.mode", "jar_mode");
-            jfireContext.addProperties(properties);
-        }
-        if (servletContext.getAttribute(EasyMvcDispathServlet.CONFIG_CLASS_NAME) != null)
-        {
-            String name = (String) servletContext.getAttribute(EasyMvcDispathServlet.CONFIG_CLASS_NAME);
+            String name = servletConfig.getInitParameter(EasyMvcDispathServlet.CONFIG_CLASS_NAME);
             try
             {
                 Class<?> configClass = classLoader.loadClass(name);
@@ -59,11 +54,19 @@ public class ActionCenterBulder
                 throw new JustThrowException(e);
             }
         }
-        if (servletContext.getAttribute(EasyMvcDispathServlet.SACAN_PACKAGENAME) != null)
+        if (servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME) != null)
         {
-            String packageName = (String) servletContext.getAttribute(EasyMvcDispathServlet.SACAN_PACKAGENAME);
+            String packageName = servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME);
             jfireContext.addPackageNames(packageName);
         }
+        Properties properties = new Properties();
+        Enumeration<String> initParams = servletConfig.getInitParameterNames();
+        while (initParams.hasMoreElements())
+        {
+            String key = initParams.nextElement();
+            properties.put(key, servletConfig.getInitParameter(key));
+        }
+        jfireContext.addProperties(properties);
         if (classLoader.getResource("mvc.json") != null)
         {
             JsonObject config = (JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("mvc.json", Charset.forName("utf8")));

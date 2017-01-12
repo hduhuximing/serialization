@@ -22,7 +22,7 @@ public class AppBeetlKit
     GroupTemplate          gt              = null;
     @Resource
     private ServletContext servletContext;
-    @PropertyRead(value = "jfire.mvc.classpathPrefix")
+    @PropertyRead("jfire.mvc.classpathPrefix")
     private String         classpathPrefix = "web";
     @PropertyRead("jfire.mvc.mode")
     private String         mode            = "webapp";

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,16 +24,18 @@ public class DispathServletHelper
 {
     private static final Logger     logger = ConsoleLogFactory.getLogger();
     private ActionCenter            actionCenter;
+    private final ServletConfig     servletConfig;
     private final ServletContext    servletContext;
     private final RequestDispatcher staticResourceDispatcher;
     private final PreHandler        preHandler;
     private final ExtraConfig       extraConfig;
     
-    public DispathServletHelper(ServletContext servletContext)
+    public DispathServletHelper(ServletConfig servletConfig)
     {
-        this.servletContext = servletContext;
+        this.servletConfig = servletConfig;
+        servletContext = servletConfig.getServletContext();
         staticResourceDispatcher = getStaticResourceDispatcher();
-        actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext);
+        actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext, servletConfig);
         extraConfig = actionCenter.getExtraConfig();
         if (extraConfig.isHotswap())
         {
@@ -140,7 +143,7 @@ public class DispathServletHelper
                 {
                     classLoader.setExcludePackages(excludePackages.split(","));
                 }
-                actionCenter = ActionCenterBulder.generate(classLoader, servletContext);
+                actionCenter = ActionCenterBulder.generate(classLoader, servletContext, servletConfig);
                 logger.debug("热部署,耗时:{}", System.currentTimeMillis() - t0);
             }
         }

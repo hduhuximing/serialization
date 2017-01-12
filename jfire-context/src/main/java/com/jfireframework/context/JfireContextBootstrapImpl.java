@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -52,122 +53,12 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     protected Map<Class<?>, Bean>   beanTypeMap      = new HashMap<Class<?>, Bean>();
     protected boolean               init             = false;
     protected List<String>          classNames       = new LinkedList<String>();
-    protected static Logger         logger           = ConsoleLogFactory.getLogger();
     protected ClassLoader           classLoader      = JfireContextImpl.class.getClassLoader();
-    protected BeanUtil              beanUtil         = new BeanUtil();
     protected Map<String, String>   properties       = new HashMap<String, String>();
     protected Map<String, String>   outterProperties = new HashMap<String, String>();
     protected Profile[]             profiles         = new Profile[0];
     protected String                activeProfile;
-    
-    class BeanUtil
-    {
-        private Logger logger = ConsoleLogFactory.getLogger();
-        
-        /**
-         * 检查所有的Class名称，通过反射获取class，并且进行初始化。
-         * 形成基本的bean信息（bean名称，bean类型，单例与否，是否实现完成接口的信息） 将这些信息放入beanNameMap
-         * 
-         * @param classNames
-         * @param beanMap
-         */
-        public void buildBean(List<String> classNames)
-        {
-            for (String each : classNames)
-            {
-                buildBean(each);
-            }
-        }
-        
-        /**
-         * 对类进行分析，给出该类的信息Bean，并且填充包括bean名称，bean类型，单例与否，是否实现完成接口的信息
-         * 
-         * @param className
-         * @param context
-         * @return
-         */
-        private void buildBean(String className)
-        {
-            Class<?> res = null;
-            try
-            {
-                res = classLoader.loadClass(className);
-            }
-            catch (ClassNotFoundException e)
-            {
-                throw new RuntimeException("对应的类不存在", e);
-            }
-            if (AnnotationUtil.isPresent(Resource.class, res) == false)
-            {
-                logger.trace("类{}未使用资源注解", className);
-                return;
-            }
-            Bean bean = null;
-            if (AnnotationUtil.isPresent(LoadBy.class, res))
-            {
-                LoadBy loadBy = AnnotationUtil.getAnnotation(LoadBy.class, res);
-                bean = new LoadByBean(res, loadBy.factoryBeanName());
-            }
-            else if (res.isInterface() == false)
-            {
-                bean = new DefaultBean(res);
-            }
-            else
-            {
-                throw new UnSupportException(StringUtil.format("在接口上只有Resource注解是无法实例化bean的.请检查{}", res.getName()));
-            }
-            if (beanNameMap.containsKey(bean.getBeanName()))
-            {
-                Bean sameNameBean = beanNameMap.get(bean.getBeanName());
-                Verify.True(sameNameBean.getOriginType().equals(bean.getOriginType()), "类{}和类{}使用了相同的bean名称，请检查", sameNameBean.getOriginType(), bean.getOriginType().getName());
-            }
-            else
-            {
-                logger.trace("为类{}注册bean", res.getName());
-                beanNameMap.put(bean.getBeanName(), bean);
-            }
-            
-        }
-        
-        /**
-         * 分析所有的组件bean，将其中需要注入的属性的bean形成injectField数组以供注入使用
-         * 
-         * @param beanNameMap
-         */
-        public void initDependencyAndParamFields()
-        {
-            Map<String, String> emptyParams = new HashMap<String, String>();
-            Map<String, ParamField> fieldMap = new HashMap<String, ParamField>();
-            for (Bean bean : beanNameMap.values())
-            {
-                if (bean.canInject())
-                {
-                    BeanInfo beanInfo = bean.getBeanInfo();
-                    bean.setInjectFields(FieldFactory.buildDependencyField(bean, beanNameMap, beanTypeMap, beanInfo));
-                    fieldMap.clear();
-                    if (beanInfo != null)
-                    {
-                        for (ParamField each : FieldFactory.buildParamField(bean, beanInfo.getParams(), properties, classLoader))
-                        {
-                            fieldMap.put(each.getName(), each);
-                        }
-                        for (ParamField each : FieldFactory.buildParamField(bean, emptyParams, properties, classLoader))
-                        {
-                            fieldMap.put(each.getName(), each);
-                        }
-                    }
-                    else
-                    {
-                        for (ParamField each : FieldFactory.buildParamField(bean, emptyParams, properties, classLoader))
-                        {
-                            fieldMap.put(each.getName(), each);
-                        }
-                    }
-                    bean.setParamFields(fieldMap.values().toArray(new ParamField[fieldMap.size()]));
-                }
-            }
-        }
-    }
+    protected static final Logger   logger           = ConsoleLogFactory.getLogger();
     
     @Override
     public void addPackageNames(String... packageNames)
@@ -336,9 +227,10 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     
     private void aggregateProperties()
     {
-        List<String> deleteKeys = new LinkedList<String>();
-        for (Entry<String, String> entry : properties.entrySet())
+        Iterator<Entry<String, String>> it = properties.entrySet().iterator();
+        while (it.hasNext())
         {
+            Entry<String, String> entry = it.next();
             String value = entry.getValue();
             if (value.startsWith("${"))
             {
@@ -365,14 +257,10 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
                     }
                     else
                     {
-                        deleteKeys.add(entry.getKey());
+                        it.remove();
                     }
                 }
             }
-        }
-        for (String deleteKey : deleteKeys)
-        {
-            properties.remove(deleteKey);
         }
         for (Entry<String, String> entry : outterProperties.entrySet())
         {
@@ -394,7 +282,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
         aggregateProperties();
         init = true;
         replaceValueFromPropertiesToBeancfg();
-        beanUtil.buildBean(classNames);
+        buildBean(classNames);
         for (Bean each : beanNameMap.values())
         {
             // 这个时候来放入typeMap，才是bean最全的时候
@@ -420,7 +308,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
          * 并且由于aop需要增加若干个类属性(属性上均有Resouce注解用来注入增强类)，所以注入属性数组的生成必须在aop之后
          */
         AopUtil.enhance(beanNameMap, classLoader);
-        beanUtil.initDependencyAndParamFields();
+        initDependencyAndParamFields();
         for (Bean bean : beanNameMap.values())
         {
             bean.decorateSelf(beanNameMap, beanTypeMap);
@@ -457,6 +345,110 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             {
                 logger.error("执行方法{}.afterContextInit发生异常", each.getClass().getName(), e);
                 throw new JustThrowException(e);
+            }
+        }
+    }
+    
+    /**
+     * 检查所有的Class名称，通过反射获取class，并且进行初始化。
+     * 形成基本的bean信息（bean名称，bean类型，单例与否，是否实现完成接口的信息） 将这些信息放入beanNameMap
+     * 
+     * @param classNames
+     * @param beanMap
+     */
+    private void buildBean(List<String> classNames)
+    {
+        for (String each : classNames)
+        {
+            buildBean(each);
+        }
+    }
+    
+    /**
+     * 对类进行分析，给出该类的信息Bean，并且填充包括bean名称，bean类型，单例与否，是否实现完成接口的信息
+     * 
+     * @param className
+     * @param context
+     * @return
+     */
+    private void buildBean(String className)
+    {
+        Class<?> res = null;
+        try
+        {
+            res = classLoader.loadClass(className);
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new RuntimeException("对应的类不存在", e);
+        }
+        if (AnnotationUtil.isPresent(Resource.class, res) == false)
+        {
+            logger.trace("类{}未使用资源注解", className);
+            return;
+        }
+        Bean bean = null;
+        if (AnnotationUtil.isPresent(LoadBy.class, res))
+        {
+            LoadBy loadBy = AnnotationUtil.getAnnotation(LoadBy.class, res);
+            bean = new LoadByBean(res, loadBy.factoryBeanName());
+        }
+        else if (res.isInterface() == false)
+        {
+            bean = new DefaultBean(res);
+        }
+        else
+        {
+            throw new UnSupportException(StringUtil.format("在接口上只有Resource注解是无法实例化bean的.请检查{}", res.getName()));
+        }
+        if (beanNameMap.containsKey(bean.getBeanName()))
+        {
+            Bean sameNameBean = beanNameMap.get(bean.getBeanName());
+            Verify.True(sameNameBean.getOriginType().equals(bean.getOriginType()), "类{}和类{}使用了相同的bean名称，请检查", sameNameBean.getOriginType(), bean.getOriginType().getName());
+        }
+        else
+        {
+            logger.trace("为类{}注册bean", res.getName());
+            beanNameMap.put(bean.getBeanName(), bean);
+        }
+        
+    }
+    
+    /**
+     * 分析所有的组件bean，将其中需要注入的属性的bean形成injectField数组以供注入使用
+     * 
+     * @param beanNameMap
+     */
+    private void initDependencyAndParamFields()
+    {
+        Map<String, String> emptyParams = new HashMap<String, String>();
+        Map<String, ParamField> fieldMap = new HashMap<String, ParamField>();
+        for (Bean bean : beanNameMap.values())
+        {
+            if (bean.canInject())
+            {
+                BeanInfo beanInfo = bean.getBeanInfo();
+                bean.setInjectFields(FieldFactory.buildDependencyField(bean, beanNameMap, beanTypeMap, beanInfo));
+                fieldMap.clear();
+                if (beanInfo != null)
+                {
+                    for (ParamField each : FieldFactory.buildParamField(bean, beanInfo.getParams(), properties, classLoader))
+                    {
+                        fieldMap.put(each.getName(), each);
+                    }
+                    for (ParamField each : FieldFactory.buildParamField(bean, emptyParams, properties, classLoader))
+                    {
+                        fieldMap.put(each.getName(), each);
+                    }
+                }
+                else
+                {
+                    for (ParamField each : FieldFactory.buildParamField(bean, emptyParams, properties, classLoader))
+                    {
+                        fieldMap.put(each.getName(), each);
+                    }
+                }
+                bean.setParamFields(fieldMap.values().toArray(new ParamField[fieldMap.size()]));
             }
         }
     }
@@ -708,6 +700,12 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
                 readConfig(each);
             }
         }
+    }
+    
+    @Override
+    public void addPackageName(Class<?> ckass)
+    {
+        addPackageNames(ckass.getPackage().getName());
     }
     
 }

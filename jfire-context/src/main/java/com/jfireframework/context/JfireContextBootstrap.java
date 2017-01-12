@@ -30,6 +30,13 @@ public interface JfireContextBootstrap
     public void addPackageNames(String... packageNames);
     
     /**
+     * 向容器内增加要扫描的包名,就是入参类所在的包
+     * 
+     * @param ckass
+     */
+    public void addPackageName(Class<?> ckass);
+    
+    /**
      * 增加若干个类到容器内，该类必须自己打上对应需要的注解
      * 
      * @param src
