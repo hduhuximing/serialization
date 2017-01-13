@@ -11,7 +11,6 @@ import com.jfireframework.mvc.config.ResultType;
 /**
  * 表示该方法是一个action方法
  * 
- * @author 林斌（windfire@zailanghua.com）
  * 
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })
@@ -30,9 +29,8 @@ public @interface RequestMapping
      * 视图类型
      * 
      * @return
-     * @author windfire(windfire@zailanghua.com)
      */
-    public ResultType resultType() default ResultType.Class_Head;
+    public ResultType resultType() default ResultType.None;
     
     /**
      * 该方法直接从request中读取流，不进行数据组装处理

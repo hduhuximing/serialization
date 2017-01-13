@@ -9,7 +9,6 @@ import org.beetl.ext.web.SessionWrapper;
 import org.beetl.ext.web.WebVariable;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.core.ModelAndView;
-import com.jfireframework.mvc.util.JfireMvcResponseWrapper;
 import com.jfireframework.mvc.util.AppBeetlKit;
 import com.jfireframework.mvc.viewrender.ViewRender;
 
@@ -23,32 +22,7 @@ public class BeetlRender implements ViewRender
     public void render(HttpServletRequest request, HttpServletResponse response, Object result) throws Throwable
     {
         ModelAndView viewAndModel = (ModelAndView) result;
-        response.setContentType("text/html");
-        if (viewAndModel.cached())
-        {
-            response.getOutputStream().write(viewAndModel.getDirectBytes());
-        }
-        else if (viewAndModel.isDirect())
-        {
-            synchronized (viewAndModel)
-            {
-                if (viewAndModel.cached())
-                {
-                    response.getOutputStream().write(viewAndModel.getDirectBytes());
-                }
-                else
-                {
-                    JfireMvcResponseWrapper wrapper = new JfireMvcResponseWrapper(response, viewAndModel);
-                    render(viewAndModel, request, wrapper);
-                    wrapper.getOutputStream().flush();
-                    viewAndModel.setDirectBytes(viewAndModel.getCache().toArray());
-                }
-            }
-        }
-        else
-        {
-            render(viewAndModel, request, response);
-        }
+        render(viewAndModel, request, response);
     }
     
     /**

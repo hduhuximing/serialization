@@ -51,8 +51,6 @@ public class EasyMvcDispathServlet extends HttpServlet
         res.setCharacterEncoding(encode);
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
         if (request.getMethod().equals("POST") && StringUtil.isNotBlank(request.getHeader(DEFAULT_METHOD_PREFIX)))
         {
             String method = request.getHeader(DEFAULT_METHOD_PREFIX).toUpperCase();

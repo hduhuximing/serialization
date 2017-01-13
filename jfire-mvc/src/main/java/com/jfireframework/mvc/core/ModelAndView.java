@@ -2,16 +2,11 @@ package com.jfireframework.mvc.core;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.jfireframework.baseutil.collection.ByteCache;
 
 public class ModelAndView
 {
-    private Map<String, Object> data   = null;
+    private Map<String, Object> data = null;
     private String              modelName;
-    private volatile boolean    direct = false;
-    private volatile byte[]     directBytes;
-    private ByteCache           cache;
-    private volatile boolean    cached = false;
     // 视图的类型
     private String              contentType;
     private Map<String, String> header;
@@ -33,13 +28,6 @@ public class ModelAndView
     public ModelAndView(String modelName)
     {
         this.modelName = modelName;
-    }
-    
-    public ModelAndView(String modelName, boolean direct)
-    {
-        this.modelName = modelName;
-        this.direct = direct;
-        cache = new ByteCache(512);
     }
     
     public void addObject(String key, Object value)
@@ -64,32 +52,6 @@ public class ModelAndView
     public Map<String, Object> getData()
     {
         return data;
-    }
-    
-    public boolean isDirect()
-    {
-        return direct;
-    }
-    
-    public byte[] getDirectBytes()
-    {
-        return directBytes;
-    }
-    
-    public void setDirectBytes(byte[] directBytes)
-    {
-        this.directBytes = directBytes;
-        cached = true;
-    }
-    
-    public ByteCache getCache()
-    {
-        return cache;
-    }
-    
-    public boolean cached()
-    {
-        return cached;
     }
     
     public String getContentType()

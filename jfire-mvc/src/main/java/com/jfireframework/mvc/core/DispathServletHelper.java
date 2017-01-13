@@ -13,7 +13,6 @@ import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.SimpleHotswapClassLoader;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
-import com.jfireframework.mvc.config.MvcStaticConfig;
 import com.jfireframework.mvc.core.action.Action;
 import com.jfireframework.mvc.core.action.ActionCenter;
 import com.jfireframework.mvc.core.action.ActionCenterBulder;
@@ -22,7 +21,17 @@ import com.jfireframework.mvc.util.FileChangeDetect;
 
 public class DispathServletHelper
 {
-    private static final Logger     logger = ConsoleLogFactory.getLogger();
+    /** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish */
+    public static final String      COMMON_DEFAULT_SERVLET_NAME    = "default";
+    /** Default Servlet name used by Google App Engine */
+    public static final String      GAE_DEFAULT_SERVLET_NAME       = "_ah_default";
+    /** Default Servlet name used by Resin */
+    public static final String      RESIN_DEFAULT_SERVLET_NAME     = "resin-file";
+    /** Default Servlet name used by WebLogic */
+    public static final String      WEBLOGIC_DEFAULT_SERVLET_NAME  = "FileServlet";
+    /** Default Servlet name used by WebSphere */
+    public static final String      WEBSPHERE_DEFAULT_SERVLET_NAME = "SimpleFileServlet";
+    private static final Logger     logger                         = ConsoleLogFactory.getLogger();
     private ActionCenter            actionCenter;
     private final ServletConfig     servletConfig;
     private final ServletContext    servletContext;
@@ -50,16 +59,16 @@ public class DispathServletHelper
     private RequestDispatcher getStaticResourceDispatcher()
     {
         RequestDispatcher requestDispatcher = null;
-        if ((requestDispatcher = servletContext.getNamedDispatcher(MvcStaticConfig.COMMON_DEFAULT_SERVLET_NAME)) != null)
+        if ((requestDispatcher = servletContext.getNamedDispatcher(COMMON_DEFAULT_SERVLET_NAME)) != null)
         {
         }
-        else if ((requestDispatcher = servletContext.getNamedDispatcher(MvcStaticConfig.RESIN_DEFAULT_SERVLET_NAME)) != null)
+        else if ((requestDispatcher = servletContext.getNamedDispatcher(RESIN_DEFAULT_SERVLET_NAME)) != null)
         {
         }
-        else if ((requestDispatcher = servletContext.getNamedDispatcher(MvcStaticConfig.WEBLOGIC_DEFAULT_SERVLET_NAME)) != null)
+        else if ((requestDispatcher = servletContext.getNamedDispatcher(WEBLOGIC_DEFAULT_SERVLET_NAME)) != null)
         {
         }
-        else if ((requestDispatcher = servletContext.getNamedDispatcher(MvcStaticConfig.WEBSPHERE_DEFAULT_SERVLET_NAME)) != null)
+        else if ((requestDispatcher = servletContext.getNamedDispatcher(WEBSPHERE_DEFAULT_SERVLET_NAME)) != null)
         {
         }
         else

@@ -30,7 +30,6 @@ import com.jfireframework.mvc.viewrender.impl.BeetlRender;
 import com.jfireframework.mvc.viewrender.impl.BytesRender;
 import com.jfireframework.mvc.viewrender.impl.HtmlRender;
 import com.jfireframework.mvc.viewrender.impl.JsonRender;
-import com.jfireframework.mvc.viewrender.impl.JspRender;
 import com.jfireframework.mvc.viewrender.impl.NoneRender;
 import com.jfireframework.mvc.viewrender.impl.RedirectRender;
 import com.jfireframework.mvc.viewrender.impl.StringRender;
@@ -41,6 +40,22 @@ public class ActionCenterBulder
     public static ActionCenter generate(ClassLoader classLoader, ServletContext servletContext, ServletConfig servletConfig)
     {
         JfireContext jfireContext = new JfireContextImpl();
+        readConfig(jfireContext, servletConfig, classLoader);
+        jfireContext.addSingletonEntity(classLoader.getClass().getName(), classLoader);
+        jfireContext.setClassLoader(classLoader);
+        AopUtil.initClassPool(classLoader);
+        addViewRender(jfireContext);
+        jfireContext.addSingletonEntity("servletContext", servletContext);
+        jfireContext.addBean(DataBinderInterceptor.class);
+        jfireContext.addBean(UploadInterceptor.class);
+        jfireContext.addBean(ExtraConfig.class);
+        ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfireContext).toArray(new Action[0]));
+        actionCenter.setExtraConfig(jfireContext.getBean(ExtraConfig.class));
+        return actionCenter;
+    }
+    
+    private static void readConfig(JfireContext jfireContext, ServletConfig servletConfig, ClassLoader classLoader)
+    {
         if (servletConfig.getInitParameter(EasyMvcDispathServlet.CONFIG_CLASS_NAME) != null)
         {
             String name = servletConfig.getInitParameter(EasyMvcDispathServlet.CONFIG_CLASS_NAME);
@@ -72,25 +87,12 @@ public class ActionCenterBulder
             JsonObject config = (JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("mvc.json", Charset.forName("utf8")));
             jfireContext.readConfig(config);
         }
-        jfireContext.addSingletonEntity(classLoader.getClass().getName(), classLoader);
-        jfireContext.setClassLoader(classLoader);
-        AopUtil.initClassPool(classLoader);
-        JsonTool.initClassPool(classLoader);
-        addViewRender(jfireContext);
-        jfireContext.addSingletonEntity("servletContext", servletContext);
-        jfireContext.addBean(DataBinderInterceptor.class);
-        jfireContext.addBean(UploadInterceptor.class);
-        jfireContext.addBean(ExtraConfig.class);
-        ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfireContext).toArray(new Action[0]));
-        actionCenter.setExtraConfig(jfireContext.getBean(ExtraConfig.class));
-        return actionCenter;
     }
     
     private static void addViewRender(JfireContext jfireContext)
     {
         jfireContext.addBean(AppBeetlKit.class);
         jfireContext.addBean(BeetlRender.class);
-        jfireContext.addBean(JspRender.class);
         jfireContext.addBean(JsonRender.class);
         jfireContext.addBean(HtmlRender.class);
         jfireContext.addBean(StringRender.class);

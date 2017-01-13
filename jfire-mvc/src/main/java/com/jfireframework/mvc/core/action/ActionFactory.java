@@ -9,7 +9,6 @@ import java.util.List;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.order.AescComparator;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.uniqueid.SummerId;
@@ -26,7 +25,9 @@ import com.jfireframework.mvc.binder.impl.HeaderBinder;
 import com.jfireframework.mvc.binder.impl.HttpServletRequestBinder;
 import com.jfireframework.mvc.binder.impl.HttpServletResponseBinder;
 import com.jfireframework.mvc.binder.impl.HttpSessionBinder;
+import com.jfireframework.mvc.config.ContentType;
 import com.jfireframework.mvc.config.ResultType;
+import com.jfireframework.mvc.core.ModelAndView;
 import com.jfireframework.mvc.interceptor.ActionInterceptor;
 import com.jfireframework.mvc.rule.RestfulRule;
 import com.jfireframework.mvc.viewrender.ViewRender;
@@ -34,7 +35,6 @@ import com.jfireframework.mvc.viewrender.impl.BeetlRender;
 import com.jfireframework.mvc.viewrender.impl.BytesRender;
 import com.jfireframework.mvc.viewrender.impl.HtmlRender;
 import com.jfireframework.mvc.viewrender.impl.JsonRender;
-import com.jfireframework.mvc.viewrender.impl.JspRender;
 import com.jfireframework.mvc.viewrender.impl.NoneRender;
 import com.jfireframework.mvc.viewrender.impl.RedirectRender;
 import com.jfireframework.mvc.viewrender.impl.StringRender;
@@ -62,13 +62,66 @@ public class ActionFactory
         actionInfo.setReadStream(requestMapping.readStream());
         actionInfo.setEntity(bean.getInstance());
         actionInfo.setHeaders(requestMapping.headers());
-        if (requestMapping.resultType() == ResultType.Class_Head)
+        if (requestMapping.resultType() == ResultType.None && method.getReturnType() != Void.class)
         {
-            throw new UnSupportException(StringUtil.format("需要明确指定方法的返回类型，请检查{}.{}", method.getDeclaringClass().getName(), method.getName()));
+            Class<?> returnType = method.getReturnType();
+            if (returnType == String.class)
+            {
+                actionInfo.setResultType(ResultType.String);
+                actionInfo.setContentType(ContentType.STRING);
+            }
+            else if (returnType == ModelAndView.class)
+            {
+                actionInfo.setResultType(ResultType.Beetl);
+                actionInfo.setContentType(ContentType.HTML);
+            }
+            else if (returnType == byte[].class)
+            {
+                actionInfo.setResultType(ResultType.Bytes);
+                actionInfo.setContentType(ContentType.STREAM);
+            }
+            else
+            {
+                actionInfo.setResultType(ResultType.Json);
+            }
         }
-        actionInfo.setResultType(requestMapping.resultType());
+        else
+        {
+            actionInfo.setResultType(requestMapping.resultType());
+        }
+        if (requestMapping.contentType().equals(""))
+        {
+            switch (actionInfo.getResultType())
+            {
+                case Json:
+                    actionInfo.setContentType(ContentType.JSON);
+                    break;
+                case Html:
+                    actionInfo.setContentType(ContentType.HTML);
+                    break;
+                case String:
+                    actionInfo.setContentType(ContentType.STRING);
+                    break;
+                case Bytes:
+                    actionInfo.setContentType(ContentType.STREAM);
+                    break;
+                case Beetl:
+                    actionInfo.setContentType(ContentType.HTML);
+                case Redirect:
+                    actionInfo.setContentType("");
+                    break;
+                case None:
+                    actionInfo.setContentType("");
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            actionInfo.setContentType(requestMapping.contentType());
+        }
         actionInfo.setViewRender(getViewRender(requestMapping.resultType(), jfireContext));
-        actionInfo.setContentType(requestMapping.contentType());
         actionInfo.setToken(requestMapping.token());
         if (actionInfo.getToken().equals(""))
         {
@@ -173,8 +226,7 @@ public class ActionFactory
                                 || each instanceof HttpServletRequestBinder //
                                 || each instanceof HttpServletResponseBinder //
                                 || each instanceof CookieBinder //
-                                || each instanceof HeaderBinder
-                        )
+                                || each instanceof HeaderBinder)
                         {
                             continue;
                         }
@@ -276,12 +328,8 @@ public class ActionFactory
                 return jfireContext.getBean(JsonRender.class);
             case Redirect:
                 return jfireContext.getBean(RedirectRender.class);
-            case Jsp:
-                return jfireContext.getBean(JspRender.class);
             case None:
                 return jfireContext.getBean(NoneRender.class);
-            case Class_Head:
-                throw new NullPointerException();
         }
         throw new NullPointerException();
     }

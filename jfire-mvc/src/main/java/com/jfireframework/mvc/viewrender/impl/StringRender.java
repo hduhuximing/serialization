@@ -25,6 +25,5 @@ public class StringRender implements ViewRender
     public void render(HttpServletRequest request, HttpServletResponse response, Object result) throws Throwable
     {
         response.getOutputStream().write(((String) result).getBytes(charset));
-        
     }
 }

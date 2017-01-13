@@ -59,17 +59,12 @@ import javassist.NotFoundException;
 public class WriterContext
 {
     private static ConcurrentHashMap<Class<?>, JsonWriter> writerMap = new ConcurrentHashMap<Class<?>, JsonWriter>();
-    private static ClassPool                               classPool;
     private static Logger                                  logger    = ConsoleLogFactory.getLogger();
     private static AtomicInteger                           count     = new AtomicInteger(1);
-    static
-    {
-        initClassPool(null);
-    }
     
-    public static void initClassPool(ClassLoader classLoader)
+    private static ClassPool initClassPool(ClassLoader classLoader)
     {
-        classPool = new ClassPool();
+        ClassPool classPool = new ClassPool();
         classPool.appendClassPath(new ClassClassPath(WriterContext.class));
         classPool.importPackage("com.jfireframework.codejson.function");
         classPool.importPackage("com.jfireframework.codejson");
@@ -80,6 +75,7 @@ public class WriterContext
         {
             classPool.insertClassPath(new LoaderClassPath(classLoader));
         }
+        return classPool;
     }
     
     static
@@ -170,9 +166,10 @@ public class WriterContext
      */
     private static Class<?> createWriter(Class<?> cklas, WriteStrategy strategy)
     {
+        ClassPool classPool = initClassPool(cklas.getClassLoader());
         if (cklas.isArray())
         {
-            return buildArrayWriter(cklas, strategy);
+            return buildArrayWriter(cklas, strategy, classPool);
         }
         else if (Iterable.class.isAssignableFrom(cklas))
         {
@@ -221,7 +218,7 @@ public class WriterContext
                 if (strategy != null)
                 {
                     implClass.setName("JsonWriter_Strategy_writer_" + count.getAndIncrement());
-                    createStrategyConstructor(implClass);
+                    createStrategyConstructor(implClass, classPool);
                 }
                 CtClass ObjectCc = classPool.get(Object.class.getName());
                 CtClass cacheCc = classPool.get(StringCache.class.getName());
@@ -241,7 +238,7 @@ public class WriterContext
         }
     }
     
-    private static void createStrategyConstructor(CtClass ckass) throws CannotCompileException, NotFoundException
+    private static void createStrategyConstructor(CtClass ckass, ClassPool classPool) throws CannotCompileException, NotFoundException
     {
         CtField ctField = new CtField(classPool.get(WriteStrategy.class.getName()), "writeStrategy", ckass);
         ctField.setModifiers(Modifier.PUBLIC);
@@ -302,7 +299,7 @@ public class WriterContext
         }
     }
     
-    private static Class<?> buildArrayWriter(Class<?> targetClass, WriteStrategy strategy)
+    private static Class<?> buildArrayWriter(Class<?> targetClass, WriteStrategy strategy, ClassPool classPool)
     {
         Class<?> rootType = targetClass;
         int dim = 0;
@@ -485,7 +482,7 @@ public class WriterContext
             if (strategy != null)
             {
                 implClass.setName("JsonWriter_Strategy_" + targetClass.getSimpleName() + '_' + System.nanoTime());
-                createStrategyConstructor(implClass);
+                createStrategyConstructor(implClass, classPool);
             }
             CtClass ObjectCc = classPool.get(Object.class.getName());
             CtClass cacheCc = classPool.get(StringCache.class.getName());

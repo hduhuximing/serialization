@@ -26,7 +26,6 @@ public class JsonRender implements ViewRender
     @Override
     public void render(HttpServletRequest request, HttpServletResponse response, Object result) throws Throwable
     {
-        response.setContentType("application/json");
         OutputStream out = response.getOutputStream();
         out.write(JsonTool.write(result).getBytes(charset));
     }

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
@@ -57,13 +58,13 @@ import javassist.NotFoundException;
 
 public class ReaderContext
 {
-    private static Map<Type, JsonReader> readerMap  = new ConcurrentHashMap<Type, JsonReader>();
-    private static ClassPool             classPool;
-    private static Set<Class<?>>         wrapperSet = new HashSet<Class<?>>();
-    private static Logger                logger     = ConsoleLogFactory.getLogger();
-    private static final AtomicInteger   count      = new AtomicInteger(1);
+    private static ConcurrentMap<Type, JsonReader> readerMap  = new ConcurrentHashMap<Type, JsonReader>();
+    private static Set<Class<?>>                   wrapperSet = new HashSet<Class<?>>();
+    private static Logger                          logger     = ConsoleLogFactory.getLogger();
+    private static final AtomicInteger             count      = new AtomicInteger(1);
     static
     {
+        ClassPool.doPruning = true;
         wrapperSet.add(String.class);
         wrapperSet.add(Boolean.class);
         wrapperSet.add(Integer.class);
@@ -77,10 +78,9 @@ public class ReaderContext
         wrapperSet.equals(String.class);
     }
     
-    public static void initClassPool(ClassLoader classLoader)
+    private static ClassPool initClassPool(ClassLoader classLoader)
     {
-        ClassPool.doPruning = true;
-        classPool = new ClassPool();
+        ClassPool classPool = new ClassPool();
         classPool.appendClassPath(new ClassClassPath(ReaderContext.class));
         classPool.importPackage("com.jfireframework.codejson.function");
         classPool.importPackage("com.jfireframework.codejson");
@@ -90,6 +90,7 @@ public class ReaderContext
         {
             classPool.insertClassPath(new LoaderClassPath(classLoader));
         }
+        return classPool;
     }
     
     static
@@ -251,6 +252,7 @@ public class ReaderContext
     
     private static Class<?> buildClass(String body, Class<?> targetClass, ReadStrategy strategy)
     {
+        ClassPool classPool = initClassPool(targetClass.getClassLoader());
         try
         {
             CtClass implClass = classPool.makeClass("JsonReader_reader_" + count.getAndIncrement());
@@ -258,7 +260,7 @@ public class ReaderContext
             if (strategy != null)
             {
                 implClass.setName("JsonRead_Strategy_reader_" + count.getAndIncrement());
-                createStrategyConstructor(implClass);
+                createStrategyConstructor(implClass, classPool);
             }
             implClass.setInterfaces(new CtClass[] { interfaceCtClass });
             CtMethod method = new CtMethod(classPool.get(Object.class.getName()), "read", new CtClass[] { classPool.get(Type.class.getName()), classPool.get(Object.class.getName()) }, implClass);
@@ -275,7 +277,7 @@ public class ReaderContext
         }
     }
     
-    private static void createStrategyConstructor(CtClass ckass) throws CannotCompileException, NotFoundException
+    private static void createStrategyConstructor(CtClass ckass, ClassPool classPool) throws CannotCompileException, NotFoundException
     {
         CtField ctField = new CtField(classPool.get(ReadStrategy.class.getName()), "readStrategy", ckass);
         ctField.setModifiers(Modifier.PUBLIC);

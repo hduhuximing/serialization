@@ -76,9 +76,6 @@ public class Action
                 case String:
                     contentType = ContentType.STRING;
                     break;
-                case Jsp:
-                    contentType = ContentType.HTML;
-                    break;
                 case Html:
                     contentType = ContentType.HTML;
                     break;
