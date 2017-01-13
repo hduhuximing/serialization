@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
+import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.aop.EnhanceAnnoInfo;
 import com.jfireframework.context.aop.annotation.AfterEnhance;
 import com.jfireframework.context.aop.annotation.AroundEnhance;
@@ -54,6 +55,7 @@ public class BeanInitProcessImpl implements BeanBootstrap
      */
     protected MethodAccessor        postConstructMethod;
     protected BeanInfo              beanInfo;
+    protected AopUtil               aopUtil;
     
     @Override
     public String getBeanName()
@@ -237,4 +239,17 @@ public class BeanInitProcessImpl implements BeanBootstrap
     {
         ;
     }
+    
+    @Override
+    public void setAopUitl(AopUtil aopUtil)
+    {
+        this.aopUtil = aopUtil;
+    }
+    
+    @Override
+    public String[] getMethodParamNames(Method method)
+    {
+        return aopUtil.getParamNames(method);
+    }
+    
 }

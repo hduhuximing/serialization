@@ -49,18 +49,13 @@ import javassist.bytecode.annotation.Annotation;
 
 public class AopUtil
 {
-    private static ClassPool classPool = ClassPool.getDefault();
-    private static CtClass   txManagerCtClass;
-    private static CtClass   resManagerCtClass;
-    private static CtClass   cacheManagerCtClass;
-    private static Logger    logger    = ConsoleLogFactory.getLogger();
+    private ClassPool classPool;
+    private CtClass   txManagerCtClass;
+    private CtClass   resManagerCtClass;
+    private CtClass   cacheManagerCtClass;
+    private Logger    logger = ConsoleLogFactory.getLogger();
     
-    static
-    {
-        initClassPool();
-    }
-    
-    public static void initClassPool(ClassLoader classLoader)
+    public AopUtil(ClassLoader classLoader)
     {
         classPool = new ClassPool();
         ClassPool.doPruning = true;
@@ -84,7 +79,16 @@ public class AopUtil
         }
     }
     
-    public static void initClassPool()
+    {
+        initClassPool();
+    }
+    
+    public void initClassPool(ClassLoader classLoader)
+    {
+        
+    }
+    
+    public void initClassPool()
     {
         initClassPool(null);
     }
@@ -95,9 +99,8 @@ public class AopUtil
      * @param packageNames
      * @param beanMap
      */
-    public static void enhance(Map<String, Bean> beanMap, ClassLoader classLoader)
+    public void enhance(Map<String, Bean> beanMap, ClassLoader classLoader)
     {
-        
         initAopMethods(beanMap);
         initAopbeanSet(beanMap);
         for (Bean bean : beanMap.values())
@@ -122,7 +125,7 @@ public class AopUtil
      * 
      * @param beanMap
      */
-    private static void initAopMethods(Map<String, Bean> beanMap)
+    private void initAopMethods(Map<String, Bean> beanMap)
     {
         for (Bean bean : beanMap.values())
         {
@@ -161,7 +164,7 @@ public class AopUtil
      * 
      * @param beanMap
      */
-    private static void initAopbeanSet(Map<String, Bean> beanMap)
+    private void initAopbeanSet(Map<String, Bean> beanMap)
     {
         for (Bean aopBean : beanMap.values())
         {
@@ -195,7 +198,7 @@ public class AopUtil
      * @throws CannotCompileException
      * @throws ClassNotFoundException
      */
-    private static void enhanceBean(Bean bean, ClassLoader classLoader) throws NotFoundException, CannotCompileException, ClassNotFoundException
+    private void enhanceBean(Bean bean, ClassLoader classLoader) throws NotFoundException, CannotCompileException, ClassNotFoundException
     {
         classPool.appendClassPath(new ClassClassPath(bean.getType()));
         CtClass parentCc = classPool.get(bean.getType().getName());
@@ -289,7 +292,7 @@ public class AopUtil
         childCc.detach();
     }
     
-    private static void enhanceBefore(CtMethod targetMethod, EnhanceAnnoInfo info) throws NotFoundException, CannotCompileException
+    private void enhanceBefore(CtMethod targetMethod, EnhanceAnnoInfo info) throws NotFoundException, CannotCompileException
     {
         // 构建随机名称，这样可以进行多次增强
         String pointName = "point" + System.nanoTime();
@@ -309,7 +312,7 @@ public class AopUtil
         targetMethod.insertBefore(body);
     }
     
-    private static void enhanceAfter(CtMethod targetMethod, EnhanceAnnoInfo info, CtClass targetCtClass) throws CannotCompileException, NotFoundException
+    private void enhanceAfter(CtMethod targetMethod, EnhanceAnnoInfo info, CtClass targetCtClass) throws CannotCompileException, NotFoundException
     {
         String pointName = "point_" + System.nanoTime();
         String body = "{ProceedPointImpl " + pointName + " = new ProceedPointImpl();";
@@ -334,7 +337,7 @@ public class AopUtil
         }
     }
     
-    private static void enhanceAround(CtMethod targetMethod, EnhanceAnnoInfo info, CtClass targetCtClass) throws CannotCompileException, NotFoundException
+    private void enhanceAround(CtMethod targetMethod, EnhanceAnnoInfo info, CtClass targetCtClass) throws CannotCompileException, NotFoundException
     {
         CtClass objectCtClass = classPool.get(Object.class.getName());
         CtClass ProceedPointImplCtClass = classPool.get(ProceedPointImpl.class.getName());
@@ -400,7 +403,7 @@ public class AopUtil
         ProceedPointImplCtClass.detach();
     }
     
-    private static void enhanceThrow(CtMethod targetMethod, EnhanceAnnoInfo info) throws NotFoundException, CannotCompileException
+    private void enhanceThrow(CtMethod targetMethod, EnhanceAnnoInfo info) throws NotFoundException, CannotCompileException
     {
         Class<?>[] types = info.getThrowtype();
         CtClass[] throwCcs = new CtClass[types.length];
@@ -427,7 +430,7 @@ public class AopUtil
      * @throws NotFoundException
      * @throws CannotCompileException
      */
-    private static void addTxToMethod(CtClass targetCc, String txFieldName, Method[] txMethods) throws NotFoundException, CannotCompileException
+    private void addTxToMethod(CtClass targetCc, String txFieldName, Method[] txMethods) throws NotFoundException, CannotCompileException
     {
         for (Method method : txMethods)
         {
@@ -473,7 +476,7 @@ public class AopUtil
      * @throws NotFoundException
      * @throws CannotCompileException
      */
-    private static void addResToMethod(CtClass targetCc, String resFieldName, Method[] resMethods) throws NotFoundException, CannotCompileException
+    private void addResToMethod(CtClass targetCc, String resFieldName, Method[] resMethods) throws NotFoundException, CannotCompileException
     {
         for (Method method : resMethods)
         {
@@ -494,7 +497,7 @@ public class AopUtil
         }
     }
     
-    private static void addCacheToMethod(CtClass targetCc, String cacheFieldName, Method[] cacheMethods) throws CannotCompileException, NotFoundException
+    private void addCacheToMethod(CtClass targetCc, String cacheFieldName, Method[] cacheMethods) throws CannotCompileException, NotFoundException
     {
         for (Method each : cacheMethods)
         {
@@ -625,7 +628,7 @@ public class AopUtil
         }
     }
     
-    public static int getParamNameIndex(String inject, String[] paramNames)
+    public int getParamNameIndex(String inject, String[] paramNames)
     {
         for (int i = 0; i < paramNames.length; i++)
         {
@@ -637,7 +640,7 @@ public class AopUtil
         throw new RuntimeException("给定的参数" + inject + "不在参数列表中");
     }
     
-    private static CtClass[] getParamTypes(Method method) throws NotFoundException
+    private CtClass[] getParamTypes(Method method) throws NotFoundException
     {
         CtClass[] paramClasses = new CtClass[method.getParameterTypes().length];
         int index = 0;
@@ -658,7 +661,7 @@ public class AopUtil
      * @throws CannotCompileException
      * @throws ClassNotFoundException
      */
-    private static void createchildClassMethod(CtClass childCc, CtClass parentClass) throws NotFoundException, CannotCompileException, ClassNotFoundException
+    private void createchildClassMethod(CtClass childCc, CtClass parentClass) throws NotFoundException, CannotCompileException, ClassNotFoundException
     {
         CtMethod[] methods = getAllMethods(parentClass);
         for (CtMethod each : methods)
@@ -681,14 +684,12 @@ public class AopUtil
         }
     }
     
-    private static boolean canHaveChildMethod(int moditifer)
+    private boolean canHaveChildMethod(int moditifer)
     {
-        if (
-            (Modifier.isPublic(moditifer) || Modifier.isProtected(moditifer)) //
-                    && Modifier.isFinal(moditifer) == false //
-                    && Modifier.isNative(moditifer) == false //
-                    && Modifier.isStatic(moditifer) == false
-        )
+        if ((Modifier.isPublic(moditifer) || Modifier.isProtected(moditifer)) //
+                && Modifier.isFinal(moditifer) == false //
+                && Modifier.isNative(moditifer) == false //
+                && Modifier.isStatic(moditifer) == false)
         {
             return true;
         }
@@ -706,7 +707,7 @@ public class AopUtil
      * @param fieldName
      * @throws CannotCompileException
      */
-    private static void addField(CtClass targetCc, CtClass fieldType, String fieldName) throws CannotCompileException
+    private void addField(CtClass targetCc, CtClass fieldType, String fieldName) throws CannotCompileException
     {
         CtField ctField = new CtField(fieldType, fieldName, targetCc);
         ctField.setModifiers(Modifier.PUBLIC);
@@ -749,7 +750,7 @@ public class AopUtil
      * @return
      * @throws CannotCompileException
      */
-    public static CtMethod copyMethod(CtMethod targetMethod, CtClass cc) throws CannotCompileException
+    public CtMethod copyMethod(CtMethod targetMethod, CtClass cc) throws CannotCompileException
     {
         CtMethod newMethod = new CtMethod(targetMethod, cc, null);
         for (Object each : targetMethod.getMethodInfo().getAttributes())
@@ -766,7 +767,7 @@ public class AopUtil
      * @param entityClass
      * @return
      */
-    public static CtMethod[] getAllMethods(CtClass cc) throws NotFoundException
+    public CtMethod[] getAllMethods(CtClass cc) throws NotFoundException
     {
         List<CtMethod> list = new LinkedList<CtMethod>();
         while (cc.getSimpleName().equals("Object") == false)
@@ -803,39 +804,7 @@ public class AopUtil
         return list.toArray(new CtMethod[list.size()]);
     }
     
-    public static String[] getParamNames(Method method)
-    {
-        Verify.False(method.getDeclaringClass().isInterface(), "使用反射获取方法形参名称的时候，方法必须是在类的方法不能是接口方法，请检查{}.{}", method.getDeclaringClass(), method.getName());
-        try
-        {
-            return getParamNames(getCtMethod(method, null));
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    private static CtMethod getCtMethod(Method method, CtClass cc) throws NotFoundException
-    {
-        CtClass ctClass;
-        if (cc == null)
-        {
-            ctClass = classPool.get(method.getDeclaringClass().getName());
-        }
-        else
-        {
-            ctClass = cc;
-        }
-        List<CtClass> list = new LinkedList<CtClass>();
-        for (Class<?> each : method.getParameterTypes())
-        {
-            list.add(classPool.get(each.getName()));
-        }
-        return ctClass.getDeclaredMethod(method.getName(), list.toArray(new CtClass[list.size()]));
-    }
-    
-    public static String[] getParamNames(CtMethod cm)
+    private String[] getParamNames(CtMethod cm)
     {
         try
         {
@@ -873,4 +842,35 @@ public class AopUtil
         }
     }
     
+    public String[] getParamNames(Method method)
+    {
+        Verify.False(method.getDeclaringClass().isInterface(), "使用反射获取方法形参名称的时候，方法必须是在类的方法不能是接口方法，请检查{}.{}", method.getDeclaringClass(), method.getName());
+        try
+        {
+            return getParamNames(getCtMethod(method, null));
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private CtMethod getCtMethod(Method method, CtClass cc) throws NotFoundException
+    {
+        CtClass ctClass;
+        if (cc == null)
+        {
+            ctClass = ClassPool.getDefault().get(method.getDeclaringClass().getName());
+        }
+        else
+        {
+            ctClass = cc;
+        }
+        List<CtClass> list = new LinkedList<CtClass>();
+        for (Class<?> each : method.getParameterTypes())
+        {
+            list.add(ClassPool.getDefault().get(each.getName()));
+        }
+        return ctClass.getDeclaredMethod(method.getName(), list.toArray(new CtClass[list.size()]));
+    }
 }

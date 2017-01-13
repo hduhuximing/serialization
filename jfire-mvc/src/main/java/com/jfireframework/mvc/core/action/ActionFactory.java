@@ -14,7 +14,6 @@ import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.uniqueid.SummerId;
 import com.jfireframework.baseutil.uniqueid.Uid;
 import com.jfireframework.context.JfireContext;
-import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.mvc.annotation.RequestMapping;
 import com.jfireframework.mvc.annotation.RequestParam;
@@ -58,7 +57,7 @@ public class ActionFactory
         actionInfo.setMethod(method);
         RequestMapping requestMapping = AnnotationUtil.getAnnotation(RequestMapping.class, method);
         actionInfo.setRequestMethod(requestMapping.method());
-        actionInfo.setDataBinders(generateBinders(method));
+        actionInfo.setDataBinders(generateBinders(method, bean));
         actionInfo.setReadStream(requestMapping.readStream());
         actionInfo.setEntity(bean.getInstance());
         actionInfo.setHeaders(requestMapping.headers());
@@ -259,7 +258,7 @@ public class ActionFactory
         return true;
     }
     
-    private static DataBinder[] generateBinders(Method method)
+    private static DataBinder[] generateBinders(Method method, Bean bean)
     {
         if (method.getParameterTypes().length == 0)
         {
@@ -267,7 +266,7 @@ public class ActionFactory
         }
         Type[] paramTypes = method.getGenericParameterTypes();
         Class<?>[] ckasss = method.getParameterTypes();
-        String[] paramNames = getParamNames(method);
+        String[] paramNames = getParamNames(method, bean);
         Annotation[][] annotations = method.getParameterAnnotations();
         DataBinder[] dataBinders = BinderFactory.build(ckasss, paramTypes, paramNames, annotations);
         return dataBinders;
@@ -279,12 +278,12 @@ public class ActionFactory
      * @param method
      * @return
      */
-    private static String[] getParamNames(Method method)
+    private static String[] getParamNames(Method method, Bean bean)
     {
         String[] paramNames;
         try
         {
-            paramNames = AopUtil.getParamNames(method);
+            paramNames = bean.getMethodParamNames(method);
         }
         catch (Exception e)
         {

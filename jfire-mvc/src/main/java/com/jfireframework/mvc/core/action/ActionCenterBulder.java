@@ -17,7 +17,6 @@ import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.JfireContext;
 import com.jfireframework.context.JfireContextImpl;
-import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
 import com.jfireframework.mvc.annotation.Controller;
 import com.jfireframework.mvc.annotation.RequestMapping;
@@ -43,7 +42,6 @@ public class ActionCenterBulder
         readConfig(jfireContext, servletConfig, classLoader);
         jfireContext.addSingletonEntity(classLoader.getClass().getName(), classLoader);
         jfireContext.setClassLoader(classLoader);
-        AopUtil.initClassPool(classLoader);
         addViewRender(jfireContext);
         jfireContext.addSingletonEntity("servletContext", servletContext);
         jfireContext.addBean(DataBinderInterceptor.class);

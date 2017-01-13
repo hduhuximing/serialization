@@ -59,6 +59,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     protected Profile[]             profiles         = new Profile[0];
     protected String                activeProfile;
     protected static final Logger   logger           = ConsoleLogFactory.getLogger();
+    protected AopUtil               aopUtil;
     
     @Override
     public void addPackageNames(String... packageNames)
@@ -274,6 +275,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     @Override
     public void initContext()
     {
+        aopUtil = new AopUtil(classLoader);
         addSingletonEntity(JfireContext.class.getName(), this);
         if (StringUtil.isNotBlank(activeProfile))
         {
@@ -307,7 +309,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
          * 因为aop进行增强时会生成子类来替代Bean中的type.
          * 并且由于aop需要增加若干个类属性(属性上均有Resouce注解用来注入增强类)，所以注入属性数组的生成必须在aop之后
          */
-        AopUtil.enhance(beanNameMap, classLoader);
+        aopUtil.enhance(beanNameMap, classLoader);
         initDependencyAndParamFields();
         for (Bean bean : beanNameMap.values())
         {

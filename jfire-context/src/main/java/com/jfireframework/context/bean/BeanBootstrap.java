@@ -3,6 +3,7 @@ package com.jfireframework.context.bean;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.aop.EnhanceAnnoInfo;
 import com.jfireframework.context.bean.field.dependency.DependencyField;
 import com.jfireframework.context.bean.field.param.ParamField;
@@ -68,4 +69,9 @@ public interface BeanBootstrap
      * @param beanTypeMap
      */
     public void decorateSelf(Map<String, Bean> beanNameMap, Map<Class<?>, Bean> beanTypeMap);
+    
+    public void setAopUitl(AopUtil aopUtil);
+    
+    public String[] getMethodParamNames(Method method);
+    
 }
