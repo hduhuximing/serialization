@@ -1,8 +1,10 @@
-package com.jfireframework.mvc.core.action;
+package com.jfireframework.mvc.util;
 
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.mvc.annotation.Document;
+import com.jfireframework.mvc.core.action.Action;
+import com.jfireframework.mvc.core.action.ActionInitListener;
 
 public abstract class AbstractReportMdActionListener implements ActionInitListener
 {

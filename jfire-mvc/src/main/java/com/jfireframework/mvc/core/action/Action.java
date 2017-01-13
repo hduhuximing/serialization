@@ -4,9 +4,7 @@ import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.config.ContentType;
 import com.jfireframework.mvc.config.RequestMethod;
 import com.jfireframework.mvc.config.ResultType;
 import com.jfireframework.mvc.interceptor.ActionInterceptor;
@@ -63,39 +61,7 @@ public class Action
         token = info.getToken();
         hasCookie = info.isHasCookie();
         hasHeader = info.isHasCookie();
-        if ("".equals(info.getContentType()))
-        {
-            switch (resultType)
-            {
-                case Json:
-                    contentType = ContentType.JSON;
-                    break;
-                case Beetl:
-                    contentType = ContentType.HTML;
-                    break;
-                case String:
-                    contentType = ContentType.STRING;
-                    break;
-                case Html:
-                    contentType = ContentType.HTML;
-                    break;
-                case Redirect:
-                    contentType = ContentType.HTML;
-                    break;
-                case None:
-                    contentType = ContentType.STREAM;
-                    break;
-                case Bytes:
-                    contentType = ContentType.STREAM;
-                    break;
-                default:
-                    throw new UnSupportException("方法没有指定返回类型");
-            }
-        }
-        else
-        {
-            contentType = info.getContentType();
-        }
+        contentType = info.getContentType();
         interceptors = info.getInterceptors();
         validatorIndexs = info.getValidatorIndex();
     }
@@ -111,7 +77,10 @@ public class Action
         }
         try
         {
-            response.setContentType(contentType);
+            if (contentType != null)
+            {
+                response.setContentType(contentType);
+            }
             viewRender.render(request, response, methodAccessor.invoke(actionEntity, (Object[]) request.getAttribute(DataBinderInterceptor.DATABINDERKEY)));
         }
         catch (Throwable e)

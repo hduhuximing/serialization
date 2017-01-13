@@ -67,17 +67,14 @@ public class ActionFactory
             if (returnType == String.class)
             {
                 actionInfo.setResultType(ResultType.String);
-                actionInfo.setContentType(ContentType.STRING);
             }
             else if (returnType == ModelAndView.class)
             {
                 actionInfo.setResultType(ResultType.Beetl);
-                actionInfo.setContentType(ContentType.HTML);
             }
             else if (returnType == byte[].class)
             {
                 actionInfo.setResultType(ResultType.Bytes);
-                actionInfo.setContentType(ContentType.STREAM);
             }
             else
             {
@@ -107,10 +104,8 @@ public class ActionFactory
                 case Beetl:
                     actionInfo.setContentType(ContentType.HTML);
                 case Redirect:
-                    actionInfo.setContentType("");
                     break;
                 case None:
-                    actionInfo.setContentType("");
                     break;
                 default:
                     break;
@@ -119,6 +114,10 @@ public class ActionFactory
         else
         {
             actionInfo.setContentType(requestMapping.contentType());
+        }
+        if (actionInfo.getContentType().equals(""))
+        {
+            actionInfo.setContentType(null);
         }
         actionInfo.setViewRender(getViewRender(requestMapping.resultType(), jfireContext));
         actionInfo.setToken(requestMapping.token());
