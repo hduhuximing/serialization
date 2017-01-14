@@ -8,7 +8,6 @@ import java.util.List;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
-import com.jfireframework.sql.annotation.SqlStrategy;
 import com.jfireframework.sql.dao.LockMode;
 import com.jfireframework.sql.interceptor.SqlInterceptor;
 import com.jfireframework.sql.interceptor.SqlInterceptor.InterceptorContext;

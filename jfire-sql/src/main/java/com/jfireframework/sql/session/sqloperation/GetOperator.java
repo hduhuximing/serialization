@@ -1,7 +1,6 @@
 package com.jfireframework.sql.session.sqloperation;
 
 import java.util.List;
-import com.jfireframework.sql.annotation.SqlStrategy;
 import com.jfireframework.sql.dao.LockMode;
 import com.jfireframework.sql.page.Page;
 
@@ -35,9 +34,9 @@ public interface GetOperator
      */
     public <T> T get(Class<T> entityClass, Object pk, LockMode mode);
     
-    public <T> T findOneByStrategy(T entity, String strategyName);
+    public <T> T findOneByStrategy(T entity, String strategy);
     
-    public <T> List<T> findAllByStrategy(T entity, String strategyName);
+    public <T> List<T> findAllByStrategy(T entity, String strategy);
     
-    public <T> List<T> findPageByStrategy(T entity, Page page, String strategyName);
+    public <T> List<T> findPageByStrategy(T entity, Page page, String strategy);
 }

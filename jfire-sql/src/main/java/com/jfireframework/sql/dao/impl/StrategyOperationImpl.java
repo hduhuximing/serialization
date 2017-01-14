@@ -10,10 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.sql.annotation.SqlStrategy;
-import com.jfireframework.sql.annotation.Sqlstrategies;
 import com.jfireframework.sql.annotation.TableEntity;
 import com.jfireframework.sql.dao.StrategyOperation;
 import com.jfireframework.sql.interceptor.SqlPreInterceptor;
@@ -38,13 +37,13 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
         MapField[] fields;
     }
     
-    private final SqlPreInterceptor[]            preInterceptors;
-    private final Class<T>                       ckass;
-    private final ResultSetTransfer<T>           resultSetTransfer;
-    private final Map<String, MapField>          mapFields;
-    private final Map<String, FindStrategySql>   findMap   = new HashMap<String, StrategyOperationImpl<T>.FindStrategySql>();
-    private final Map<String, UpdateStrategySql> updateMap = new HashMap<String, StrategyOperationImpl<T>.UpdateStrategySql>();
-    private final String                         tableName;
+    private final SqlPreInterceptor[]                      preInterceptors;
+    private final Class<T>                                 ckass;
+    private final ResultSetTransfer<T>                     resultSetTransfer;
+    private final Map<String, MapField>                    mapFields;
+    private final ConcurrentMap<String, FindStrategySql>   findMap   = new ConcurrentHashMap<String, StrategyOperationImpl<T>.FindStrategySql>();
+    private final ConcurrentMap<String, UpdateStrategySql> updateMap = new ConcurrentHashMap<String, StrategyOperationImpl<T>.UpdateStrategySql>();
+    private final String                                   tableName;
     
     public StrategyOperationImpl(Class<T> ckass, MapField[] mapFields, SqlPreInterceptor[] preInterceptors)
     {
@@ -53,21 +52,28 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
         this.preInterceptors = preInterceptors;
         this.mapFields = parse(mapFields);
         tableName = ckass.getAnnotation(TableEntity.class).name();
-        if (ckass.isAnnotationPresent(Sqlstrategies.class))
+    }
+    
+    private FindStrategySql getFind(String strategy)
+    {
+        FindStrategySql findStrategySql = findMap.get(strategy);
+        if (findStrategySql == null)
         {
-            for (SqlStrategy each : ckass.getAnnotation(Sqlstrategies.class).value())
-            {
-                String name = each.name();
-                String fields = each.fields();
-                FindStrategySql findStrategySql = buildFind(fields);
-                findMap.put(name, findStrategySql);
-                if (fields.charAt(0) != '*')
-                {
-                    UpdateStrategySql updateStrategySql = buildUpdate(fields);
-                    updateMap.put(name, updateStrategySql);
-                }
-            }
+            findStrategySql = buildFind(strategy);
+            findMap.putIfAbsent(strategy, findStrategySql);
         }
+        return findStrategySql;
+    }
+    
+    private UpdateStrategySql getUpdate(String strategy)
+    {
+        UpdateStrategySql updateStrategySql = updateMap.get(strategy);
+        if (updateStrategySql == null)
+        {
+            updateStrategySql = buildUpdate(strategy);
+            updateMap.putIfAbsent(strategy, updateStrategySql);
+        }
+        return updateStrategySql;
     }
     
     private Map<String, MapField> parse(MapField[] mapFields)
@@ -86,7 +92,7 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
         List<MapField> selectFields = new LinkedList<MapField>();
         List<MapField> whereFields = new LinkedList<MapField>();
         cache.append("select ");
-        String[] tmp = fields.split("\\|");
+        String[] tmp = fields.split(";");
         String t_valueFields = tmp[0];
         String t_whereFields = tmp[1];
         if (t_valueFields.equals("*"))
@@ -129,7 +135,7 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
         StringCache cache = new StringCache();
         List<MapField> list = new LinkedList<MapField>();
         cache.append("update ").append(tableName).append(" set ");
-        String[] tmp = fields.split("\\|");
+        String[] tmp = fields.split(";");
         String t_valueFields = tmp[0];
         String t_whereFields = tmp[1];
         for (String setField : t_valueFields.split(","))
@@ -151,9 +157,9 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
     }
     
     @Override
-    public T findOne(Connection connection, T param, String strategyName)
+    public T findOne(Connection connection, T param, String strategy)
     {
-        FindStrategySql findStrategySql = findMap.get(strategyName);
+        FindStrategySql findStrategySql = getFind(strategy);
         String sql = findStrategySql.sql;
         for (SqlPreInterceptor each : preInterceptors)
         {
@@ -212,10 +218,10 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
     }
     
     @Override
-    public List<T> findAll(Connection connection, T param, String strategyName)
+    public List<T> findAll(Connection connection, T param, String strategy)
     {
+        FindStrategySql findStrategySql = getFind(strategy);
         List<T> list = new ArrayList<T>();
-        FindStrategySql findStrategySql = findMap.get(strategyName);
         String sql = findStrategySql.sql;
         for (SqlPreInterceptor each : preInterceptors)
         {
@@ -265,9 +271,9 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
     
     @SuppressWarnings("unchecked")
     @Override
-    public List<T> findPage(Connection connection, T param, Page page, PageParse pageParse, String strategyName)
+    public List<T> findPage(Connection connection, T param, Page page, PageParse pageParse, String strategy)
     {
-        FindStrategySql findStrategySql = findMap.get(strategyName);
+        FindStrategySql findStrategySql = getFind(strategy);
         try
         {
             pageParse.doQuery(param, findStrategySql.whereFields, connection, findStrategySql.sql, resultSetTransfer, page);
@@ -280,9 +286,9 @@ public class StrategyOperationImpl<T> implements StrategyOperation<T>
     }
     
     @Override
-    public int update(Connection connection, T param, String strategyName)
+    public int update(Connection connection, T param, String strategy)
     {
-        UpdateStrategySql updateStrategySql = updateMap.get(strategyName);
+        UpdateStrategySql updateStrategySql = getUpdate(strategy);
         String sql = updateStrategySql.sql;
         for (SqlPreInterceptor each : preInterceptors)
         {

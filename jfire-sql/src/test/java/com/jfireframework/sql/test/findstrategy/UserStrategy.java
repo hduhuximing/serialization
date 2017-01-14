@@ -1,17 +1,9 @@
 package com.jfireframework.sql.test.findstrategy;
 
 import com.jfireframework.sql.annotation.Id;
-import com.jfireframework.sql.annotation.SqlStrategy;
-import com.jfireframework.sql.annotation.Sqlstrategies;
 import com.jfireframework.sql.annotation.TableEntity;
 
 @TableEntity(name = "userstrategy")
-@Sqlstrategies({ //
-        @SqlStrategy(name = "test1", fields = "name,password|age,boy"), //
-        @SqlStrategy(name = "test2", fields = "name,age,birthday|id"), //
-        @SqlStrategy(name = "test3", fields = "id,password,age|boy"), //
-        @SqlStrategy(name = "test4", fields = "password,age|age")
-})
 public class UserStrategy
 {
     

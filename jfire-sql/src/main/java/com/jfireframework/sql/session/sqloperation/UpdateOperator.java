@@ -1,7 +1,5 @@
 package com.jfireframework.sql.session.sqloperation;
 
-import com.jfireframework.sql.annotation.SqlStrategy;
-
 public interface UpdateOperator
 {
     /**
@@ -15,5 +13,5 @@ public interface UpdateOperator
      */
     public <T> int delete(T entity);
     
-    public <T> int updateByStrategy(T entity, String strategyName);
+    public <T> int updateByStrategy(T entity, String strategy);
 }
