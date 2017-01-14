@@ -591,8 +591,8 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             outterProperties = new HashMap<String, String>();
             for (String each : AnnotationUtil.getAnnotation(OutterProperties.class, ckass).value())
             {
-                String[] tmp = each.split("=");
-                outterProperties.put(tmp[0], tmp[1]);
+                int index = each.indexOf("=");
+                outterProperties.put(each.substring(0, index), each.substring(index + 1));
             }
         }
         if (AnnotationUtil.isPresent(PropertyPaths.class, ckass))
@@ -626,8 +626,8 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
                     Map<String, String> map = new HashMap<String, String>();
                     for (String depend : each.dependencies())
                     {
-                        String[] tmp = depend.split("=");
-                        map.put(tmp[0], tmp[1]);
+                        int index = depend.indexOf("=");
+                        map.put(depend.substring(0, index), depend.substring(index + 1));
                     }
                     beanInfo.setDependencies(map);
                 }
@@ -636,8 +636,8 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
                     Map<String, String> map = new HashMap<String, String>();
                     for (String param : each.params())
                     {
-                        String[] tmp = param.split("=");
-                        map.put(tmp[0], tmp[1]);
+                        int index = param.indexOf("=");
+                        map.put(param.substring(0, index), param.substring(index + 1));
                     }
                     beanInfo.setParams(map);
                 }

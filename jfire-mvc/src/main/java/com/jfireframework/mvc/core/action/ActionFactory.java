@@ -119,7 +119,7 @@ public class ActionFactory
         {
             actionInfo.setContentType(null);
         }
-        actionInfo.setViewRender(getViewRender(requestMapping.resultType(), jfireContext));
+        actionInfo.setViewRender(getViewRender(actionInfo.getResultType(), jfireContext));
         actionInfo.setToken(requestMapping.token());
         if (actionInfo.getToken().equals(""))
         {
@@ -220,11 +220,13 @@ public class ActionFactory
                 {
                     for (DataBinder each : actionInfo.getDataBinders())
                     {
-                        if (each instanceof HttpSessionBinder //
-                                || each instanceof HttpServletRequestBinder //
-                                || each instanceof HttpServletResponseBinder //
-                                || each instanceof CookieBinder //
-                                || each instanceof HeaderBinder)
+                        if (
+                            each instanceof HttpSessionBinder //
+                                    || each instanceof HttpServletRequestBinder //
+                                    || each instanceof HttpServletResponseBinder //
+                                    || each instanceof CookieBinder //
+                                    || each instanceof HeaderBinder
+                        )
                         {
                             continue;
                         }

@@ -105,6 +105,7 @@ public class AopUtil
         initAopbeanSet(beanMap);
         for (Bean bean : beanMap.values())
         {
+            bean.setAopUitl(this);
             try
             {
                 if (bean.needEnhance())
@@ -686,10 +687,12 @@ public class AopUtil
     
     private boolean canHaveChildMethod(int moditifer)
     {
-        if ((Modifier.isPublic(moditifer) || Modifier.isProtected(moditifer)) //
-                && Modifier.isFinal(moditifer) == false //
-                && Modifier.isNative(moditifer) == false //
-                && Modifier.isStatic(moditifer) == false)
+        if (
+            (Modifier.isPublic(moditifer) || Modifier.isProtected(moditifer)) //
+                    && Modifier.isFinal(moditifer) == false //
+                    && Modifier.isNative(moditifer) == false //
+                    && Modifier.isStatic(moditifer) == false
+        )
         {
             return true;
         }
