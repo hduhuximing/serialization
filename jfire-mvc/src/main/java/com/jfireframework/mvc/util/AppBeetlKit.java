@@ -50,6 +50,35 @@ public class AppBeetlKit
         render(vm, servletContext, outputStream);
     }
     
+    public String render(String key, Map<String, Object> data, ServletContext servletContext)
+    {
+        String ajaxId = null;
+        Template template = null;
+        try
+        {
+            int ajaxIdIndex = key.lastIndexOf("#");
+            if (ajaxIdIndex != -1)
+            {
+                ajaxId = key.substring(ajaxIdIndex + 1);
+                key = key.substring(0, ajaxIdIndex);
+                template = gt.getAjaxTemplate(key, ajaxId);
+            }
+            else
+            {
+                template = gt.getTemplate(key);
+            }
+            WebVariable webVariable = new WebVariable();
+            template.binding(data);
+            template.binding("servlet", webVariable);
+            template.binding("ctxPath", servletContext.getContextPath());
+            return template.render();
+        }
+        catch (Exception e)
+        {
+            throw new JustThrowException(e);
+        }
+    }
+    
     public void render(ModelAndView vm, ServletContext servletContext, OutputStream outputStream)
     {
         String ajaxId = null;

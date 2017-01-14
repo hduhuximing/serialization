@@ -2,15 +2,14 @@ package com.jfireframework.context.cache;
 
 public interface Cache
 {
-    public void put(Object key, Object value);
+    public void put(String key, Object value);
     
-    public void put(Object key, Object value, int timeToLive);
+    public void put(String key, Object value, int timeToLive);
     
-    public Object get(Object key);
+    public Object get(String key);
     
-    public void remove(Object key);
+    public void remove(String key);
     
     public void clear();
     
-    public String getName();
 }
