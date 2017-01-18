@@ -1,4 +1,4 @@
-package com.jfireframework.context.bean.annotation.config;
+package com.jfireframework.context.config.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 用来代替配置文件中properties中的作用
+ * 用来填充配置文件中packageNames的值
  * 
  * @author linbin
  *
@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.TYPE)
 @Documented
-public @interface OutterProperties
+public @interface PackageNames
 {
     public String[] value();
 }

@@ -6,6 +6,11 @@ import com.jfireframework.context.config.BeanInfo;
 
 public interface JfireContextBootstrap
 {
+    /**
+     * 扫描该类所在的包
+     */
+    public void scanSelfPackage();
+    
     public void addProperties(Properties... properties);
     
     /**

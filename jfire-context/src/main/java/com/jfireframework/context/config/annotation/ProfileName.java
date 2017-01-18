@@ -1,4 +1,4 @@
-package com.jfireframework.context.bean.annotation.config;
+package com.jfireframework.context.config.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.TYPE)
 @Documented
-public @interface ActiveProfile
+public @interface ProfileName
 {
     public String value();
 }

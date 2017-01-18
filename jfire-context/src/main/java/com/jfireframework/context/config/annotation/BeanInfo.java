@@ -1,4 +1,4 @@
-package com.jfireframework.context.bean.annotation.config;
+package com.jfireframework.context.config.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

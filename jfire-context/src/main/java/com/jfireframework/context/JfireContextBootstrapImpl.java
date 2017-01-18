@@ -29,13 +29,6 @@ import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.aop.AopUtil;
 import com.jfireframework.context.bean.Bean;
-import com.jfireframework.context.bean.annotation.config.ActiveProfile;
-import com.jfireframework.context.bean.annotation.config.Beans;
-import com.jfireframework.context.bean.annotation.config.Import;
-import com.jfireframework.context.bean.annotation.config.OutterProperties;
-import com.jfireframework.context.bean.annotation.config.PackageNames;
-import com.jfireframework.context.bean.annotation.config.ProfileName;
-import com.jfireframework.context.bean.annotation.config.PropertyPaths;
 import com.jfireframework.context.bean.field.FieldFactory;
 import com.jfireframework.context.bean.field.param.ParamField;
 import com.jfireframework.context.bean.impl.DefaultBean;
@@ -45,6 +38,13 @@ import com.jfireframework.context.bean.load.LoadBy;
 import com.jfireframework.context.config.BeanInfo;
 import com.jfireframework.context.config.ContextConfig;
 import com.jfireframework.context.config.Profile;
+import com.jfireframework.context.config.annotation.ActiveProfile;
+import com.jfireframework.context.config.annotation.Beans;
+import com.jfireframework.context.config.annotation.Import;
+import com.jfireframework.context.config.annotation.OutterProperties;
+import com.jfireframework.context.config.annotation.PackageNames;
+import com.jfireframework.context.config.annotation.ProfileName;
+import com.jfireframework.context.config.annotation.PropertyPaths;
 
 public class JfireContextBootstrapImpl implements JfireContextBootstrap
 {
@@ -199,7 +199,10 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             if (AnnotationUtil.isPresent(Resource.class, src))
             {
                 Bean bean = new DefaultBean(src);
-                beanNameMap.put(bean.getBeanName(), bean);
+                if (beanNameMap.put(bean.getBeanName(), bean) != null)
+                {
+                    throw new UnSupportException("存在同名的bean:" + bean.getBeanName());
+                }
             }
         }
     }
@@ -209,7 +212,10 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     {
         Verify.False(init, "不能在容器初始化后再加入Bean");
         Bean bean = new DefaultBean(resourceName, src, prototype);
-        beanNameMap.put(resourceName, bean);
+        if (beanNameMap.put(resourceName, bean) != null)
+        {
+            throw new UnSupportException("存在同名的bean:" + resourceName);
+        }
     }
     
     @Override
@@ -275,6 +281,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     @Override
     public void initContext()
     {
+        scanForConfiguration();
         aopUtil = new AopUtil(classLoader);
         addSingletonEntity(JfireContext.class.getName(), this);
         if (StringUtil.isNotBlank(activeProfile))
@@ -347,6 +354,32 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             {
                 logger.error("执行方法{}.afterContextInit发生异常", each.getClass().getName(), e);
                 throw new JustThrowException(e);
+            }
+        }
+    }
+    
+    private void scanForConfiguration()
+    {
+        for (String className : classNames)
+        {
+            try
+            {
+                Class<?> ckass = classLoader.loadClass(className);
+                if (AnnotationUtil.isPresent(ActiveProfile.class, ckass)//
+                        || AnnotationUtil.isPresent(Beans.class, ckass)//
+                        || AnnotationUtil.isPresent(Import.class, ckass)//
+                        || AnnotationUtil.isPresent(OutterProperties.class, ckass)//
+                        || AnnotationUtil.isPresent(PackageNames.class, ckass)//
+                        || AnnotationUtil.isPresent(ProfileName.class, ckass)//
+                        || AnnotationUtil.isPresent(PropertyPaths.class, ckass))
+                {
+                    readConfig(ckass);
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
     }
@@ -566,7 +599,10 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     {
         Verify.False(init, "不能在容器初始化后还加入bean,请检查{}", CodeLocation.getCodeLocation(2));
         Bean bean = new OuterEntityBean(beanName, entity);
-        beanNameMap.put(beanName, bean);
+        if (beanNameMap.put(beanName, bean) != null)
+        {
+            throw new UnSupportException("存在同名的bean:" + beanName);
+        }
     }
     
     @Override
@@ -586,7 +622,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
         {
             packageNames = AnnotationUtil.getAnnotation(PackageNames.class, ckass).value();
         }
-        if (AnnotationUtil.isPresent(com.jfireframework.context.bean.annotation.config.OutterProperties.class, ckass))
+        if (AnnotationUtil.isPresent(com.jfireframework.context.config.annotation.OutterProperties.class, ckass))
         {
             outterProperties = new HashMap<String, String>();
             for (String each : AnnotationUtil.getAnnotation(OutterProperties.class, ckass).value())
@@ -608,7 +644,7 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
         {
             Beans beans = AnnotationUtil.getAnnotation(Beans.class, ckass);
             List<BeanInfo> list = new LinkedList<BeanInfo>();
-            for (com.jfireframework.context.bean.annotation.config.BeanInfo each : beans.value())
+            for (com.jfireframework.context.config.annotation.BeanInfo each : beans.value())
             {
                 BeanInfo beanInfo = new BeanInfo();
                 beanInfo.setBeanName(each.beanName());
@@ -708,6 +744,12 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     public void addPackageName(Class<?> ckass)
     {
         addPackageNames(ckass.getPackage().getName());
+    }
+    
+    @Override
+    public void scanSelfPackage()
+    {
+        addPackageName(this.getClass());
     }
     
 }
