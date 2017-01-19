@@ -8,7 +8,7 @@
 		<artifactId>framework-parent</artifactId>
 		<version>1.0</version>
 	</parent>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<artifactId>jfire-coordinator</artifactId>
 	<name>coordinator</name>
 	<url>http://maven.apache.org</url>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>com.jfireframework</groupId>
 			<artifactId>jfire-baseutil</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
