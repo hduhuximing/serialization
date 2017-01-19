@@ -281,7 +281,6 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     @Override
     public void initContext()
     {
-        scanForConfiguration();
         aopUtil = new AopUtil(classLoader);
         addSingletonEntity(JfireContext.class.getName(), this);
         if (StringUtil.isNotBlank(activeProfile))
@@ -354,32 +353,6 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
             {
                 logger.error("执行方法{}.afterContextInit发生异常", each.getClass().getName(), e);
                 throw new JustThrowException(e);
-            }
-        }
-    }
-    
-    private void scanForConfiguration()
-    {
-        for (String className : classNames)
-        {
-            try
-            {
-                Class<?> ckass = classLoader.loadClass(className);
-                if (AnnotationUtil.isPresent(ActiveProfile.class, ckass)//
-                        || AnnotationUtil.isPresent(Beans.class, ckass)//
-                        || AnnotationUtil.isPresent(Import.class, ckass)//
-                        || AnnotationUtil.isPresent(OutterProperties.class, ckass)//
-                        || AnnotationUtil.isPresent(PackageNames.class, ckass)//
-                        || AnnotationUtil.isPresent(ProfileName.class, ckass)//
-                        || AnnotationUtil.isPresent(PropertyPaths.class, ckass))
-                {
-                    readConfig(ckass);
-                }
-            }
-            catch (ClassNotFoundException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
         }
     }
@@ -747,9 +720,41 @@ public class JfireContextBootstrapImpl implements JfireContextBootstrap
     }
     
     @Override
-    public void scanSelfPackage()
+    public void scanForConfiguration()
     {
-        addPackageName(this.getClass());
+        String callerClassName = Thread.currentThread().getStackTrace()[2].getClassName();
+        int index = callerClassName.lastIndexOf('.');
+        if (index > 0)
+        {
+            String packageName = callerClassName.substring(0, index);
+            scanForConfiguration(packageName);
+        }
     }
     
+    @Override
+    public void scanForConfiguration(String packageName)
+    {
+        for (String className : PackageScan.scan(packageName))
+        {
+            try
+            {
+                Class<?> ckass = classLoader.loadClass(className);
+                if (AnnotationUtil.isPresent(ActiveProfile.class, ckass)//
+                        || AnnotationUtil.isPresent(Beans.class, ckass)//
+                        || AnnotationUtil.isPresent(Import.class, ckass)//
+                        || AnnotationUtil.isPresent(OutterProperties.class, ckass)//
+                        || AnnotationUtil.isPresent(PackageNames.class, ckass)//
+                        || AnnotationUtil.isPresent(ProfileName.class, ckass)//
+                        || AnnotationUtil.isPresent(PropertyPaths.class, ckass))
+                {
+                    readConfig(ckass);
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 }
