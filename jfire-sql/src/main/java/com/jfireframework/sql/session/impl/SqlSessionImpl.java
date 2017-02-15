@@ -48,11 +48,11 @@ public class SqlSessionImpl implements SqlSession
             if (transNum == 0)
             {
                 transNum++;
-                connection.setAutoCommit(false);
                 if (isolate > 0)
                 {
                     connection.setTransactionIsolation(isolate);
                 }
+                connection.setAutoCommit(false);
             }
             else
             {
