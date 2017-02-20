@@ -1,5 +1,8 @@
 package com.jfireframework.boot;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.context.JfireContext;
@@ -7,8 +10,9 @@ import com.jfireframework.context.JfireContextImpl;
 
 public class BootApplication
 {
-    private String configClassName;
-    private String packageName;
+    private String     configClassName;
+    private String     packageName;
+    private Properties outConfigProperties;
     
     private void init(String configClassName)
     {
@@ -17,6 +21,18 @@ public class BootApplication
         if (index != -1)
         {
             packageName = configClassName.substring(0, index);
+        }
+        if (new File("boot.config").exists())
+        {
+            outConfigProperties = new Properties();
+            try (FileInputStream inputStream = new FileInputStream(new File("boot.config")))
+            {
+                outConfigProperties.load(inputStream);
+            }
+            catch (IOException e)
+            {
+                throw new JustThrowException(e);
+            }
         }
     }
     
@@ -53,6 +69,7 @@ public class BootApplication
                 properties.put("boot_packageName", packageName);
                 properties.put("jfire.mvc.classpathPrefix", appInfo.prefix());
                 properties.put("jfire.mvc.mode", "run_in_jar_mode");
+                properties.putAll(outConfigProperties);
                 jfireContext.addProperties(properties);
                 jfireContext.addBean("bootStarter", false, BootStarter.class);
                 BootStarter bootStarter = (BootStarter) jfireContext.getBean("bootStarter");
