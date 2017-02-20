@@ -22,10 +22,10 @@ public class BootApplication
         {
             packageName = configClassName.substring(0, index);
         }
-        if (new File("boot.config").exists())
+        if (new File("boot.properties").exists())
         {
             outConfigProperties = new Properties();
-            try (FileInputStream inputStream = new FileInputStream(new File("boot.config")))
+            try (FileInputStream inputStream = new FileInputStream(new File("boot.properties")))
             {
                 outConfigProperties.load(inputStream);
             }
