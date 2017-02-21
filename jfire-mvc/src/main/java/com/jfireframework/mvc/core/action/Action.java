@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.binder.DataBinder;
 import com.jfireframework.mvc.config.RequestMethod;
-import com.jfireframework.mvc.config.ResultType;
 import com.jfireframework.mvc.interceptor.ActionInterceptor;
 import com.jfireframework.mvc.interceptor.impl.DataBinderInterceptor;
 import com.jfireframework.mvc.rule.HeaderRule;
@@ -17,7 +16,6 @@ import sun.reflect.MethodAccessor;
 /**
  * 传统action类，用来代表一个事先定义的url地址响应，该url地址中不包含*这样的通配符
  * 
- * @author 林斌（windfire@zailanghua.com）
  * 
  */
 public class Action
@@ -35,7 +33,6 @@ public class Action
     private final RequestMethod       requestMethod;
     private final Method              method;
     private final String              contentType;
-    private final ResultType          resultType;
     private final ActionInterceptor[] interceptors;
     private final String              token;
     private final ViewRender          viewRender;
@@ -57,7 +54,6 @@ public class Action
         readStream = info.isReadStream();
         requestMethod = info.getRequestMethod();
         method = info.getMethod();
-        resultType = info.getResultType();
         token = info.getToken();
         hasCookie = info.isHasCookie();
         hasHeader = info.isHasCookie();
@@ -137,11 +133,6 @@ public class Action
     public String getContentType()
     {
         return contentType;
-    }
-    
-    public ResultType getResultType()
-    {
-        return resultType;
     }
     
     public ActionInterceptor[] getInterceptors()

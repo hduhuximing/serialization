@@ -12,7 +12,7 @@ public class BootApplication
 {
     private String     configClassName;
     private String     packageName;
-    private Properties outConfigProperties;
+    private Properties outConfigProperties = new Properties();
     
     private void init(String configClassName)
     {

@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import com.jfireframework.mvc.config.RequestMethod;
-import com.jfireframework.mvc.config.ResultType;
+import com.jfireframework.mvc.viewrender.DefaultResultType;
 
 /**
  * 表示该方法是一个action方法
@@ -30,7 +30,7 @@ public @interface RequestMapping
      * 
      * @return
      */
-    public ResultType resultType() default ResultType.None;
+    public String resultType() default DefaultResultType.None;
     
     /**
      * 该方法直接从request中读取流，不进行数据组装处理

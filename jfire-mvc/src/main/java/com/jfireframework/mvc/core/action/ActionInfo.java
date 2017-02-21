@@ -3,7 +3,6 @@ package com.jfireframework.mvc.core.action;
 import java.lang.reflect.Method;
 import com.jfireframework.mvc.binder.DataBinder;
 import com.jfireframework.mvc.config.RequestMethod;
-import com.jfireframework.mvc.config.ResultType;
 import com.jfireframework.mvc.interceptor.ActionInterceptor;
 import com.jfireframework.mvc.rule.HeaderRule;
 import com.jfireframework.mvc.rule.RestfulRule;
@@ -21,7 +20,6 @@ public class ActionInfo
     private RestfulRule         restfulRule;
     private boolean             readStream = false;
     private String              contentType;
-    private ResultType          resultType;
     // 该action方法的快速反射调用工具
     private MethodAccessor      methodAccessor;
     private ActionInterceptor[] interceptors;
@@ -110,16 +108,6 @@ public class ActionInfo
     public void setMethodAccessor(MethodAccessor methodAccessor)
     {
         this.methodAccessor = methodAccessor;
-    }
-    
-    public ResultType getResultType()
-    {
-        return resultType;
-    }
-    
-    public void setResultType(ResultType resultType)
-    {
-        this.resultType = resultType;
     }
     
     public Object getEntity()

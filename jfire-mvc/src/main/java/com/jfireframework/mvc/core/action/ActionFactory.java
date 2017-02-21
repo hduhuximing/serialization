@@ -25,18 +25,11 @@ import com.jfireframework.mvc.binder.impl.HttpServletRequestBinder;
 import com.jfireframework.mvc.binder.impl.HttpServletResponseBinder;
 import com.jfireframework.mvc.binder.impl.HttpSessionBinder;
 import com.jfireframework.mvc.config.ContentType;
-import com.jfireframework.mvc.config.ResultType;
 import com.jfireframework.mvc.core.ModelAndView;
 import com.jfireframework.mvc.interceptor.ActionInterceptor;
 import com.jfireframework.mvc.rule.RestfulRule;
-import com.jfireframework.mvc.viewrender.ViewRender;
-import com.jfireframework.mvc.viewrender.impl.BeetlRender;
-import com.jfireframework.mvc.viewrender.impl.BytesRender;
-import com.jfireframework.mvc.viewrender.impl.HtmlRender;
-import com.jfireframework.mvc.viewrender.impl.JsonRender;
-import com.jfireframework.mvc.viewrender.impl.NoneRender;
-import com.jfireframework.mvc.viewrender.impl.RedirectRender;
-import com.jfireframework.mvc.viewrender.impl.StringRender;
+import com.jfireframework.mvc.viewrender.DefaultResultType;
+import com.jfireframework.mvc.viewrender.RenderManager;
 
 public class ActionFactory
 {
@@ -53,6 +46,7 @@ public class ActionFactory
      */
     public static Action buildAction(Method method, String requestPath, Bean bean, JfireContext jfireContext)
     {
+        RenderManager renderManager = jfireContext.getBean(RenderManager.class);
         ActionInfo actionInfo = new ActionInfo();
         actionInfo.setMethod(method);
         RequestMapping requestMapping = AnnotationUtil.getAnnotation(RequestMapping.class, method);
@@ -61,54 +55,57 @@ public class ActionFactory
         actionInfo.setReadStream(requestMapping.readStream());
         actionInfo.setEntity(bean.getInstance());
         actionInfo.setHeaders(requestMapping.headers());
-        if (requestMapping.resultType() == ResultType.None && method.getReturnType() != Void.class)
+        String resultType = "";
+        if (requestMapping.resultType() == DefaultResultType.None && method.getReturnType() != Void.class)
         {
             Class<?> returnType = method.getReturnType();
             if (returnType == String.class)
             {
-                actionInfo.setResultType(ResultType.String);
+                actionInfo.setViewRender(renderManager.get(DefaultResultType.Str, method));
+                resultType = DefaultResultType.Str;
             }
             else if (returnType == ModelAndView.class)
             {
-                actionInfo.setResultType(ResultType.Beetl);
+                actionInfo.setViewRender(renderManager.get(DefaultResultType.Beetl, method));
+                resultType = DefaultResultType.Beetl;
             }
             else if (returnType == byte[].class)
             {
-                actionInfo.setResultType(ResultType.Bytes);
+                actionInfo.setViewRender(renderManager.get(DefaultResultType.Bytes, method));
+                resultType = DefaultResultType.Bytes;
             }
             else
             {
-                actionInfo.setResultType(ResultType.Json);
+                actionInfo.setViewRender(renderManager.get(DefaultResultType.Json, method));
+                resultType = DefaultResultType.Json;
             }
         }
         else
         {
-            actionInfo.setResultType(requestMapping.resultType());
+            actionInfo.setViewRender(renderManager.get(requestMapping.resultType(), method));
+            resultType = requestMapping.resultType();
         }
         if (requestMapping.contentType().equals(""))
         {
-            switch (actionInfo.getResultType())
+            if (resultType.equals(DefaultResultType.Json))
             {
-                case Json:
-                    actionInfo.setContentType(ContentType.JSON);
-                    break;
-                case Html:
-                    actionInfo.setContentType(ContentType.HTML);
-                    break;
-                case String:
-                    actionInfo.setContentType(ContentType.STRING);
-                    break;
-                case Bytes:
-                    actionInfo.setContentType(ContentType.STREAM);
-                    break;
-                case Beetl:
-                    actionInfo.setContentType(ContentType.HTML);
-                case Redirect:
-                    break;
-                case None:
-                    break;
-                default:
-                    break;
+                actionInfo.setContentType(ContentType.JSON);
+            }
+            else if (resultType.equals(DefaultResultType.Html))
+            {
+                actionInfo.setContentType(ContentType.HTML);
+            }
+            else if (resultType.equals(DefaultResultType.Str))
+            {
+                actionInfo.setContentType(ContentType.STRING);
+            }
+            else if (resultType.equals(DefaultResultType.Bytes))
+            {
+                actionInfo.setContentType(ContentType.STREAM);
+            }
+            else if (resultType.equals(DefaultResultType.Beetl))
+            {
+                actionInfo.setContentType(ContentType.HTML);
             }
         }
         else
@@ -119,7 +116,6 @@ public class ActionFactory
         {
             actionInfo.setContentType(null);
         }
-        actionInfo.setViewRender(getViewRender(actionInfo.getResultType(), jfireContext));
         actionInfo.setToken(requestMapping.token());
         if (actionInfo.getToken().equals(""))
         {
@@ -312,25 +308,4 @@ public class ActionFactory
         return paramNames;
     }
     
-    private static ViewRender getViewRender(ResultType resultType, JfireContext jfireContext)
-    {
-        switch (resultType)
-        {
-            case Beetl:
-                return jfireContext.getBean(BeetlRender.class);
-            case Bytes:
-                return jfireContext.getBean(BytesRender.class);
-            case Html:
-                return jfireContext.getBean(HtmlRender.class);
-            case String:
-                return jfireContext.getBean(StringRender.class);
-            case Json:
-                return jfireContext.getBean(JsonRender.class);
-            case Redirect:
-                return jfireContext.getBean(RedirectRender.class);
-            case None:
-                return jfireContext.getBean(NoneRender.class);
-        }
-        throw new NullPointerException();
-    }
 }

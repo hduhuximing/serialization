@@ -10,9 +10,9 @@ import org.beetl.ext.web.WebVariable;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.core.ModelAndView;
 import com.jfireframework.mvc.util.AppBeetlKit;
+import com.jfireframework.mvc.viewrender.DefaultResultType;
 import com.jfireframework.mvc.viewrender.ViewRender;
 
-@Resource
 public class BeetlRender implements ViewRender
 {
     @Resource
@@ -64,6 +64,12 @@ public class BeetlRender implements ViewRender
     protected void modifyTemplate(Template template, String key, HttpServletRequest request, HttpServletResponse response, Object... args)
     {
         
+    }
+    
+    @Override
+    public String renderType()
+    {
+        return DefaultResultType.Beetl;
     }
     
 }
