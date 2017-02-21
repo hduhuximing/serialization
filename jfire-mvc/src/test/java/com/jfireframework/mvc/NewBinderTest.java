@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.mvc.binder.impl.ArrayBinder;
@@ -101,6 +102,10 @@ public class NewBinderTest
     }
     
     @Test
+    @Ignore
+    /**
+     * 不支持这种情况
+     */
     public void test7()
     {
         TreeValueNode node = new TreeValueNode();

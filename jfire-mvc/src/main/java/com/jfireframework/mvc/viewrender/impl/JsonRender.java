@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.context.bean.annotation.field.PropertyRead;
+import com.jfireframework.mvc.viewrender.DefaultResultType;
 import com.jfireframework.mvc.viewrender.ViewRender;
 
 @Resource
@@ -28,5 +29,11 @@ public class JsonRender implements ViewRender
     {
         OutputStream out = response.getOutputStream();
         out.write(JsonTool.write(result).getBytes(charset));
+    }
+    
+    @Override
+    public String renderType()
+    {
+        return DefaultResultType.Json;
     }
 }

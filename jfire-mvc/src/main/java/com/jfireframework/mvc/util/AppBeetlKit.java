@@ -16,10 +16,9 @@ import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.context.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.core.ModelAndView;
 
-@Resource
 public class AppBeetlKit
 {
-    GroupTemplate          gt              = null;
+    private GroupTemplate  gt              = null;
     @Resource
     private ServletContext servletContext;
     @PropertyRead("jfire.mvc.classpathPrefix")
