@@ -112,7 +112,7 @@ public class ActionFactory
         {
             actionInfo.setContentType(requestMapping.contentType());
         }
-        if (actionInfo.getContentType().equals(""))
+        if ("".equals(actionInfo.getContentType()))
         {
             actionInfo.setContentType(null);
         }
