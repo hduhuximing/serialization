@@ -27,7 +27,7 @@ import com.jfireframework.mvc.binder.impl.MapBinder;
 import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
 import com.jfireframework.mvc.binder.impl.SqlDateBinder;
 import com.jfireframework.mvc.binder.impl.StringBinder;
-import com.jfireframework.mvc.binder.impl.UploadBinder;
+import com.jfireframework.mvc.binder.impl.SingleUploadBinder;
 import com.jfireframework.mvc.binder.impl.WrapperBinder;
 
 public class BinderFactory
@@ -94,7 +94,7 @@ public class BinderFactory
             }
             else if (target == UploadItem.class)
             {
-                binders.add(new UploadBinder(target, prefixName, annotations));
+                binders.add(new SingleUploadBinder(target, prefixName, annotations));
             }
             else if (target.isArray())
             {

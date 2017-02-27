@@ -5,8 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.field.array.AbstractArrayField;
 import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class ArrayObjectField extends AbstractArrayField
 {
@@ -27,9 +27,9 @@ public class ArrayObjectField extends AbstractArrayField
     }
     
     @Override
-    protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+    protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
     {
-        return binder.bind(request, (TreeValueNode) node, response);
+        return binder.bind(request, (TreeValueResolver) node, response);
     }
     
 }

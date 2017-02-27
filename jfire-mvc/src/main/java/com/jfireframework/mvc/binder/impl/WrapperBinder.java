@@ -4,9 +4,9 @@ import java.lang.annotation.Annotation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 import com.jfireframework.mvc.binder.transfer.Transfer;
 import com.jfireframework.mvc.binder.transfer.TransferFactory;
 
@@ -22,14 +22,14 @@ public class WrapperBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
-        ParamNode node = treeValueNode.get(prefixName);
+        ParamResolver node = treeValueNode.get(prefixName);
         if (node == null)
         {
             return null;
         }
-        return transfer.trans(((StringValueNode) node).getValue());
+        return transfer.trans(((StringValueResolver) node).getValue());
     }
     
     @Override

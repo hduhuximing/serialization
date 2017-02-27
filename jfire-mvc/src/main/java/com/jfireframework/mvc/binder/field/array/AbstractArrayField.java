@@ -8,9 +8,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.field.AbstractBinderField;
-import com.jfireframework.mvc.binder.node.ArrayNode;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ArrayResolver;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public abstract class AbstractArrayField extends AbstractBinderField
 {
@@ -23,17 +23,17 @@ public abstract class AbstractArrayField extends AbstractBinderField
     }
     
     @Override
-    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamNode node, Object entity)
+    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamResolver node, Object entity)
     {
         
-        if (node instanceof ArrayNode)
+        if (node instanceof ArrayResolver)
         {
-            ArrayNode arrayNode = (ArrayNode) node;
+            ArrayResolver arrayNode = (ArrayResolver) node;
             unsafe.putObject(entity, offset, buildFromArray(arrayNode.getArray().size(), arrayNode.getArray(), request, response));
         }
-        else if (node instanceof TreeValueNode)
+        else if (node instanceof TreeValueResolver)
         {
-            TreeValueNode treeValueNode = (TreeValueNode) node;
+            TreeValueResolver treeValueNode = (TreeValueResolver) node;
             int max = 0;
             for (String each : treeValueNode.keySet())
             {
@@ -61,10 +61,10 @@ public abstract class AbstractArrayField extends AbstractBinderField
     
     protected abstract Object buildByString(String str);
     
-    protected Object buildFromTree(int size, Set<Entry<String, ParamNode>> set, HttpServletRequest request, HttpServletResponse response)
+    protected Object buildFromTree(int size, Set<Entry<String, ParamResolver>> set, HttpServletRequest request, HttpServletResponse response)
     {
         Object array = Array.newInstance(ckass, size);
-        for (Entry<String, ParamNode> each : set)
+        for (Entry<String, ParamResolver> each : set)
         {
             int index = Integer.valueOf(each.getKey());
             Array.set(array, index, buildByNode(each.getValue(), request, response));
@@ -72,6 +72,6 @@ public abstract class AbstractArrayField extends AbstractBinderField
         return array;
     }
     
-    protected abstract Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response);
+    protected abstract Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response);
     
 }

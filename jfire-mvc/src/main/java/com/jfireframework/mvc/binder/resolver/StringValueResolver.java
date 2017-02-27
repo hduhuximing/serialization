@@ -1,10 +1,10 @@
-package com.jfireframework.mvc.binder.node;
+package com.jfireframework.mvc.binder.resolver;
 
-public class StringValueNode implements ParamNode
+public class StringValueResolver implements ParamResolver
 {
     private final String value;
     
-    public StringValueNode(String value)
+    public StringValueResolver(String value)
     {
         this.value = value;
     }

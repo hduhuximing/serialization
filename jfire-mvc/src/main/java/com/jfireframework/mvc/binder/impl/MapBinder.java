@@ -6,9 +6,9 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class MapBinder implements DataBinder
 {
@@ -21,14 +21,14 @@ public class MapBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
         Map<String, String> map = new HashMap<String, String>();
-        for (Entry<String, ParamNode> entry : treeValueNode.entrySet())
+        for (Entry<String, ParamResolver> entry : treeValueNode.entrySet())
         {
-            if (entry.getValue() instanceof StringValueNode)
+            if (entry.getValue() instanceof StringValueResolver)
             {
-                map.put(entry.getKey(), ((StringValueNode) entry.getValue()).getValue());
+                map.put(entry.getKey(), ((StringValueResolver) entry.getValue()).getValue());
             }
         }
         return map;

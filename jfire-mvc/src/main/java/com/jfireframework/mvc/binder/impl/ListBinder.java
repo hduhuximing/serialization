@@ -10,10 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.verify.Verify;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.ArrayNode;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ArrayResolver;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public abstract class ListBinder implements DataBinder
 {
@@ -65,21 +65,21 @@ public abstract class ListBinder implements DataBinder
     
     @SuppressWarnings("rawtypes")
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
-        ParamNode node = treeValueNode.get(prefixName);
+        ParamResolver node = treeValueNode.get(prefixName);
         if (node == null)
         {
             return new LinkedList();
         }
-        if (node instanceof ArrayNode)
+        if (node instanceof ArrayResolver)
         {
-            ArrayNode arrayNode = (ArrayNode) node;
+            ArrayResolver arrayNode = (ArrayResolver) node;
             return buildFromArray(arrayNode.getArray().size(), arrayNode.getArray(), request, response);
         }
-        else if (node instanceof TreeValueNode)
+        else if (node instanceof TreeValueResolver)
         {
-            TreeValueNode new_treeValueNode = (TreeValueNode) node;
+            TreeValueResolver new_treeValueNode = (TreeValueResolver) node;
             return buildFromTree(new_treeValueNode.entrySet(), request, response);
         }
         else
@@ -102,11 +102,11 @@ public abstract class ListBinder implements DataBinder
     
     protected abstract Object buildByString(String str);
     
-    protected Object buildFromTree(Set<Entry<String, ParamNode>> set, HttpServletRequest request, HttpServletResponse response)
+    protected Object buildFromTree(Set<Entry<String, ParamResolver>> set, HttpServletRequest request, HttpServletResponse response)
     {
         Object[] t_array;
         int length = 0;
-        for (Entry<String, ParamNode> each : set)
+        for (Entry<String, ParamResolver> each : set)
         {
             int index = Integer.valueOf(each.getKey());
             if (index > length)
@@ -115,7 +115,7 @@ public abstract class ListBinder implements DataBinder
             }
         }
         t_array = new Object[length + 1];
-        for (Entry<String, ParamNode> each : set)
+        for (Entry<String, ParamResolver> each : set)
         {
             int index = Integer.valueOf(each.getKey());
             t_array[index] = buildByNode(each.getValue(), request, response);
@@ -128,7 +128,7 @@ public abstract class ListBinder implements DataBinder
         return list;
     }
     
-    protected abstract Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response);
+    protected abstract Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response);
     
     @Override
     public String getParamName()
@@ -151,9 +151,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Integer.valueOf(value);
         }
     }
@@ -173,9 +173,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Long.valueOf(value);
         }
     }
@@ -195,9 +195,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Short.valueOf(value);
         }
     }
@@ -217,9 +217,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Long.valueOf(value);
         }
     }
@@ -239,9 +239,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Float.valueOf(value);
         }
     }
@@ -261,9 +261,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Double.valueOf(value);
         }
     }
@@ -283,9 +283,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return value;
         }
     }
@@ -307,9 +307,9 @@ public abstract class ListBinder implements DataBinder
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            return binder.bind(request, (TreeValueNode) node, response);
+            return binder.bind(request, (TreeValueResolver) node, response);
         }
         
     }

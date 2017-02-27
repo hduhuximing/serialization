@@ -10,10 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.field.AbstractBinderField;
 import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
-import com.jfireframework.mvc.binder.node.ArrayNode;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ArrayResolver;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public abstract class ListField extends AbstractBinderField
 {
@@ -69,16 +69,16 @@ public abstract class ListField extends AbstractBinderField
     }
     
     @Override
-    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamNode node, Object entity)
+    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamResolver node, Object entity)
     {
-        if (node instanceof ArrayNode)
+        if (node instanceof ArrayResolver)
         {
-            ArrayNode arrayNode = (ArrayNode) node;
+            ArrayResolver arrayNode = (ArrayResolver) node;
             unsafe.putObject(entity, offset, buildFromArray(arrayNode.getArray(), request, response));
         }
-        else if (node instanceof TreeValueNode)
+        else if (node instanceof TreeValueResolver)
         {
-            TreeValueNode treeValueNode = (TreeValueNode) node;
+            TreeValueResolver treeValueNode = (TreeValueResolver) node;
             unsafe.putObject(entity, offset, buildFromTree(treeValueNode.entrySet(), request, response));
         }
     }
@@ -95,11 +95,11 @@ public abstract class ListField extends AbstractBinderField
     
     protected abstract Object buildByString(String str);
     
-    private List<?> buildFromTree(Set<Entry<String, ParamNode>> set, HttpServletRequest request, HttpServletResponse response)
+    private List<?> buildFromTree(Set<Entry<String, ParamResolver>> set, HttpServletRequest request, HttpServletResponse response)
     {
         List<Object> list = new ArrayList<Object>();
         int max = 0;
-        for (Entry<String, ParamNode> each : set)
+        for (Entry<String, ParamResolver> each : set)
         {
             int index = Integer.valueOf(each.getKey());
             if (index > max)
@@ -108,7 +108,7 @@ public abstract class ListField extends AbstractBinderField
             }
         }
         Object[] t_array = new Object[max + 1];
-        for (Entry<String, ParamNode> each : set)
+        for (Entry<String, ParamResolver> each : set)
         {
             int index = Integer.valueOf(each.getKey());
             t_array[index] = buildByNode(each.getValue(), request, response);
@@ -120,7 +120,7 @@ public abstract class ListField extends AbstractBinderField
         return list;
     }
     
-    protected abstract Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response);
+    protected abstract Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response);
     
     static class ListBooleanField extends ListField
     {
@@ -137,9 +137,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Boolean.valueOf(value);
         }
         
@@ -160,9 +160,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Byte.valueOf(value);
         }
         
@@ -183,9 +183,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return value.charAt(0);
         }
         
@@ -206,9 +206,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Double.valueOf(value);
         }
         
@@ -229,9 +229,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Float.valueOf(value);
         }
         
@@ -252,9 +252,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Integer.valueOf(value);
         }
         
@@ -275,9 +275,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Long.valueOf(value);
         }
         
@@ -302,9 +302,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            return binder.bind(request, (TreeValueNode) node, response);
+            return binder.bind(request, (TreeValueResolver) node, response);
         }
         
     }
@@ -324,9 +324,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return Short.valueOf(value);
         }
         
@@ -347,9 +347,9 @@ public abstract class ListField extends AbstractBinderField
         }
         
         @Override
-        protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+        protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             return value;
         }
         

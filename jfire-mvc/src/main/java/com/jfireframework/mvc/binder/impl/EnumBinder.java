@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class EnumBinder implements DataBinder
 {
@@ -31,16 +31,16 @@ public class EnumBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
-        ParamNode node = treeValueNode.get(prefixName);
+        ParamResolver node = treeValueNode.get(prefixName);
         if (node == null)
         {
             return null;
         }
         else
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             Enum<?> instance = instances.get(value);
             return instance;
         }

@@ -2,7 +2,7 @@ package com.jfireframework.mvc.binder.field;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.jfireframework.mvc.binder.node.ParamNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
 
 public interface BinderField
 {
@@ -14,7 +14,7 @@ public interface BinderField
      * @param node
      * @param entity
      */
-    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamNode node, Object entity);
+    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamResolver node, Object entity);
     
     public String getName();
 }

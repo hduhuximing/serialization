@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.annotation.MvcDateParse;
 import com.jfireframework.mvc.binder.field.AbstractBinderField;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
 
 public class DateField extends AbstractBinderField
 {
@@ -31,9 +31,9 @@ public class DateField extends AbstractBinderField
     }
     
     @Override
-    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamNode node, Object entity)
+    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamResolver node, Object entity)
     {
-        String value = ((StringValueNode) node).getValue();
+        String value = ((StringValueResolver) node).getValue();
         SimpleDateFormat format = new SimpleDateFormat(pattern);
         try
         {

@@ -1,8 +1,8 @@
-package com.jfireframework.mvc.binder.node;
+package com.jfireframework.mvc.binder.resolver;
 
 import java.util.ArrayList;
 
-public class ArrayNode implements ParamNode
+public class ArrayResolver implements ParamResolver
 {
     private ArrayList<String> array = new ArrayList<String>();
     

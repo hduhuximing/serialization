@@ -2,6 +2,7 @@ package com.jfireframework.mvc.core;
 
 import java.io.IOException;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -27,18 +28,20 @@ import com.jfireframework.mvc.util.ChangeMethodRequest;
 @MultipartConfig
 public class EasyMvcDispathServlet extends HttpServlet
 {
-    private static final long    serialVersionUID      = 6091581255799463902L;
-    private Logger               logger                = ConsoleLogFactory.getLogger();
-    private DispathServletHelper helper;
-    private static final String  DEFAULT_METHOD_PREFIX = "_method";
-    private String               encode;
-    public static final String   CONFIG_CLASS_NAME     = AutumnId.instance().generate();
-    public static final String   SACAN_PACKAGENAME     = AutumnId.instance().generate();
+    private static final long                       serialVersionUID      = 6091581255799463902L;
+    private Logger                                  logger                = ConsoleLogFactory.getLogger();
+    private DispathServletHelper                    helper;
+    private static final String                     DEFAULT_METHOD_PREFIX = "_method";
+    private String                                  encode;
+    public static final String                      CONFIG_CLASS_NAME     = AutumnId.instance().generate();
+    public static final String                      SACAN_PACKAGENAME     = AutumnId.instance().generate();
+    public static final ThreadLocal<ServletContext> CONTEXT               = new ThreadLocal<ServletContext>();
     
     @Override
     public void init(ServletConfig servletConfig) throws ServletException
     {
         logger.debug("初始化Context-mvc Servlet");
+        CONTEXT.set(servletConfig.getServletContext());
         helper = new DispathServletHelper(servletConfig);
         encode = helper.getExtraConfig().getEncode();
     }

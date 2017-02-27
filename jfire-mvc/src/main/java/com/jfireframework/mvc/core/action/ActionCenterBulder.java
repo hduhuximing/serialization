@@ -21,8 +21,6 @@ import com.jfireframework.context.bean.Bean;
 import com.jfireframework.mvc.annotation.Controller;
 import com.jfireframework.mvc.annotation.RequestMapping;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
-import com.jfireframework.mvc.interceptor.impl.DataBinderInterceptor;
-import com.jfireframework.mvc.interceptor.impl.UploadInterceptor;
 import com.jfireframework.mvc.util.ExtraConfig;
 import com.jfireframework.mvc.viewrender.RenderManager;
 import com.jfireframework.mvc.viewrender.impl.BytesRender;
@@ -43,8 +41,6 @@ public class ActionCenterBulder
         jfireContext.setClassLoader(classLoader);
         addViewRender(jfireContext);
         jfireContext.addSingletonEntity("servletContext", servletContext);
-        jfireContext.addBean(DataBinderInterceptor.class);
-        jfireContext.addBean(UploadInterceptor.class);
         jfireContext.addBean(ExtraConfig.class);
         ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfireContext).toArray(new Action[0]));
         actionCenter.setExtraConfig(jfireContext.getBean(ExtraConfig.class));

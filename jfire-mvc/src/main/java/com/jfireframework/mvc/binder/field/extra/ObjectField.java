@@ -5,8 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.field.AbstractBinderField;
 import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class ObjectField extends AbstractBinderField
 {
@@ -19,9 +19,9 @@ public class ObjectField extends AbstractBinderField
     }
     
     @Override
-    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamNode node, Object entity)
+    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamResolver node, Object entity)
     {
-        Object value = binder.bind(request, (TreeValueNode) node, response);
+        Object value = binder.bind(request, (TreeValueResolver) node, response);
         unsafe.putObject(entity, offset, value);
     }
     

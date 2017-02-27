@@ -3,6 +3,7 @@ package com.jfireframework.mvc.interceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.order.Order;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 import com.jfireframework.mvc.core.action.Action;
 
 /**
@@ -20,7 +21,7 @@ public interface ActionInterceptor extends Order
      * @param request
      * @param response
      */
-    public boolean interceptor(HttpServletRequest request, HttpServletResponse response, Action action);
+    public boolean interceptor(HttpServletRequest request, HttpServletResponse response, Action action, TreeValueResolver resolver);
     
     /**
      * 返回需要进行前置拦截的路径，*代表拦截所有。匹配的时候是从前到后的匹配方式。多个规则之间可以使用;进行间隔 返回null表明不通过路径判断

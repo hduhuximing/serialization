@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.field.AbstractBinderField;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
 
 public class StringField extends AbstractBinderField
 {
@@ -16,9 +16,9 @@ public class StringField extends AbstractBinderField
     }
     
     @Override
-    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamNode node, Object entity)
+    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamResolver node, Object entity)
     {
-        StringValueNode realNode = (StringValueNode) node;
+        StringValueResolver realNode = (StringValueResolver) node;
         unsafe.putObject(entity, offset, realNode.getValue());
     }
     

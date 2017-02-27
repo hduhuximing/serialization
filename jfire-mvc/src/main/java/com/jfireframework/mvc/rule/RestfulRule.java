@@ -2,7 +2,7 @@ package com.jfireframework.mvc.rule;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class RestfulRule
 {
@@ -103,7 +103,7 @@ public class RestfulRule
         }
     }
     
-    public void getObtain(String rul, TreeValueNode node)
+    public void getObtain(String rul, TreeValueResolver node)
     {
         String[] values = getObtain(rul);
         for (int i = 0; i < valueLength; i++)

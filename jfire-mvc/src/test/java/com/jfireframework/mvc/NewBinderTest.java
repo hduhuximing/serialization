@@ -10,7 +10,7 @@ import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.mvc.binder.impl.ArrayBinder;
 import com.jfireframework.mvc.binder.impl.ListBinder;
 import com.jfireframework.mvc.binder.impl.ObjectDataBinder;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 import com.jfireframework.mvc.vo.Desk;
 import com.jfireframework.mvc.vo.Desk.length;
 import com.jfireframework.mvc.vo.Home;
@@ -23,7 +23,7 @@ public class NewBinderTest
     @Test
     public void test()
     {
-        TreeValueNode paramTree = new TreeValueNode();
+        TreeValueResolver paramTree = new TreeValueResolver();
         paramTree.put("foo[bar][numbers][]", "1");
         paramTree.put("foo[bar][numbers][]", "2");
         paramTree.put("foo[bar][numbers][]", "3");
@@ -39,7 +39,7 @@ public class NewBinderTest
     @Test
     public void test8()
     {
-        TreeValueNode node = new TreeValueNode();
+        TreeValueResolver node = new TreeValueResolver();
         node.put("pre[desks][0][name]", "1");
         node.put("pre[desks][1][name]", "2");
         ObjectDataBinder binder = new ObjectDataBinder(ListData.class, "pre", new Annotation[0]);
@@ -59,7 +59,7 @@ public class NewBinderTest
     public void test6()
     {
         ArrayBinder binder = ArrayBinder.valueOf(int[].class, "i", new Annotation[0]);
-        TreeValueNode node = new TreeValueNode();
+        TreeValueResolver node = new TreeValueResolver();
         node.put("i", "1");
         node.put("i", "2");
         int[] result = (int[]) binder.bind(null, node, null);
@@ -108,7 +108,7 @@ public class NewBinderTest
      */
     public void test7()
     {
-        TreeValueNode node = new TreeValueNode();
+        TreeValueResolver node = new TreeValueResolver();
         node.put("desk[name]", "aa");
         node.put("desk[name]", "bb");
         node.put("desk[l]", "1");
@@ -123,7 +123,7 @@ public class NewBinderTest
     public void test2()
     {
         ObjectDataBinder binder = new ObjectDataBinder(Desk.class, "", null);
-        TreeValueNode paramTree = new TreeValueNode();
+        TreeValueResolver paramTree = new TreeValueResolver();
         paramTree.put("name", "hello");
         paramTree.put("width", "20");
         paramTree.put("l", "LONG");
@@ -148,7 +148,7 @@ public class NewBinderTest
     public void test3()
     {
         ObjectDataBinder binder = new ObjectDataBinder(Person.class, "", null);
-        TreeValueNode node = new TreeValueNode();
+        TreeValueResolver node = new TreeValueResolver();
         node.put("age", "15");
         node.put("name", "test");
         node.put("weight", "15.36");
@@ -166,7 +166,7 @@ public class NewBinderTest
     @Test
     public void test4()
     {
-        TreeValueNode map = new TreeValueNode();
+        TreeValueResolver map = new TreeValueResolver();
         map.put("host[name]", "林斌");
         map.put("host[age]", "25");
         map.put("host[weight]", "75.26");

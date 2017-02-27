@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class HttpServletRequestBinder implements DataBinder
 {
@@ -16,7 +16,7 @@ public class HttpServletRequestBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
         return request;
     }

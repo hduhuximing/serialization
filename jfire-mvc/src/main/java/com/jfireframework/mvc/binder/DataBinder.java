@@ -2,7 +2,7 @@ package com.jfireframework.mvc.binder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public interface DataBinder
 {
@@ -14,7 +14,7 @@ public interface DataBinder
      * @param response
      * @return
      */
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response);
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response);
     
     /**
      * 该参数的名称

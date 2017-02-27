@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.mvc.binder.field.array.AbstractArrayField;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
 
 public class ArrayEnumField extends AbstractArrayField
 {
@@ -35,9 +35,9 @@ public class ArrayEnumField extends AbstractArrayField
     }
     
     @Override
-    protected Object buildByNode(ParamNode node, HttpServletRequest request, HttpServletResponse response)
+    protected Object buildByNode(ParamResolver node, HttpServletRequest request, HttpServletResponse response)
     {
-        String value = ((StringValueNode) node).getValue();
+        String value = ((StringValueResolver) node).getValue();
         Enum<?> instance = instances.get(value);
         return instance;
     }

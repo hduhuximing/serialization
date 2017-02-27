@@ -15,8 +15,8 @@ import com.jfireframework.mvc.annotation.MvcIgnore;
 import com.jfireframework.mvc.binder.DataBinder;
 import com.jfireframework.mvc.binder.field.AbstractBinderField;
 import com.jfireframework.mvc.binder.field.BinderField;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class ObjectDataBinder implements DataBinder
 {
@@ -43,11 +43,11 @@ public class ObjectDataBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
         if (prefixName.length() != 0)
         {
-            treeValueNode = (TreeValueNode) treeValueNode.get(prefixName);
+            treeValueNode = (TreeValueResolver) treeValueNode.get(prefixName);
         }
         try
         {
@@ -59,7 +59,7 @@ public class ObjectDataBinder implements DataBinder
             Object entity = null;
             for (BinderField each : fields)
             {
-                ParamNode node = treeValueNode.get(each.getName());
+                ParamResolver node = treeValueNode.get(each.getName());
                 if (node != null)
                 {
                     if (entity == null)

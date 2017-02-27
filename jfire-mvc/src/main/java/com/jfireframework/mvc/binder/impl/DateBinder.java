@@ -8,9 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.mvc.annotation.MvcDateParse;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 
 public class DateBinder implements DataBinder
 {
@@ -32,12 +32,12 @@ public class DateBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
-        ParamNode node = treeValueNode.get(prefixName);
+        ParamResolver node = treeValueNode.get(prefixName);
         if (node != null)
         {
-            String value = ((StringValueNode) node).getValue();
+            String value = ((StringValueResolver) node).getValue();
             SimpleDateFormat format = new SimpleDateFormat(pattern);
             try
             {

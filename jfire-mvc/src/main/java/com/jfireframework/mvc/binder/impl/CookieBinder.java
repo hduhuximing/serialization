@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.mvc.annotation.CookieValue;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 import com.jfireframework.mvc.binder.transfer.Transfer;
 import com.jfireframework.mvc.binder.transfer.TransferFactory;
 
@@ -46,7 +46,7 @@ public class CookieBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
         Cookie[] cookies = request.getCookies();
         Cookie target = null;

@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.mvc.annotation.HeaderValue;
 import com.jfireframework.mvc.binder.DataBinder;
-import com.jfireframework.mvc.binder.node.TreeValueNode;
+import com.jfireframework.mvc.binder.resolver.TreeValueResolver;
 import com.jfireframework.mvc.binder.transfer.Transfer;
 import com.jfireframework.mvc.binder.transfer.TransferFactory;
 
@@ -46,7 +46,7 @@ public class HeaderBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueNode treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
     {
         String value = request.getHeader(headerName);
         if (StringUtil.isNotBlank(value))

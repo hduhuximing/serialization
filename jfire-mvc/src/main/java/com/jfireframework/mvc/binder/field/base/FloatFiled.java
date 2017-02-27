@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.jfireframework.mvc.binder.field.AbstractBinderField;
-import com.jfireframework.mvc.binder.node.ParamNode;
-import com.jfireframework.mvc.binder.node.StringValueNode;
+import com.jfireframework.mvc.binder.resolver.ParamResolver;
+import com.jfireframework.mvc.binder.resolver.StringValueResolver;
 
 public class FloatFiled extends AbstractBinderField
 {
@@ -16,9 +16,9 @@ public class FloatFiled extends AbstractBinderField
     }
     
     @Override
-    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamNode node, Object entity)
+    public void setValue(HttpServletRequest request, HttpServletResponse response, ParamResolver node, Object entity)
     {
-        String value = ((StringValueNode) node).getValue();
+        String value = ((StringValueResolver) node).getValue();
         float f = Float.valueOf(value).floatValue();
         unsafe.putFloat(entity, offset, f);
     }

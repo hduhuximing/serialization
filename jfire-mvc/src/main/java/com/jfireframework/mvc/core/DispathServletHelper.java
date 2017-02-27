@@ -43,6 +43,7 @@ public class DispathServletHelper
     {
         this.servletConfig = servletConfig;
         servletContext = servletConfig.getServletContext();
+        
         staticResourceDispatcher = getStaticResourceDispatcher();
         actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext, servletConfig);
         extraConfig = actionCenter.getExtraConfig();
@@ -54,6 +55,7 @@ public class DispathServletHelper
         {
             preHandler = new NopPreHandler();
         }
+        
     }
     
     private RequestDispatcher getStaticResourceDispatcher()
