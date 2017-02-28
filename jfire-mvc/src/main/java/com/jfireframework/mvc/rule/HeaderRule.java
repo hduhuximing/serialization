@@ -107,7 +107,7 @@ public class HeaderRule
             {
                 for (int i = 0; i < rules1.length; i++)
                 {
-                    if (rules1[i].equals(rules2[2]) == false)
+                    if (rules1[i].equals(rules2[i]) == false)
                     {
                         return false;
                     }
