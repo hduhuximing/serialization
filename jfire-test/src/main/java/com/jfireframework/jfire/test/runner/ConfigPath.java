@@ -1,10 +1,16 @@
-package com.jfireframework.context.test.runner;
+package com.jfireframework.jfire.test.runner;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * 指定配置文件的注解
+ * 
+ * @author linbin
+ * 
+ */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PropertyAdd
+public @interface ConfigPath
 {
     public String value();
 }

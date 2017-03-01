@@ -1,4 +1,4 @@
-package com.jfireframework.context.test.runner;
+package com.jfireframework.jfire.test.runner;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,24 +13,24 @@ import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.codejson.JsonTool;
-import com.jfireframework.context.JfireContext;
-import com.jfireframework.context.JfireContextImpl;
+import com.jfireframework.jfire.Jfire;
+import com.jfireframework.jfire.JfireConfig;
 
-public class BeanContextRunner extends BlockJUnit4ClassRunner
+public class JifreRunner extends BlockJUnit4ClassRunner
 {
-    private Class<?>     klass;
-    private JfireContext beanContext;
+    private Class<?> klass;
+    private Jfire    jfire;
     
-    public BeanContextRunner(Class<?> klass) throws InitializationError, URISyntaxException
+    public JifreRunner(Class<?> klass) throws InitializationError, URISyntaxException
     {
         super(klass);
         this.klass = klass;
         ConfigPath path = klass.getAnnotation(ConfigPath.class);
         String value = path.value();
-        beanContext = new JfireContextImpl();
+        JfireConfig jfireConfig = new JfireConfig();
         if (value.startsWith("classpath:"))
         {
-            beanContext.readConfig((JsonObject) JsonTool.fromString(StringUtil.readFromClasspath(value.substring(10), Charset.forName("utf8"))));
+            jfireConfig.readConfig((JsonObject) JsonTool.fromString(StringUtil.readFromClasspath(value.substring(10), Charset.forName("utf8"))));
         }
         else if (value.startsWith("file:"))
         {
@@ -40,7 +40,7 @@ public class BeanContextRunner extends BlockJUnit4ClassRunner
                 inputStream = new FileInputStream(new File(value.substring(5)));
                 byte[] src = new byte[inputStream.available()];
                 inputStream.read(src);
-                beanContext.readConfig((JsonObject) JsonTool.fromString(new String(src, Charset.forName("utf8"))));
+                jfireConfig.readConfig((JsonObject) JsonTool.fromString(new String(src, Charset.forName("utf8"))));
             }
             catch (IOException e)
             {
@@ -61,7 +61,7 @@ public class BeanContextRunner extends BlockJUnit4ClassRunner
                 }
             }
         }
-        beanContext.addBean(klass.getName(), false, klass);
+        jfireConfig.addBean(klass.getName(), false, klass);
         if (klass.isAnnotationPresent(PropertyAdd.class))
         {
             Properties properties = new Properties();
@@ -71,13 +71,13 @@ public class BeanContextRunner extends BlockJUnit4ClassRunner
                 String[] tmp = each.split("=");
                 properties.put(tmp[0], tmp[1]);
             }
-            beanContext.addProperties(properties);
+            jfireConfig.addProperties(properties);
         }
-        beanContext.initContext();
+        jfire = new Jfire(jfireConfig);
     }
     
     protected Object createTest()
     {
-        return beanContext.getBean(klass);
+        return jfire.getBean(klass);
     }
 }
