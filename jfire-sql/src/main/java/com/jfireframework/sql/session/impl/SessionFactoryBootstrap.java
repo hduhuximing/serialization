@@ -18,7 +18,6 @@ import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
 import com.jfireframework.baseutil.uniqueid.SummerId;
 import com.jfireframework.baseutil.uniqueid.Uid;
-import com.jfireframework.context.bean.annotation.field.CanBeNull;
 import com.jfireframework.sql.annotation.Sql;
 import com.jfireframework.sql.dao.Dao;
 import com.jfireframework.sql.dao.impl.MysqlDAO;
@@ -45,7 +44,6 @@ public abstract class SessionFactoryBootstrap implements SessionFactory
     @Resource
     protected DataSource                        dataSource;
     @Resource
-    @CanBeNull
     protected ClassLoader                       classLoader;
     protected static ThreadLocal<SqlSession>    sessionLocal = new ThreadLocal<SqlSession>();
     protected String                            scanPackage;

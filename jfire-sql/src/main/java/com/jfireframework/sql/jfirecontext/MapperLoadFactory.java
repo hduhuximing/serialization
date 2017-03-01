@@ -1,7 +1,7 @@
 package com.jfireframework.sql.jfirecontext;
 
 import javax.annotation.Resource;
-import com.jfireframework.context.bean.load.BeanLoadFactory;
+import com.jfireframework.jfire.bean.load.BeanLoadFactory;
 import com.jfireframework.sql.session.impl.SessionFactoryImpl;
 
 @Resource(name = "sessionFactory")

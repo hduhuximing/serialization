@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import javax.annotation.Resource;
-import com.jfireframework.context.bean.load.LoadBy;
+import com.jfireframework.jfire.bean.load.LoadBy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = { ElementType.TYPE })

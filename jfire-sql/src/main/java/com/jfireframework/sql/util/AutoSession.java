@@ -3,7 +3,7 @@ package com.jfireframework.sql.util;
 import javax.annotation.Resource;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
-import com.jfireframework.context.tx.RessourceManager;
+import com.jfireframework.jfire.tx.RessourceManager;
 import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.session.SqlSession;
 import com.jfireframework.sql.session.impl.SqlSessionImpl;

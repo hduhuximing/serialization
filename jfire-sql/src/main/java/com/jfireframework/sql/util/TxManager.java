@@ -4,7 +4,7 @@ import javax.annotation.Resource;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
-import com.jfireframework.context.tx.TransactionManager;
+import com.jfireframework.jfire.tx.TransactionManager;
 import com.jfireframework.sql.session.SessionFactory;
 import com.jfireframework.sql.session.SqlSession;
 
