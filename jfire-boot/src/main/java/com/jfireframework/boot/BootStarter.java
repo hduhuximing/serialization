@@ -10,7 +10,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebFilter;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.context.bean.annotation.field.PropertyRead;
+import com.jfireframework.jfire.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
 import io.undertow.Handlers;
 import io.undertow.Undertow;

@@ -27,8 +27,7 @@ public class OracleParse implements PageParse
         String countSql = PageSqlCache.getCountSql(originSql);
         if (countSql == null)
         {
-            int index = originSql.indexOf("from");
-            countSql = "select count(*) " + originSql.substring(index);
+            countSql = "select count(*) from ( " + originSql + " )";
             PageSqlCache.putCountSql(originSql, countSql);
         }
         return countSql;

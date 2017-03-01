@@ -5,8 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.context.JfireContext;
-import com.jfireframework.context.JfireContextImpl;
+import com.jfireframework.jfire.JfireContext;
+import com.jfireframework.jfire.JfireContextImpl;
 
 public class BootApplication
 {
