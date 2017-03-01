@@ -16,12 +16,12 @@ import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.jfire.Jfire;
 import com.jfireframework.jfire.JfireConfig;
 
-public class JifreRunner extends BlockJUnit4ClassRunner
+public class JfireRunner extends BlockJUnit4ClassRunner
 {
     private Class<?> klass;
     private Jfire    jfire;
     
-    public JifreRunner(Class<?> klass) throws InitializationError, URISyntaxException
+    public JfireRunner(Class<?> klass) throws InitializationError, URISyntaxException
     {
         super(klass);
         this.klass = klass;
