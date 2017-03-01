@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
-import com.jfireframework.context.bean.annotation.field.MapKey;
+import com.jfireframework.jfire.bean.annotation.field.MapKey;
 
 @Resource
 public class RenderManager

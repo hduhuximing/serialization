@@ -5,8 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.jfire.JfireContext;
-import com.jfireframework.jfire.JfireContextImpl;
+import com.jfireframework.jfire.Jfire;
+import com.jfireframework.jfire.JfireConfig;
 
 public class BootApplication
 {
@@ -58,9 +58,9 @@ public class BootApplication
             }
             else
             {
-                JfireContext jfireContext = new JfireContextImpl();
-                jfireContext.readConfig(ckass);
-                jfireContext.addPackageNames(packageName);
+                JfireConfig jfireConfig = new JfireConfig();
+                jfireConfig.readConfig(ckass);
+                jfireConfig.addPackageNames(packageName);
                 AppInfo appInfo = ckass.getAnnotation(AppInfo.class);
                 Properties properties = new Properties();
                 properties.put("boot_appName", appInfo.appName());
@@ -70,9 +70,10 @@ public class BootApplication
                 properties.put("jfire.mvc.classpathPrefix", appInfo.prefix());
                 properties.put("jfire.mvc.mode", "run_in_jar_mode");
                 properties.putAll(outConfigProperties);
-                jfireContext.addProperties(properties);
-                jfireContext.addBean("bootStarter", false, BootStarter.class);
-                BootStarter bootStarter = (BootStarter) jfireContext.getBean("bootStarter");
+                jfireConfig.addProperties(properties);
+                jfireConfig.addBean("bootStarter", false, BootStarter.class);
+                Jfire jfire = new Jfire(jfireConfig);
+                BootStarter bootStarter = (BootStarter) jfire.getBean("bootStarter");
                 bootStarter.start();
             }
         }

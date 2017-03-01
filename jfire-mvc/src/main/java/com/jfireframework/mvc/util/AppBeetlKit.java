@@ -13,7 +13,7 @@ import org.beetl.core.resource.ClasspathResourceLoader;
 import org.beetl.core.resource.WebAppResourceLoader;
 import org.beetl.ext.web.WebVariable;
 import com.jfireframework.baseutil.exception.JustThrowException;
-import com.jfireframework.context.bean.annotation.field.PropertyRead;
+import com.jfireframework.jfire.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.core.ModelAndView;
 
 public class AppBeetlKit

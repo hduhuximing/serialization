@@ -13,8 +13,8 @@ import com.jfireframework.baseutil.order.AescComparator;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.uniqueid.SummerId;
 import com.jfireframework.baseutil.uniqueid.Uid;
-import com.jfireframework.context.JfireContext;
-import com.jfireframework.context.bean.Bean;
+import com.jfireframework.jfire.Jfire;
+import com.jfireframework.jfire.bean.Bean;
 import com.jfireframework.mvc.annotation.RequestMapping;
 import com.jfireframework.mvc.annotation.RequestParam;
 import com.jfireframework.mvc.binder.BinderFactory;
@@ -44,9 +44,9 @@ public class ActionFactory
      * @param rootRequestPath 顶级请求路径，实际的请求路径为顶级请求路径/方法请求路径
      * @param beanContext
      */
-    public static Action buildAction(Method method, String requestPath, Bean bean, JfireContext jfireContext)
+    public static Action buildAction(Method method, String requestPath, Bean bean, Jfire jfire)
     {
-        RenderManager renderManager = jfireContext.getBean(RenderManager.class);
+        RenderManager renderManager = jfire.getBean(RenderManager.class);
         ActionInfo actionInfo = new ActionInfo();
         actionInfo.setMethod(method);
         RequestMapping requestMapping = AnnotationUtil.getAnnotation(RequestMapping.class, method);
@@ -132,13 +132,13 @@ public class ActionFactory
         {
             throw new JustThrowException(e);
         }
-        actionInfo.setInterceptors(getInterceptors(jfireContext, actionInfo));
+        actionInfo.setInterceptors(getInterceptors(jfire, actionInfo));
         return new Action(actionInfo);
     }
     
-    private static ActionInterceptor[] getInterceptors(JfireContext jfireContext, ActionInfo info)
+    private static ActionInterceptor[] getInterceptors(Jfire jfire, ActionInfo info)
     {
-        Bean[] beans = jfireContext.getBeanByInterface(ActionInterceptor.class);
+        Bean[] beans = jfire.getBeanByInterface(ActionInterceptor.class);
         List<ActionInterceptor> interceptors = new ArrayList<ActionInterceptor>();
         next: for (Bean each : beans)
         {
@@ -216,13 +216,11 @@ public class ActionFactory
                 {
                     for (DataBinder each : actionInfo.getDataBinders())
                     {
-                        if (
-                            each instanceof HttpSessionBinder //
-                                    || each instanceof HttpServletRequestBinder //
-                                    || each instanceof HttpServletResponseBinder //
-                                    || each instanceof CookieBinder //
-                                    || each instanceof HeaderBinder
-                        )
+                        if (each instanceof HttpSessionBinder //
+                                || each instanceof HttpServletRequestBinder //
+                                || each instanceof HttpServletResponseBinder //
+                                || each instanceof CookieBinder //
+                                || each instanceof HeaderBinder)
                         {
                             continue;
                         }

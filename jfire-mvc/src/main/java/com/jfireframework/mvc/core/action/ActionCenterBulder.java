@@ -15,9 +15,9 @@ import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.codejson.JsonObject;
 import com.jfireframework.codejson.JsonTool;
-import com.jfireframework.context.JfireContext;
-import com.jfireframework.context.JfireContextImpl;
-import com.jfireframework.context.bean.Bean;
+import com.jfireframework.jfire.Jfire;
+import com.jfireframework.jfire.JfireConfig;
+import com.jfireframework.jfire.bean.Bean;
 import com.jfireframework.mvc.annotation.Controller;
 import com.jfireframework.mvc.annotation.RequestMapping;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
@@ -35,19 +35,20 @@ public class ActionCenterBulder
     
     public static ActionCenter generate(ClassLoader classLoader, ServletContext servletContext, ServletConfig servletConfig)
     {
-        JfireContext jfireContext = new JfireContextImpl();
-        readConfig(jfireContext, servletConfig, classLoader);
-        jfireContext.addSingletonEntity(classLoader.getClass().getName(), classLoader);
-        jfireContext.setClassLoader(classLoader);
-        addViewRender(jfireContext);
-        jfireContext.addSingletonEntity("servletContext", servletContext);
-        jfireContext.addBean(ExtraConfig.class);
-        ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfireContext).toArray(new Action[0]));
-        actionCenter.setExtraConfig(jfireContext.getBean(ExtraConfig.class));
+        JfireConfig jfireConfig = new JfireConfig();
+        readConfig(jfireConfig, servletConfig, classLoader);
+        jfireConfig.addSingletonEntity(classLoader.getClass().getName(), classLoader);
+        jfireConfig.setClassLoader(classLoader);
+        addViewRender(jfireConfig);
+        jfireConfig.addSingletonEntity("servletContext", servletContext);
+        jfireConfig.addBean(ExtraConfig.class);
+        Jfire jfire = new Jfire(jfireConfig);
+        ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfire).toArray(new Action[0]));
+        actionCenter.setExtraConfig(jfire.getBean(ExtraConfig.class));
         return actionCenter;
     }
     
-    private static void readConfig(JfireContext jfireContext, ServletConfig servletConfig, ClassLoader classLoader)
+    private static void readConfig(JfireConfig jfireConfig, ServletConfig servletConfig, ClassLoader classLoader)
     {
         if (servletConfig.getInitParameter(EasyMvcDispathServlet.CONFIG_CLASS_NAME) != null)
         {
@@ -55,7 +56,7 @@ public class ActionCenterBulder
             try
             {
                 Class<?> configClass = classLoader.loadClass(name);
-                jfireContext.readConfig(configClass);
+                jfireConfig.readConfig(configClass);
             }
             catch (ClassNotFoundException e)
             {
@@ -65,7 +66,7 @@ public class ActionCenterBulder
         if (servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME) != null)
         {
             String packageName = servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME);
-            jfireContext.addPackageNames(packageName);
+            jfireConfig.addPackageNames(packageName);
         }
         Properties properties = new Properties();
         Enumeration<String> initParams = servletConfig.getInitParameterNames();
@@ -74,36 +75,36 @@ public class ActionCenterBulder
             String key = initParams.nextElement();
             properties.put(key, servletConfig.getInitParameter(key));
         }
-        jfireContext.addProperties(properties);
+        jfireConfig.addProperties(properties);
         if (classLoader.getResource("mvc.json") != null)
         {
             JsonObject config = (JsonObject) JsonTool.fromString(StringUtil.readFromClasspath("mvc.json", Charset.forName("utf8")));
-            jfireContext.readConfig(config);
+            jfireConfig.readConfig(config);
         }
     }
     
-    private static void addViewRender(JfireContext jfireContext)
+    private static void addViewRender(JfireConfig jfireConfig)
     {
         {
-            jfireContext.addBean(JsonRender.class);
-            jfireContext.addBean(HtmlRender.class);
-            jfireContext.addBean(StringRender.class);
-            jfireContext.addBean(RedirectRender.class);
-            jfireContext.addBean(NoneRender.class);
-            jfireContext.addBean(BytesRender.class);
+            jfireConfig.addBean(JsonRender.class);
+            jfireConfig.addBean(HtmlRender.class);
+            jfireConfig.addBean(StringRender.class);
+            jfireConfig.addBean(RedirectRender.class);
+            jfireConfig.addBean(NoneRender.class);
+            jfireConfig.addBean(BytesRender.class);
         }
         {
-            jfireContext.addBean(RenderManager.class);
+            jfireConfig.addBean(RenderManager.class);
         }
     }
     
     /**
      * 初始化Beancontext容器，并且抽取其中的ActionClass注解的类，将action实例化
      */
-    private static List<Action> generateActions(String contextUrl, JfireContext jfireContext)
+    private static List<Action> generateActions(String contextUrl, Jfire jfire)
     {
-        Bean[] beans = jfireContext.getBeanByAnnotation(Controller.class);
-        Bean[] listenerBeans = jfireContext.getBeanByInterface(ActionInitListener.class);
+        Bean[] beans = jfire.getBeanByAnnotation(Controller.class);
+        Bean[] listenerBeans = jfire.getBeanByInterface(ActionInitListener.class);
         List<ActionInitListener> tmp = new LinkedList<ActionInitListener>();
         for (Bean each : listenerBeans)
         {
@@ -113,7 +114,7 @@ public class ActionCenterBulder
         List<Action> list = new ArrayList<Action>();
         for (Bean each : beans)
         {
-            list.addAll(generateActions(each, listeners, jfireContext, contextUrl));
+            list.addAll(generateActions(each, listeners, jfire, contextUrl));
         }
         return list;
     }
@@ -124,10 +125,10 @@ public class ActionCenterBulder
      * @param bean
      * @param listeners
      * @param contextUrl
-     * @param jfireContext
+     * @param jfire
      * @return
      */
-    private static List<Action> generateActions(Bean bean, ActionInitListener[] listeners, JfireContext jfireContext, String contextUrl)
+    private static List<Action> generateActions(Bean bean, ActionInitListener[] listeners, Jfire jfire, String contextUrl)
     {
         Class<?> src = bean.getOriginType();
         String requestUrl = contextUrl;
@@ -143,7 +144,7 @@ public class ActionCenterBulder
         {
             if (AnnotationUtil.isPresent(RequestMapping.class, each))
             {
-                Action action = ActionFactory.buildAction(each, requestUrl, bean, jfireContext);
+                Action action = ActionFactory.buildAction(each, requestUrl, bean, jfire);
                 list.add(action);
                 for (ActionInitListener listener : listeners)
                 {

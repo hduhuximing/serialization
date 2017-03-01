@@ -1,7 +1,7 @@
 package com.jfireframework.mvc.util;
 
 import javax.annotation.Resource;
-import com.jfireframework.context.bean.annotation.field.PropertyRead;
+import com.jfireframework.jfire.bean.annotation.field.PropertyRead;
 
 @Resource
 public class ExtraConfig

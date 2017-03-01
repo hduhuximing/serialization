@@ -5,7 +5,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.jfireframework.context.bean.annotation.field.PropertyRead;
+import com.jfireframework.jfire.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.viewrender.DefaultResultType;
 import com.jfireframework.mvc.viewrender.ViewRender;
 

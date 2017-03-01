@@ -32,8 +32,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.jfireframework</groupId>
-			<artifactId>jfire-context</artifactId>
-			<version>1.0</version>
+			<artifactId>jfire</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
