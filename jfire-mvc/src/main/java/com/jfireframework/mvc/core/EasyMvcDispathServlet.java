@@ -34,7 +34,6 @@ public class EasyMvcDispathServlet extends HttpServlet
     private static final String                     DEFAULT_METHOD_PREFIX = "_method";
     private String                                  encode;
     public static final String                      CONFIG_CLASS_NAME     = AutumnId.instance().generate();
-    public static final String                      SACAN_PACKAGENAME     = AutumnId.instance().generate();
     public static final ThreadLocal<ServletContext> CONTEXT               = new ThreadLocal<ServletContext>();
     
     @Override

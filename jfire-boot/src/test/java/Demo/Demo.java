@@ -8,7 +8,6 @@ public class Demo
 {
     public static void main(String[] args)
     {
-        new BootApplication().start();
-        ;
+        new BootApplication(Demo.class).start();
     }
 }

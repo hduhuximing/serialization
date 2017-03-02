@@ -63,11 +63,6 @@ public class ActionCenterBulder
                 throw new JustThrowException(e);
             }
         }
-        if (servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME) != null)
-        {
-            String packageName = servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME);
-            jfireConfig.addPackageNames(packageName);
-        }
         Properties properties = new Properties();
         Enumeration<String> initParams = servletConfig.getInitParameterNames();
         while (initParams.hasMoreElements())
