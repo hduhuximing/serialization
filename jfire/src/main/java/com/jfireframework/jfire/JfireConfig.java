@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +41,7 @@ import com.jfireframework.jfire.config.ContextConfig;
 import com.jfireframework.jfire.config.Profile;
 import com.jfireframework.jfire.config.annotation.ActiveProfile;
 import com.jfireframework.jfire.config.annotation.Beans;
+import com.jfireframework.jfire.config.annotation.Configuration;
 import com.jfireframework.jfire.config.annotation.Import;
 import com.jfireframework.jfire.config.annotation.OutterProperties;
 import com.jfireframework.jfire.config.annotation.PackageNames;
@@ -59,7 +61,6 @@ public class JfireConfig
     protected Profile[]             profiles         = new Profile[0];
     protected String                activeProfile;
     protected static final Logger   logger           = ConsoleLogFactory.getLogger();
-    protected AopUtil               aopUtil;
     
     public JfireConfig addPackageNames(String... packageNames)
     {
@@ -171,7 +172,7 @@ public class JfireConfig
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                throw new JustThrowException(e);
             }
             finally
             {
@@ -235,7 +236,8 @@ public class JfireConfig
     
     protected void initContext(Jfire jfire)
     {
-        aopUtil = new AopUtil(classLoader);
+        resolveClassName(classNames);
+        AopUtil aopUtil = new AopUtil(classLoader);
         addSingletonEntity(Jfire.class.getName(), jfire);
         addSingletonEntity(ClassLoader.class.getName(), classLoader);
         if (StringUtil.isNotBlank(activeProfile))
@@ -245,7 +247,7 @@ public class JfireConfig
         aggregateProperties();
         init = true;
         replaceValueFromPropertiesToBeancfg();
-        buildBean(classNames);
+        resolveBean(classNames);
         for (Bean each : beanNameMap.values())
         {
             // 这个时候来放入typeMap，才是bean最全的时候
@@ -309,6 +311,30 @@ public class JfireConfig
                 logger.error("执行方法{}.afterContextInit发生异常", each.getClass().getName(), e);
                 throw new JustThrowException(e);
             }
+        }
+    }
+    
+    private void resolveClassName(List<String> classNames)
+    {
+        List<Class<?>> tmp = new ArrayList<Class<?>>();
+        for (String each : classNames)
+        {
+            try
+            {
+                Class<?> res = classLoader.loadClass(each);
+                if (AnnotationUtil.isPresent(Configuration.class, res))
+                {
+                    tmp.add(res);
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new RuntimeException("对应的类不存在", e);
+            }
+        }
+        for (Class<?> each : tmp)
+        {
+            readConfig(each);
         }
     }
     
@@ -442,11 +468,11 @@ public class JfireConfig
      * @param classNames
      * @param beanMap
      */
-    private void buildBean(List<String> classNames)
+    private void resolveBean(List<String> classNames)
     {
         for (String each : classNames)
         {
-            buildBean(each);
+            resolveBean(each);
         }
     }
     
@@ -457,7 +483,7 @@ public class JfireConfig
      * @param context
      * @return
      */
-    private void buildBean(String className)
+    private void resolveBean(String className)
     {
         Class<?> res = null;
         try
