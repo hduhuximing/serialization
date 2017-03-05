@@ -17,5 +17,14 @@ import java.lang.annotation.Target;
 @Documented
 public @interface OutterProperties
 {
-    public String[] value();
+    public String[] value() default {};
+    
+    public Property[] properties() default {};
+    
+    public static @interface Property
+    {
+        public String name();
+        
+        public String value();
+    }
 }

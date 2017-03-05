@@ -46,7 +46,7 @@ public class DispathServletHelper
         staticResourceDispatcher = getStaticResourceDispatcher();
         actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext, servletConfig);
         mvcConfig = actionCenter.getExtraConfig();
-        if (mvcConfig.isHotswap())
+        if (mvcConfig.isHotdev())
         {
             preHandler = new HotswapPreHandler(mvcConfig);
         }

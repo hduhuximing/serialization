@@ -52,6 +52,14 @@ public class BootApplication
             properties.put("boot_configClassName", configClass.getName());
             properties.put("jfire.mvc.classpathPrefix", appInfo.prefix());
             properties.put("jfire.mvc.mode", "run_in_jar_mode");
+            if (appInfo.hotdev())
+            {
+                properties.put("hotdev", "true");
+                properties.put("monitorPath", appInfo.monitorPath());
+                properties.put("reloadPackages", appInfo.reploadPackages());
+                properties.put("reloadPath", appInfo.reloadPath());
+                properties.put("excludePackages", appInfo.excludePackages());
+            }
             properties.putAll(outConfigProperties);
             jfireConfig.addProperties(properties);
             jfireConfig.addBean("bootStarter", false, BootStarter.class);

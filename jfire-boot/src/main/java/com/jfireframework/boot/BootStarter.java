@@ -24,6 +24,16 @@ import io.undertow.servlet.api.ServletInfo;
 
 public class BootStarter
 {
+    @PropertyRead("hotdev")
+    private boolean      hotdev          = false;
+    @PropertyRead("monitorPath")
+    private String       monitorPath;
+    @PropertyRead("reloadPath")
+    private String       reloadPath;
+    @PropertyRead("reloadPackages")
+    private String       reloadPackages;
+    @PropertyRead("excludePackages")
+    private String       excludePackages;
     @PropertyRead("boot_port")
     private int          port;
     @PropertyRead("boot_appName")
@@ -35,7 +45,7 @@ public class BootStarter
     @PropertyRead("jfire.mvc.mode")
     private String       mode            = "run_in_jar_mode";
     @Resource
-    private List<Filter> filters   = new LinkedList<>();
+    private List<Filter> filters         = new LinkedList<>();
     
     @PostConstruct
     public void init()
@@ -56,6 +66,13 @@ public class BootStarter
                     .addInitParam(EasyMvcDispathServlet.CONFIG_CLASS_NAME, configClassName)//
                     .addInitParam("jfire.mvc.mode", mode)//
                     .addInitParam("jfire.mvc.classpathPrefix", classpathPrefix);
+            if (hotdev)
+            {
+                servletInfo = servletInfo.addInitParam("monitorPath", monitorPath)//
+                        .addInitParam("reloadPath", reloadPath)//
+                        .addInitParam("reloadPackages", reloadPackages)//
+                        .addInitParam("excludePackages", excludePackages);
+            }
             DeploymentInfo servletBuilder = Servlets.deployment()//
                     .setClassLoader(BootStarter.class.getClassLoader())//
                     .setContextPath(appName)//

@@ -8,8 +8,8 @@ public class MvcConfig
 {
     @PropertyRead("encode")
     private String  encode  = "UTF-8";
-    @PropertyRead("hotswap")
-    private boolean hotswap = false;
+    @PropertyRead("hotdev")
+    private boolean hotdev = false;
     @PropertyRead("monitorPath")
     private String  monitorPath;
     @PropertyRead("reloadPath")
@@ -39,14 +39,14 @@ public class MvcConfig
         this.encode = encode;
     }
     
-    public boolean isHotswap()
+    public boolean isHotdev()
     {
-        return hotswap;
+        return hotdev;
     }
     
-    public void setHotswap(boolean hotswap)
+    public void setHotdev(boolean hotswap)
     {
-        this.hotswap = hotswap;
+        this.hotdev = hotswap;
     }
     
     public String getMonitorPath()
