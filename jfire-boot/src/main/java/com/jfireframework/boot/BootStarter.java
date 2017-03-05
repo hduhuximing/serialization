@@ -30,8 +30,6 @@ public class BootStarter
     private String       appName;
     @PropertyRead("boot_configClassName")
     private String       configClassName;
-    @PropertyRead("boot_packageName")
-    private String       packageName;
     @PropertyRead("jfire.mvc.classpathPrefix")
     private String       classpathPrefix = "web";
     @PropertyRead("jfire.mvc.mode")
@@ -56,7 +54,6 @@ public class BootStarter
                     .setAsyncSupported(true)//
                     .setMultipartConfig(new MultipartConfigElement(EasyMvcDispathServlet.class.getAnnotation(MultipartConfig.class)))//
                     .addInitParam(EasyMvcDispathServlet.CONFIG_CLASS_NAME, configClassName)//
-                    .addInitParam(EasyMvcDispathServlet.SACAN_PACKAGENAME, packageName)//
                     .addInitParam("jfire.mvc.mode", mode)//
                     .addInitParam("jfire.mvc.classpathPrefix", classpathPrefix);
             DeploymentInfo servletBuilder = Servlets.deployment()//

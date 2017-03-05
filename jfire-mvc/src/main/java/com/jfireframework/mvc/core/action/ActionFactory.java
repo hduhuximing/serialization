@@ -144,7 +144,7 @@ public class ActionFactory
         {
             ActionInterceptor interceptor = (ActionInterceptor) each.getInstance();
             String excludePath = interceptor.excludePath();
-            if (excludePath != null)
+            if (StringUtil.isNotBlank(excludePath))
             {
                 if ("*".equals(excludePath))
                 {
@@ -162,24 +162,27 @@ public class ActionFactory
                 }
             }
             String includePath = interceptor.includePath();
-            if ("*".equals(includePath))
+            if (StringUtil.isNotBlank(includePath))
             {
-                interceptors.add(interceptor);
-                continue next;
-            }
-            else
-            {
-                for (String singleInRule : includePath.split(";"))
+                if ("*".equals(includePath))
                 {
-                    if (isInterceptored(info.getRequestUrl(), singleInRule))
+                    interceptors.add(interceptor);
+                    continue next;
+                }
+                else
+                {
+                    for (String singleInRule : includePath.split(";"))
                     {
-                        interceptors.add(interceptor);
-                        continue next;
+                        if (isInterceptored(info.getRequestUrl(), singleInRule))
+                        {
+                            interceptors.add(interceptor);
+                            continue next;
+                        }
                     }
                 }
             }
             String token = interceptor.tokenRule();
-            if (token != null && info.getToken().equals(token))
+            if (StringUtil.isNotBlank(token) && token.equals(info.getToken()))
             {
                 interceptors.add(interceptor);
             }
