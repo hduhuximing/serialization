@@ -102,7 +102,10 @@ public class JfireConfig
             readProperties(contextConfig.getPropertyPaths());
             properties.putAll(contextConfig.getProperties());
             profiles = contextConfig.getProfiles();
-            activeProfile = contextConfig.getActiveProfile();
+            if (StringUtil.isNotBlank(contextConfig.getActiveProfile()))
+            {
+                activeProfile = contextConfig.getActiveProfile();
+            }
             return this;
         }
         catch (ClassNotFoundException e)
