@@ -30,14 +30,12 @@ public abstract class AbstractReportMdActionListener implements ActionInitListen
             {
                 doc = "无";
             }
-            logger.debug(
-                    pattarn, //
+            logger.debug(pattarn, //
                     action.getRequestUrl(), //
                     action.getRequestMethod().name(), //
                     action.getViewRender().renderType(), //
                     doc, //
-                    action.getMethod().toGenericString()
-            );
+                    action.getMethod().toGenericString());
         }
     }
     

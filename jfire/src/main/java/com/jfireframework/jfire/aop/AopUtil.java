@@ -463,7 +463,7 @@ public class AopUtil
             ctMethod.insertAfter(field + ".commit();" + field + ".closeCurrentSession();");
             for (CtClass exCc : exCcs)
             {
-                ctMethod.addCatch("{" + field + ".rollback($e);" + field + ".closeCurrentSession();" + "throw new RuntimeException($e);}", exCc);
+                ctMethod.addCatch("{" + field + ".rollback($e);" + field + ".closeCurrentSession();" + "throw $e;}", exCc);
             }
         }
     }

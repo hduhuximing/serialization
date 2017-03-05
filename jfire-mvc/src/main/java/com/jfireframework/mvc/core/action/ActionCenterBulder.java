@@ -20,8 +20,8 @@ import com.jfireframework.jfire.JfireConfig;
 import com.jfireframework.jfire.bean.Bean;
 import com.jfireframework.mvc.annotation.Controller;
 import com.jfireframework.mvc.annotation.RequestMapping;
+import com.jfireframework.mvc.config.MvcConfig;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
-import com.jfireframework.mvc.util.ExtraConfig;
 import com.jfireframework.mvc.viewrender.RenderManager;
 import com.jfireframework.mvc.viewrender.impl.BytesRender;
 import com.jfireframework.mvc.viewrender.impl.HtmlRender;
@@ -41,10 +41,10 @@ public class ActionCenterBulder
         jfireConfig.setClassLoader(classLoader);
         addViewRender(jfireConfig);
         jfireConfig.addSingletonEntity("servletContext", servletContext);
-        jfireConfig.addBean(ExtraConfig.class);
+        jfireConfig.addBean(MvcConfig.class);
         Jfire jfire = new Jfire(jfireConfig);
         ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfire).toArray(new Action[0]));
-        actionCenter.setExtraConfig(jfire.getBean(ExtraConfig.class));
+        actionCenter.setExtraConfig(jfire.getBean(MvcConfig.class));
         return actionCenter;
     }
     
@@ -62,11 +62,6 @@ public class ActionCenterBulder
             {
                 throw new JustThrowException(e);
             }
-        }
-        if (servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME) != null)
-        {
-            String packageName = servletConfig.getInitParameter(EasyMvcDispathServlet.SACAN_PACKAGENAME);
-            jfireConfig.addPackageNames(packageName);
         }
         Properties properties = new Properties();
         Enumeration<String> initParams = servletConfig.getInitParameterNames();

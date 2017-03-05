@@ -13,10 +13,10 @@ import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.SimpleHotswapClassLoader;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.mvc.config.MvcConfig;
 import com.jfireframework.mvc.core.action.Action;
 import com.jfireframework.mvc.core.action.ActionCenter;
 import com.jfireframework.mvc.core.action.ActionCenterBulder;
-import com.jfireframework.mvc.util.ExtraConfig;
 import com.jfireframework.mvc.util.FileChangeDetect;
 
 public class DispathServletHelper
@@ -37,19 +37,18 @@ public class DispathServletHelper
     private final ServletContext    servletContext;
     private final RequestDispatcher staticResourceDispatcher;
     private final PreHandler        preHandler;
-    private final ExtraConfig       extraConfig;
+    private final MvcConfig       mvcConfig;
     
     public DispathServletHelper(ServletConfig servletConfig)
     {
         this.servletConfig = servletConfig;
         servletContext = servletConfig.getServletContext();
-        
         staticResourceDispatcher = getStaticResourceDispatcher();
         actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext, servletConfig);
-        extraConfig = actionCenter.getExtraConfig();
-        if (extraConfig.isHotswap())
+        mvcConfig = actionCenter.getExtraConfig();
+        if (mvcConfig.isHotdev())
         {
-            preHandler = new HotswapPreHandler(extraConfig);
+            preHandler = new HotswapPreHandler(mvcConfig);
         }
         else
         {
@@ -97,9 +96,9 @@ public class DispathServletHelper
         }
     }
     
-    public ExtraConfig getExtraConfig()
+    public MvcConfig getMvcConfig()
     {
-        return extraConfig;
+        return mvcConfig;
     }
     
     public void preHandle()
@@ -129,7 +128,7 @@ public class DispathServletHelper
         private final String           reloadPackages;
         private final String           excludePackages;
         
-        public HotswapPreHandler(ExtraConfig extraConfig)
+        public HotswapPreHandler(MvcConfig extraConfig)
         {
             List<File> roots = new LinkedList<File>();
             for (String each : extraConfig.getMonitorPath().split(","))

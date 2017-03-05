@@ -10,18 +10,12 @@ import com.jfireframework.jfire.JfireConfig;
 
 public class BootApplication
 {
-    private String     configClassName;
-    private String     packageName;
     private Properties outConfigProperties = new Properties();
+    private Class<?>   configClass;
     
-    private void init(String configClassName)
+    private void init(Class<?> configClass)
     {
-        this.configClassName = configClassName;
-        int index = configClassName.lastIndexOf('.');
-        if (index != -1)
-        {
-            packageName = configClassName.substring(0, index);
-        }
+        this.configClass = configClass;
         if (new File("boot.properties").exists())
         {
             outConfigProperties = new Properties();
@@ -36,51 +30,42 @@ public class BootApplication
         }
     }
     
-    public BootApplication()
+    public BootApplication(Class<?> configClass)
     {
-        configClassName = Thread.currentThread().getStackTrace()[2].getClassName();
-        init(configClassName);
-    }
-    
-    public BootApplication(Class<?> ckass)
-    {
-        init(ckass.getName());
+        init(configClass);
     }
     
     public void start()
     {
-        try
+        if (configClass.isAnnotationPresent(AppInfo.class) == false)
         {
-            Class<?> ckass = Class.forName(configClassName);
-            if (ckass.isAnnotationPresent(AppInfo.class) == false)
-            {
-                throw new NullPointerException("无法在类:" + configClassName + "上找到AppInfo注解,无法获取需要启动的信息");
-            }
-            else
-            {
-                JfireConfig jfireConfig = new JfireConfig();
-                jfireConfig.readConfig(ckass);
-                jfireConfig.addPackageNames(packageName);
-                AppInfo appInfo = ckass.getAnnotation(AppInfo.class);
-                Properties properties = new Properties();
-                properties.put("boot_appName", appInfo.appName());
-                properties.put("boot_port", String.valueOf(appInfo.port()));
-                properties.put("boot_configClassName", configClassName);
-                properties.put("boot_packageName", packageName);
-                properties.put("jfire.mvc.classpathPrefix", appInfo.prefix());
-                properties.put("jfire.mvc.mode", "run_in_jar_mode");
-                properties.putAll(outConfigProperties);
-                jfireConfig.addProperties(properties);
-                jfireConfig.addBean("bootStarter", false, BootStarter.class);
-                Jfire jfire = new Jfire(jfireConfig);
-                BootStarter bootStarter = (BootStarter) jfire.getBean("bootStarter");
-                bootStarter.start();
-            }
+            throw new NullPointerException("无法在类:" + configClass.getName() + "上找到AppInfo注解,无法获取需要启动的信息");
         }
-        catch (ClassNotFoundException e)
+        else
         {
-            throw new JustThrowException(e);
+            JfireConfig jfireConfig = new JfireConfig();
+            jfireConfig.readConfig(configClass);
+            AppInfo appInfo = configClass.getAnnotation(AppInfo.class);
+            Properties properties = new Properties();
+            properties.put("boot_appName", appInfo.appName());
+            properties.put("boot_port", String.valueOf(appInfo.port()));
+            properties.put("boot_configClassName", configClass.getName());
+            properties.put("jfire.mvc.classpathPrefix", appInfo.prefix());
+            properties.put("jfire.mvc.mode", "run_in_jar_mode");
+            if (appInfo.hotdev())
+            {
+                properties.put("hotdev", "true");
+                properties.put("monitorPath", appInfo.monitorPath());
+                properties.put("reloadPackages", appInfo.reploadPackages());
+                properties.put("reloadPath", appInfo.reloadPath());
+                properties.put("excludePackages", appInfo.excludePackages());
+            }
+            properties.putAll(outConfigProperties);
+            jfireConfig.addProperties(properties);
+            jfireConfig.addBean("bootStarter", false, BootStarter.class);
+            Jfire jfire = new Jfire(jfireConfig);
+            BootStarter bootStarter = (BootStarter) jfire.getBean("bootStarter");
+            bootStarter.start();
         }
-        
     }
 }

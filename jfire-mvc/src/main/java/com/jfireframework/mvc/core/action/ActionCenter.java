@@ -7,11 +7,11 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.UnSupportException;
-import com.jfireframework.mvc.util.ExtraConfig;
+import com.jfireframework.mvc.config.MvcConfig;
 
 public final class ActionCenter
 {
-    private ExtraConfig               extraConfig;
+    private MvcConfig               extraConfig;
     private final ActionClassify      getAction;
     private final ActionClassify      postAction;
     private final ActionClassify      delAction;
@@ -194,12 +194,12 @@ public final class ActionCenter
         return action;
     }
     
-    public ExtraConfig getExtraConfig()
+    public MvcConfig getExtraConfig()
     {
         return extraConfig;
     }
     
-    public void setExtraConfig(ExtraConfig extraConfig)
+    public void setExtraConfig(MvcConfig extraConfig)
     {
         this.extraConfig = extraConfig;
     }

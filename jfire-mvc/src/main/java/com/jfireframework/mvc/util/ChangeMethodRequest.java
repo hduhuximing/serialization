@@ -444,6 +444,7 @@ public class ChangeMethodRequest implements HttpServletRequest
         return null;
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public String getRealPath(String path)
     {

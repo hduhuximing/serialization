@@ -16,4 +16,14 @@ public @interface AppInfo
     public String prefix() default "web";
     
     public int port() default 80;
+    
+    public boolean hotdev() default false;
+    
+    public String monitorPath() default "";
+    
+    public String reloadPath() default "";
+    
+    public String reploadPackages() default "";
+    
+    public String excludePackages() default "";
 }

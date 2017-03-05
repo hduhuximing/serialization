@@ -5,7 +5,6 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.jfireframework.mvc.config.RequestMethod;
 import com.jfireframework.mvc.viewrender.DefaultResultType;
 
 /**
@@ -18,6 +17,12 @@ import com.jfireframework.mvc.viewrender.DefaultResultType;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestMapping
 {
+    
+    public static enum RequestMethod
+    {
+        GET, POST, PUT, DELETE
+    }
+    
     /**
      * 请求路径，默认不填写的话为方法名称
      * 
