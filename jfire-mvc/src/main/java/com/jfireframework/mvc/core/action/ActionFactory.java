@@ -24,10 +24,10 @@ import com.jfireframework.mvc.binder.impl.HeaderBinder;
 import com.jfireframework.mvc.binder.impl.HttpServletRequestBinder;
 import com.jfireframework.mvc.binder.impl.HttpServletResponseBinder;
 import com.jfireframework.mvc.binder.impl.HttpSessionBinder;
-import com.jfireframework.mvc.config.ContentType;
 import com.jfireframework.mvc.core.ModelAndView;
 import com.jfireframework.mvc.interceptor.ActionInterceptor;
 import com.jfireframework.mvc.rule.RestfulRule;
+import com.jfireframework.mvc.util.ContentType;
 import com.jfireframework.mvc.viewrender.DefaultResultType;
 import com.jfireframework.mvc.viewrender.RenderManager;
 

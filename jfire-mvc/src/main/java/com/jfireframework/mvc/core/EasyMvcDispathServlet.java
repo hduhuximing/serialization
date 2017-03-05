@@ -43,7 +43,7 @@ public class EasyMvcDispathServlet extends HttpServlet
         logger.debug("初始化Context-mvc Servlet");
         CONTEXT.set(servletConfig.getServletContext());
         helper = new DispathServletHelper(servletConfig);
-        encode = helper.getExtraConfig().getEncode();
+        encode = helper.getMvcConfig().getEncode();
     }
     
     @Override

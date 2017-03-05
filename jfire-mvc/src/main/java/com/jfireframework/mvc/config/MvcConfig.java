@@ -1,10 +1,10 @@
-package com.jfireframework.mvc.util;
+package com.jfireframework.mvc.config;
 
 import javax.annotation.Resource;
 import com.jfireframework.jfire.bean.annotation.field.PropertyRead;
 
 @Resource
-public class ExtraConfig
+public class MvcConfig
 {
     @PropertyRead("encode")
     private String  encode  = "UTF-8";
