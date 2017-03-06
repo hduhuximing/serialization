@@ -68,7 +68,8 @@ public class BootStarter
                     .addInitParam("jfire.mvc.classpathPrefix", classpathPrefix);
             if (hotdev)
             {
-                servletInfo = servletInfo.addInitParam("monitorPath", monitorPath)//
+                servletInfo = servletInfo.addInitParam("hotdev", "true")//
+                        .addInitParam("monitorPath", monitorPath)//
                         .addInitParam("reloadPath", reloadPath)//
                         .addInitParam("reloadPackages", reloadPackages)//
                         .addInitParam("excludePackages", excludePackages);

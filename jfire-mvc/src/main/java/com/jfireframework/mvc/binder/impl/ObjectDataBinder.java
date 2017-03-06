@@ -43,15 +43,23 @@ public class ObjectDataBinder implements DataBinder
     }
     
     @Override
-    public Object bind(HttpServletRequest request, TreeValueResolver treeValueNode, HttpServletResponse response)
+    public Object bind(HttpServletRequest request, TreeValueResolver treeValueResolver, HttpServletResponse response)
     {
         if (prefixName.length() != 0)
         {
-            treeValueNode = (TreeValueResolver) treeValueNode.get(prefixName);
+            ParamResolver resolver = treeValueResolver.get(prefixName);
+            if (resolver instanceof TreeValueResolver)
+            {
+                treeValueResolver = (TreeValueResolver) resolver;
+            }
+            else
+            {
+                throw new UnsupportedOperationException("尝试获取的数据是一组键值对，但是获取的数据类型是" + resolver.getClass());
+            }
         }
         try
         {
-            if (treeValueNode == null)
+            if (treeValueResolver == null)
             {
                 LOGGER.debug("尝试获取对象{}的数据，但是不存在", prefixName);
                 return null;
@@ -59,7 +67,7 @@ public class ObjectDataBinder implements DataBinder
             Object entity = null;
             for (BinderField each : fields)
             {
-                ParamResolver node = treeValueNode.get(each.getName());
+                ParamResolver node = treeValueResolver.get(each.getName());
                 if (node != null)
                 {
                     if (entity == null)
