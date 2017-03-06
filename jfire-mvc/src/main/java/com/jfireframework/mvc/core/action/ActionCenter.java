@@ -11,7 +11,7 @@ import com.jfireframework.mvc.config.MvcConfig;
 
 public final class ActionCenter
 {
-    private MvcConfig               extraConfig;
+    private MvcConfig               mvcConfig;
     private final ActionClassify      getAction;
     private final ActionClassify      postAction;
     private final ActionClassify      delAction;
@@ -194,14 +194,14 @@ public final class ActionCenter
         return action;
     }
     
-    public MvcConfig getExtraConfig()
+    public MvcConfig getMvcConfig()
     {
-        return extraConfig;
+        return mvcConfig;
     }
     
-    public void setExtraConfig(MvcConfig extraConfig)
+    public void setMvcConfig(MvcConfig extraConfig)
     {
-        this.extraConfig = extraConfig;
+        this.mvcConfig = extraConfig;
     }
     
 }

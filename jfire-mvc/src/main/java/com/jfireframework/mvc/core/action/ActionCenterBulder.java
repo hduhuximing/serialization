@@ -44,7 +44,7 @@ public class ActionCenterBulder
         jfireConfig.addBean(MvcConfig.class);
         Jfire jfire = new Jfire(jfireConfig);
         ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfire).toArray(new Action[0]));
-        actionCenter.setExtraConfig(jfire.getBean(MvcConfig.class));
+        actionCenter.setMvcConfig(jfire.getBean(MvcConfig.class));
         return actionCenter;
     }
     
@@ -110,6 +110,10 @@ public class ActionCenterBulder
         for (Bean each : beans)
         {
             list.addAll(generateActions(each, listeners, jfire, contextUrl));
+        }
+        for (ActionInitListener listener : listeners)
+        {
+            listener.initFinish();
         }
         return list;
     }

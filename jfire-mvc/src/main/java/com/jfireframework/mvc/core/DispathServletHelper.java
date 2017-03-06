@@ -8,6 +8,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.SimpleHotswapClassLoader;
@@ -37,7 +38,7 @@ public class DispathServletHelper
     private final ServletContext    servletContext;
     private final RequestDispatcher staticResourceDispatcher;
     private final PreHandler        preHandler;
-    private final MvcConfig       mvcConfig;
+    private final MvcConfig         mvcConfig;
     
     public DispathServletHelper(ServletConfig servletConfig)
     {
@@ -45,7 +46,7 @@ public class DispathServletHelper
         servletContext = servletConfig.getServletContext();
         staticResourceDispatcher = getStaticResourceDispatcher();
         actionCenter = ActionCenterBulder.generate(Thread.currentThread().getContextClassLoader(), servletContext, servletConfig);
-        mvcConfig = actionCenter.getExtraConfig();
+        mvcConfig = actionCenter.getMvcConfig();
         if (mvcConfig.isHotdev())
         {
             preHandler = new HotswapPreHandler(mvcConfig);
@@ -128,17 +129,24 @@ public class DispathServletHelper
         private final String           reloadPackages;
         private final String           excludePackages;
         
-        public HotswapPreHandler(MvcConfig extraConfig)
+        public HotswapPreHandler(MvcConfig mvcConfig)
         {
             List<File> roots = new LinkedList<File>();
-            for (String each : extraConfig.getMonitorPath().split(","))
+            for (String each : mvcConfig.getMonitorPath().split(","))
             {
                 roots.add(new File(each));
             }
             detect = new FileChangeDetect(roots.toArray(new File[roots.size()]));
-            reloadPath = extraConfig.getReloadPath();
-            reloadPackages = extraConfig.getReloadPackages();
-            excludePackages = extraConfig.getExcludePackages();
+            reloadPath = mvcConfig.getReloadPath();
+            reloadPackages = mvcConfig.getReloadPackages();
+            if (StringUtil.isNotBlank(mvcConfig.getExcludePackages()))
+            {
+                excludePackages = mvcConfig.getExcludePackages();
+            }
+            else
+            {
+                excludePackages = null;
+            }
         }
         
         @Override
