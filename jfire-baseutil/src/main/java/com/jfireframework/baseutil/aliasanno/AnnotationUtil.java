@@ -106,27 +106,55 @@ public class AnnotationUtil
     
     static class AnnoContext
     {
-        private final Map<String, Object>              valueMap = new HashMap<String, Object>();
+        private final Map<String, ValueProxy>          valueMap = new HashMap<String, ValueProxy>();
         private final Set<Class<? extends Annotation>> types    = new HashSet<Class<? extends Annotation>>();
         private final ClassLoader                      classLoader;
+        private Set<ExtendsFor>                        extendsFors;
+        
+        enum schema
+        {
+            alias, extendsfor, origin
+        }
+        
+        class ValueProxy
+        {
+            private final Object value;
+            private final schema schema;
+            
+            public ValueProxy(Object value, schema schema)
+            {
+                this.value = value;
+                this.schema = schema;
+            }
+        }
         
         public AnnoContext(Annotation annotation)
         {
             classLoader = annotation.annotationType().getClassLoader();
-            fillAnnoValues(annotation);
+            resolveAliasValues(annotation);
         }
         
-        private void fillAnnoValues(Annotation annotation)
+        private void resolveAliasValues(Annotation annotation)
         {
             types.add(annotation.annotationType());
             for (Method each : annotation.annotationType().getMethods())
             {
-                if (each.getParameterTypes().length != 0)
+                if (each.getParameterTypes().length != 0 || each.getDeclaringClass() == Annotation.class)
                 {
                     continue;
                 }
+                // if (each.isAnnotationPresent(ExtendsFor.class))
+                // {
+                // if (extendsFors == null)
+                // {
+                // extendsFors = new HashSet<ExtendsFor>();
+                // }
+                // extendsFors.add(each.getAnnotation(ExtendsFor.class));
+                // continue;
+                // }
                 String name = null;
                 Object value = null;
+                ValueProxy valueProxy;
                 if (each.isAnnotationPresent(AliasFor.class))
                 {
                     AliasFor aliasFor = each.getAnnotation(AliasFor.class);
@@ -146,6 +174,7 @@ public class AnnotationUtil
                     {
                         throw new JustThrowException(e);
                     }
+                    valueProxy = new ValueProxy(value, schema.alias);
                 }
                 else
                 {
@@ -159,25 +188,42 @@ public class AnnotationUtil
                         e.printStackTrace();
                         throw new JustThrowException(e);
                     }
+                    valueProxy = new ValueProxy(value, schema.origin);
                 }
                 String originName = each.getDeclaringClass().getName() + '.' + each.getName();
+                // if判断为真，意味着该属性的值被更上层的注解指定过
                 if (valueMap.containsKey(originName))
                 {
-                    /**
-                     * 这里的逻辑是，如果值域中已经包含了本注解原始名称，说明该注解的值被更高层指定了。
-                     * 那么这里需要放入的真实名称的值就要使用高层指定的值
-                     */
-                    if (valueMap.containsKey(name) == false)
+                    ValueProxy pred = valueMap.get(originName);
+                    switch (pred.schema)
                     {
-                        valueMap.put(name, valueMap.get(originName));
+                        case origin:
+                            // 在属性值已经被上层注解注定的情况下，上层的注解的类型肯定不是origin
+                            throw new UnSupportException("程序逻辑异常，代码不应该可以走到这个地方");
+                        case alias:
+                            // originName与name相同，并且已经存在，意味着该属性的值已经被上层注解指定。并且本属性是注解的原始属性，而非其余作用
+                            if (originName.equals(name))
+                            {
+                                valueProxy = new ValueProxy(pred.value, schema.origin);
+                                // 这一步进行了一个替换，主要是schema的值
+                                valueMap.put(originName, valueProxy);
+                            }
+                            // originname与name不相同，意味着该属性也是对别的注解的某一个属性的aliasfor
+                            else
+                            {
+                                valueProxy = new ValueProxy(pred.value, valueProxy.schema);
+                                valueMap.put(name, valueProxy);
+                            }
+                            break;
+                        case extendsfor:
+                            break;
+                        default:
+                            break;
                     }
                 }
                 else
                 {
-                    if (valueMap.containsKey(name) == false)
-                    {
-                        valueMap.put(name, value);
-                    }
+                    valueMap.put(name, valueProxy);
                 }
                 
             }
@@ -187,7 +233,7 @@ public class AnnotationUtil
                 {
                     continue;
                 }
-                fillAnnoValues(anno);
+                resolveAliasValues(anno);
             }
         }
         
@@ -209,7 +255,7 @@ public class AnnotationUtil
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
             {
                 String name = method.getDeclaringClass().getName() + '.' + method.getName();
-                return valueMap.get(name);
+                return valueMap.get(name).value;
             }
         }
     }
