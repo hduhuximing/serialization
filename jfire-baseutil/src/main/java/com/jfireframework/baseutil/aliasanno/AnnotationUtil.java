@@ -5,6 +5,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -109,7 +110,6 @@ public class AnnotationUtil
         private final Map<String, ValueProxy>          valueMap = new HashMap<String, ValueProxy>();
         private final Set<Class<? extends Annotation>> types    = new HashSet<Class<? extends Annotation>>();
         private final ClassLoader                      classLoader;
-        private Set<ExtendsFor>                        extendsFors;
         
         enum schema
         {
@@ -143,15 +143,6 @@ public class AnnotationUtil
                 {
                     continue;
                 }
-                // if (each.isAnnotationPresent(ExtendsFor.class))
-                // {
-                // if (extendsFors == null)
-                // {
-                // extendsFors = new HashSet<ExtendsFor>();
-                // }
-                // extendsFors.add(each.getAnnotation(ExtendsFor.class));
-                // continue;
-                // }
                 String name = null;
                 Object value = null;
                 ValueProxy valueProxy;
@@ -175,6 +166,35 @@ public class AnnotationUtil
                         throw new JustThrowException(e);
                     }
                     valueProxy = new ValueProxy(value, schema.alias);
+                }
+                else if (each.isAnnotationPresent(ExtendsFor.class))
+                {
+                    ExtendsFor extendsFor = each.getAnnotation(ExtendsFor.class);
+                    try
+                    {
+                        if (each.getReturnType() != extendsFor.annotation().getMethod(extendsFor.value()).getReturnType())
+                        {
+                            throw new UnSupportException(StringUtil.format("需要继承的属性与本注解属性不一致，请检查{}.{}", each.getDeclaringClass().getName(), each.getName()));
+                        }
+                        if (each.getReturnType().isArray() == false)
+                        {
+                            throw new UnSupportException(StringUtil.format("只有数组才能继承，请检查{}.{}", each.getDeclaringClass().getName(), each.getName()));
+                        }
+                        name = extendsFor.annotation().getName() + "." + extendsFor.annotation().getMethod(extendsFor.value()).getName();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new UnSupportException(StringUtil.format("别名注解的属性不存在，请检查{}.{}中的别名是否拼写错误", each.getDeclaringClass().getName(), each.getName()), e);
+                    }
+                    try
+                    {
+                        value = each.invoke(annotation);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new JustThrowException(e);
+                    }
+                    valueProxy = new ValueProxy(value, schema.extendsfor);
                 }
                 else
                 {
@@ -201,25 +221,26 @@ public class AnnotationUtil
                             // 在属性值已经被上层注解注定的情况下，上层的注解的类型肯定不是origin
                             throw new UnSupportException("程序逻辑异常，代码不应该可以走到这个地方");
                         case alias:
-                            // originName与name相同，并且已经存在，意味着该属性的值已经被上层注解指定。并且本属性是注解的原始属性，而非其余作用
-                            if (originName.equals(name))
-                            {
-                                valueProxy = new ValueProxy(pred.value, schema.origin);
-                                // 这一步进行了一个替换，主要是schema的值
-                                valueMap.put(originName, valueProxy);
-                            }
-                            // originname与name不相同，意味着该属性也是对别的注解的某一个属性的aliasfor
-                            else
-                            {
-                                valueProxy = new ValueProxy(pred.value, valueProxy.schema);
-                                valueMap.put(name, valueProxy);
-                            }
+                            valueProxy = new ValueProxy(pred.value, valueProxy.schema);
+                            valueMap.put(name, valueProxy);
                             break;
                         case extendsfor:
+                            Class<?> predType = pred.value.getClass();
+                            int predArrayLength = Array.getLength(pred.value);
+                            int arrayLength = Array.getLength(valueProxy.value);
+                            Object newArray = Array.newInstance(predType.getComponentType(), predArrayLength + arrayLength);
+                            System.arraycopy(valueProxy.value, 0, newArray, 0, arrayLength);
+                            System.arraycopy(pred.value, 0, newArray, arrayLength, predArrayLength);
+                            valueProxy = new ValueProxy(newArray, schema.origin);
+                            valueMap.put(name, valueProxy);
                             break;
                         default:
                             break;
                     }
+                }
+                // 出现这种情况意味着本属性要指定的值已经被上层的注解指定，此时应该忽略
+                else if (valueMap.containsKey(name))
+                {
                 }
                 else
                 {
