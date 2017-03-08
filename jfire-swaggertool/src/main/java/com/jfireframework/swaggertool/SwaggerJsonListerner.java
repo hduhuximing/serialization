@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
+import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.uniqueid.AutumnId;
 import com.jfireframework.codejson.JsonTool;
 import com.jfireframework.mvc.annotation.RequestMapping;
@@ -90,14 +91,20 @@ public abstract class SwaggerJsonListerner implements ActionInitListener
         PathItemObject pathItemObject = new PathItemObject();
         if (StringUtil.isNotBlank(apiOperation.path()))
         {
-            swaggerObject.getPaths().put(apiOperation.path(), pathItemObject);
+            if (swaggerObject.getPaths().put(apiOperation.path(), pathItemObject) != null)
+            {
+                throw new UnSupportException(apiOperation.path() + "存在重复,请检查" + action.getMethod().toGenericString());
+            }
         }
         else
         {
-            swaggerObject.getPaths().put(requestMapping.value(), pathItemObject);
+            if (swaggerObject.getPaths().put(requestMapping.value(), pathItemObject) != null)
+            {
+                throw new UnSupportException(requestMapping.value() + "存在重复,请检查" + action.getMethod().toGenericString());
+            }
         }
         String httpMethod = apiOperation.method();
-        if (StringUtil.isNotBlank(httpMethod)==false)
+        if (StringUtil.isNotBlank(httpMethod) == false)
         {
             httpMethod = requestMapping.method().name().toLowerCase();
         }
