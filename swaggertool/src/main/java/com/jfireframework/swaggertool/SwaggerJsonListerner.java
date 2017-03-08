@@ -10,6 +10,7 @@ import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
 import com.jfireframework.baseutil.uniqueid.AutumnId;
 import com.jfireframework.codejson.JsonTool;
+import com.jfireframework.mvc.annotation.RequestMapping;
 import com.jfireframework.mvc.core.action.Action;
 import com.jfireframework.mvc.core.action.ActionInitListener;
 import com.jfireframework.swaggertool.SwaggerObject.Info;
@@ -53,8 +54,9 @@ public abstract class SwaggerJsonListerner implements ActionInitListener
     public void init(Action action)
     {
         Map<String, ApiSchema> schemas = new HashMap<String, ApiSchema>();
-        ApiOperation operation = AnnotationUtil.getAnnotation(ApiOperation.class, action.getMethod());
-        if (operation == null)
+        RequestMapping requestMapping = AnnotationUtil.getAnnotation(RequestMapping.class, action.getMethod());
+        ApiOperation apiOperation = AnnotationUtil.getAnnotation(ApiOperation.class, action.getMethod());
+        if (apiOperation == null)
         {
             return;
         }
@@ -86,42 +88,54 @@ public abstract class SwaggerJsonListerner implements ActionInitListener
         }
         OperationObject operationObject = new OperationObject();
         PathItemObject pathItemObject = new PathItemObject();
-        swaggerObject.getPaths().put(operation.path(), pathItemObject);
-        if (operation.method().equals("get"))
+        if (StringUtil.isNotBlank(apiOperation.path()))
+        {
+            swaggerObject.getPaths().put(apiOperation.path(), pathItemObject);
+        }
+        else
+        {
+            swaggerObject.getPaths().put(requestMapping.value(), pathItemObject);
+        }
+        String httpMethod = apiOperation.method();
+        if (StringUtil.isNotBlank(httpMethod))
+        {
+            httpMethod = requestMapping.method().name();
+        }
+        if (httpMethod.equals("get"))
         {
             pathItemObject.setGet(operationObject);
         }
-        else if (operation.method().equals("post"))
+        else if (httpMethod.equals("post"))
         {
             pathItemObject.setPost(operationObject);
         }
-        else if (operation.method().equals("put"))
+        else if (httpMethod.equals("put"))
         {
             pathItemObject.setPut(operationObject);
         }
-        else if (operation.method().equals("delete"))
+        else if (httpMethod.equals("delete"))
         {
             pathItemObject.setDelete(operationObject);
         }
         operationObject.setResponses(new ResponsesObject());
-        operationObject.setTags(operation.tags());
-        operationObject.setSummary(operation.summary());
-        operationObject.setDescription(operation.description());
+        operationObject.setTags(apiOperation.tags());
+        operationObject.setSummary(apiOperation.summary());
+        operationObject.setDescription(apiOperation.description());
         operationObject.setOperationId(AutumnId.instance().generateDigits());
         List<String> mimes = new ArrayList<String>();
-        for (MIME each : operation.consumes())
+        for (MIME each : apiOperation.consumes())
         {
             mimes.add(each.type());
         }
         operationObject.setConsumes(mimes.toArray(new String[mimes.size()]));
         mimes.clear();
-        for (MIME each : operation.produces())
+        for (MIME each : apiOperation.produces())
         {
             mimes.add(each.type());
         }
         operationObject.setProduces(mimes.toArray(new String[mimes.size()]));
-        operationObject.setSchemes(operation.schemes());
-        operationObject.setDeprecated(operation.deprecated());
+        operationObject.setSchemes(apiOperation.schemes());
+        operationObject.setDeprecated(apiOperation.deprecated());
         List<ParameterObject> list = new ArrayList<SwaggerObject.ParameterObject>();
         if (AnnotationUtil.isPresent(ApiParameters.class, action.getMethod()))
         {

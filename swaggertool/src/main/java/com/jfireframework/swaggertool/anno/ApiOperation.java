@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiOperation
 {
-    public String path();
+    public String path() default "";
     
-    public String method();
+    public String method() default "";
     
     public String[] tags();
     
