@@ -13,7 +13,7 @@ public @interface ApiParameter
     
     public String description() default "";
     
-    public boolean required();
+    public boolean required() default true;
     
     public String type();
     

@@ -97,9 +97,9 @@ public abstract class SwaggerJsonListerner implements ActionInitListener
             swaggerObject.getPaths().put(requestMapping.value(), pathItemObject);
         }
         String httpMethod = apiOperation.method();
-        if (StringUtil.isNotBlank(httpMethod))
+        if (StringUtil.isNotBlank(httpMethod)==false)
         {
-            httpMethod = requestMapping.method().name();
+            httpMethod = requestMapping.method().name().toLowerCase();
         }
         if (httpMethod.equals("get"))
         {
