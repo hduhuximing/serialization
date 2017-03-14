@@ -11,6 +11,17 @@ public class BeanInfo
     private Map<String, String> params       = new HashMap<String, String>();
     private Map<String, String> dependencies = new HashMap<String, String>();
     private String              postConstructMethod;
+    private String              closeMethod;
+    
+    public String getCloseMethod()
+    {
+        return closeMethod;
+    }
+    
+    public void setCloseMethod(String closeMethod)
+    {
+        this.closeMethod = closeMethod;
+    }
     
     public String getBeanName()
     {

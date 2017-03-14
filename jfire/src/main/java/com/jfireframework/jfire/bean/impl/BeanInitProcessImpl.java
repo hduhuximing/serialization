@@ -54,6 +54,7 @@ public class BeanInitProcessImpl implements BeanBootstrap
      * 对象初始化后，在容器内首先先调用的方法
      */
     protected MethodAccessor        postConstructMethod;
+    protected MethodAccessor        preDestoryMethod;
     protected BeanInfo              beanInfo;
     protected AopUtil               aopUtil;
     
@@ -250,6 +251,12 @@ public class BeanInitProcessImpl implements BeanBootstrap
     public String[] getMethodParamNames(Method method)
     {
         return aopUtil.getParamNames(method);
+    }
+    
+    @Override
+    public void setPreDestoryMethod(MethodAccessor preDestoryMethod)
+    {
+        this.preDestoryMethod = preDestoryMethod;
     }
     
 }

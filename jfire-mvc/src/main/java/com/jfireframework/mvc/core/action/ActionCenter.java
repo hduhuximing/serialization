@@ -7,16 +7,18 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.exception.UnSupportException;
+import com.jfireframework.jfire.Jfire;
 import com.jfireframework.mvc.config.MvcConfig;
 
 public final class ActionCenter
 {
-    private MvcConfig               mvcConfig;
+    private MvcConfig                 mvcConfig;
     private final ActionClassify      getAction;
     private final ActionClassify      postAction;
     private final ActionClassify      delAction;
     private final ActionClassify      putAction;
     private final Map<String, Action> tokenActionMap = new HashMap<String, Action>();
+    private final Jfire               jfire;
     
     class ActionClassify
     {
@@ -54,9 +56,9 @@ public final class ActionCenter
         }
     }
     
-    public ActionCenter(Action[] actions)
+    public ActionCenter(Action[] actions, Jfire jfire)
     {
-        
+        this.jfire = jfire;
         Map<String, Action[]> getActions = new HashMap<String, Action[]>();
         Map<String, Action[]> postActions = new HashMap<String, Action[]>();
         Map<String, Action[]> putActions = new HashMap<String, Action[]>();
@@ -204,4 +206,8 @@ public final class ActionCenter
         this.mvcConfig = extraConfig;
     }
     
+    public void close()
+    {
+        jfire.close();
+    }
 }

@@ -3,6 +3,8 @@ package com.jfireframework.mvc.core;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -128,6 +130,7 @@ public class DispathServletHelper
         private final String           reloadPath;
         private final String           reloadPackages;
         private final String           excludePackages;
+        private final ExecutorService  closeExector = Executors.newCachedThreadPool();
         
         public HotswapPreHandler(MvcConfig mvcConfig)
         {
@@ -161,10 +164,22 @@ public class DispathServletHelper
                 {
                     classLoader.setExcludePackages(excludePackages.split(","));
                 }
+                closeActionCenter(actionCenter);
                 actionCenter = ActionCenterBulder.generate(classLoader, servletContext, servletConfig);
                 logger.debug("热部署,耗时:{}", System.currentTimeMillis() - t0);
             }
         }
         
+        private void closeActionCenter(final ActionCenter actionCenter)
+        {
+            closeExector.submit(new Runnable() {
+                
+                @Override
+                public void run()
+                {
+                    actionCenter.close();
+                }
+            });
+        }
     }
 }

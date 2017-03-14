@@ -43,7 +43,7 @@ public class ActionCenterBulder
         jfireConfig.addSingletonEntity("servletContext", servletContext);
         jfireConfig.addBean(MvcConfig.class);
         Jfire jfire = new Jfire(jfireConfig);
-        ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfire).toArray(new Action[0]));
+        ActionCenter actionCenter = new ActionCenter(generateActions(servletContext.getContextPath(), jfire).toArray(new Action[0]), jfire);
         actionCenter.setMvcConfig(jfire.getBean(MvcConfig.class));
         return actionCenter;
     }

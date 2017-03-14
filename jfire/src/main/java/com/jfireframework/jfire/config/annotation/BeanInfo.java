@@ -21,5 +21,7 @@ public @interface BeanInfo
     
     public String postConstructMethod() default "";
     
+    public String closeMethod() default "";
+    
     public String[] params() default {};
 }

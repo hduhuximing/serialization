@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import com.jfireframework.baseutil.StringUtil;
 import com.jfireframework.baseutil.aliasanno.AnnotationUtil;
@@ -64,6 +65,12 @@ public class DefaultBean extends BaseBean
                 Verify.True(postConstructMethod == null, "一个类只能有一个方法使用注解PostConstruct");
                 Verify.True(each.getParameterTypes().length == 0, "使用PostConstruct注解的方法必须是无参方法，请检查{}.{}", each.getDeclaringClass().getName(), each.getName());
                 postConstructMethod = ReflectUtil.fastMethod(each);
+            }
+            if (each.isAnnotationPresent(PreDestroy.class))
+            {
+                Verify.True(preDestoryMethod == null, "一个雷只能有一个方法使用注解PreDestory");
+                Verify.True(each.getParameterTypes().length == 0, "使用PreDestory注解的方法必须是无参方法，请检查{}.{}", each.getDeclaringClass().getName(), each.getName());
+                preDestoryMethod = ReflectUtil.fastMethod(each);
             }
         }
     }

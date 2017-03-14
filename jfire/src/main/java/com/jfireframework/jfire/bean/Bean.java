@@ -15,4 +15,8 @@ public interface Bean extends BeanBootstrap
      */
     public Object getInstance(Map<String, Object> beanInstanceMap);
     
+    /**
+     * 当容器被关闭的时候该方法会被调用
+     */
+    public void close();
 }

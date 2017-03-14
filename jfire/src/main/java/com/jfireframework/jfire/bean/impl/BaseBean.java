@@ -1,6 +1,7 @@
 package com.jfireframework.jfire.bean.impl;
 
 import java.util.HashMap;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.jfire.bean.Bean;
 
 public abstract class BaseBean extends BeanInitProcessImpl implements Bean
@@ -16,4 +17,18 @@ public abstract class BaseBean extends BeanInitProcessImpl implements Bean
     /** 单例的引用对象 */
     protected Object                                     singletonInstance;
     
+    public void close()
+    {
+        if (prototype == false && preDestoryMethod != null)
+        {
+            try
+            {
+                preDestoryMethod.invoke(singletonInstance, null);
+            }
+            catch (Exception e)
+            {
+                throw new JustThrowException(e);
+            }
+        }
+    }
 }

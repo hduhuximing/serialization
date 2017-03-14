@@ -74,4 +74,5 @@ public interface BeanBootstrap
     
     public String[] getMethodParamNames(Method method);
     
+    public void setPreDestoryMethod(MethodAccessor preDestoryMethod);
 }

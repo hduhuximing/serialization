@@ -82,4 +82,14 @@ public class Jfire
         return list.toArray(new Bean[list.size()]);
     }
     
+    /**
+     * 关闭容器。该方法会触发单例bean上的close方法
+     */
+    public void close()
+    {
+        for (Bean each : beanNameMap.values())
+        {
+            each.close();
+        }
+    }
 }

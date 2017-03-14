@@ -264,6 +264,10 @@ public class JfireConfig
                 {
                     each.setPostConstructMethod(ReflectUtil.fastMethod(ReflectUtil.getMethodWithoutParam(beanInfo.getPostConstructMethod(), each.getOriginType())));
                 }
+                if (beanInfo.getCloseMethod() != null)
+                {
+                    each.setPreDestoryMethod(ReflectUtil.fastMethod(ReflectUtil.getMethodWithoutParam(beanInfo.getCloseMethod(), each.getOriginType())));
+                }
             }
         }
         for (BeanInfo each : configMap.values())
@@ -653,6 +657,10 @@ public class JfireConfig
                 if (StringUtil.isNotBlank(each.postConstructMethod()))
                 {
                     beanInfo.setPostConstructMethod(each.postConstructMethod());
+                }
+                if (StringUtil.isNotBlank(each.closeMethod()))
+                {
+                    beanInfo.setCloseMethod(each.closeMethod());
                 }
                 if (each.dependencies().length != 0)
                 {
