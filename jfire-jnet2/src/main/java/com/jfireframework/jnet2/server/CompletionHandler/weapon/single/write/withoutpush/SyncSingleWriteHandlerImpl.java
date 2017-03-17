@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.jnet2.ComListener;
 import com.jfireframework.jnet2.common.channel.impl.ServerChannel;
 import com.jfireframework.jnet2.server.CompletionHandler.WeaponWriteHandler;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.single.SingleReadHandler;
@@ -14,7 +15,7 @@ public class SyncSingleWriteHandlerImpl implements WeaponWriteHandler
     private final ServerChannel           serverChannel;
     private final SingleReadHandler readHandler;
     private final static Logger           logger = ConsoleLogFactory.getLogger();
-    
+    public static ComListener comListener;
     public SyncSingleWriteHandlerImpl(ServerChannel serverChannel, SingleReadHandler readHandler)
     {
         this.serverChannel = serverChannel;
@@ -30,6 +31,7 @@ public class SyncSingleWriteHandlerImpl implements WeaponWriteHandler
             serverChannel.getSocketChannel().write(buffer, 10, TimeUnit.SECONDS, buf, this);
             return;
         }
+        comListener.on(1);
         buf.release();
         readHandler.notifyRead();
     }

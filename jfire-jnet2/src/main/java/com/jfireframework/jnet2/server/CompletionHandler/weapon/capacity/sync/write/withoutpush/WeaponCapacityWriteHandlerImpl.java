@@ -5,10 +5,12 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.TimeUnit;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
+import com.jfireframework.baseutil.collection.buffer.DirectByteBuf;
 import com.jfireframework.baseutil.concurrent.CpuCachePadingInt;
 import com.jfireframework.baseutil.concurrent.CpuCachePadingLong;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
+import com.jfireframework.jnet2.ComListener;
 import com.jfireframework.jnet2.common.channel.impl.ServerChannel;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.capacity.common.BufHolder;
 import com.jfireframework.jnet2.server.CompletionHandler.weapon.capacity.sync.CapacityReadHandler;
@@ -31,9 +33,12 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
     private final CpuCachePadingInt         idleState         = new CpuCachePadingInt(idle);
     private static final Logger             logger            = ConsoleLogFactory.getLogger();
     private final BatchWriteHandler         batchWriteHandler = new BatchWriteHandler();
+    private final MergeWriteHandler         mergeWriteHandler = new MergeWriteHandler();
     private final AsynchronousSocketChannel socketChannel;
     private final ByteBuffer[]              batchBuffers;
     private final ByteBuf<?>[]              batchBufs;
+    public static ComListener               comListener;
+    private final int                       batchMode         = 0;
     
     public WeaponCapacityWriteHandlerImpl(ServerChannel serverChannel, int capacity, CapacityReadHandler readHandler)
     {
@@ -68,6 +73,7 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
             socketChannel.write(buffer, 10, TimeUnit.SECONDS, buf, this);
             return;
         }
+        comListener.on(1);
         buf.release();
         cursor += 1;
         writeNextBuf();
@@ -77,7 +83,7 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
     {
         if (cursor < wrap)
         {
-            batchWrite();
+            batchWrite1();
             return;
         }
         else
@@ -87,18 +93,16 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
             {
                 if (cursor < wrap)
                 {
-                    batchWrite();
+                    batchWrite1();
                     return;
                 }
                 else
                 {
                     /*
                      * 在进入idle状态前，一定要尝试唤醒读取一次。否则的话，由于读取已经处于休眠状态，写出也进入休眠状态，
-                     * 尝试之后仍然是休眠状态退出。这个通道就卡住了。
-                     * 如果唤醒了读取线程，则会有新的数据进入，通道就能持续运作。
+                     * 尝试之后仍然是休眠状态退出。这个通道就卡住了。 如果唤醒了读取线程，则会有新的数据进入，通道就能持续运作。
                      * 对于唤醒读取的时机选择很重要。为了性能的最大化考虑，一个是在写出线程进入idle状态前唤醒，一个是在批量写出,
-                     * cursor前进的时候唤醒。
-                     * 这些时候唤醒，都存在着可以让读取进程有空间写入的时机。
+                     * cursor前进的时候唤醒。 这些时候唤醒，都存在着可以让读取进程有空间写入的时机。
                      */
                     readHandler.notifyRead();
                     idleState.set(idle);
@@ -128,11 +132,12 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
     {
         int length = 0;
         ByteBuf<?> buf;
+        ByteBuffer[] send = new ByteBuffer[(int) (wrap - cursor)];
         for (long i = cursor; i < wrap; i++)
         {
             buf = getBuf(i);
             batchBufs[length] = buf;
-            batchBuffers[length++] = buf.nioBuffer();
+            send[length++] = buf.nioBuffer();
         }
         batchWriteHandler.length = length;
         // 因为这些数据已经有地方存放了，所以这里可以直接让序号前进
@@ -140,7 +145,44 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
         readHandler.notifyRead();
         try
         {
-            socketChannel.write(batchBuffers, 0, length, 10, TimeUnit.SECONDS, batchBuffers, batchWriteHandler);
+            socketChannel.write(send, 0, length, 100, TimeUnit.SECONDS, send, batchWriteHandler);
+        }
+        catch (Exception e)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                batchBufs[i].release();
+            }
+            readHandler.catchThrowable(e);
+        }
+    }
+    
+    private void batchWrite1()
+    {
+        int length = 0;
+        ByteBuf<?> buf;
+        int tmp_capacity = 0;
+        if (wrap - cursor < 100)
+        {
+            wrap = writeCursor.value() + 1;
+        }
+        for (long i = cursor; i < wrap; i++)
+        {
+            tmp_capacity += getBuf(i).remainRead();
+        }
+        ByteBuf<?> send = DirectByteBuf.allocate(tmp_capacity);
+        for (long i = cursor; i < wrap; i++)
+        {
+            buf = getBuf(i);
+            send.put(buf);
+            buf.release();
+        }
+        mergeWriteHandler.total = (int) (wrap - cursor);
+        cursor = wrap;
+        readHandler.notifyRead();
+        try
+        {
+            socketChannel.write(send.cachedNioBuffer(), send, mergeWriteHandler);
         }
         catch (Exception e)
         {
@@ -215,18 +257,29 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
         @Override
         public void completed(Long result, ByteBuffer[] buffers)
         {
-            for (int i = 0; i < length; i++)
+            int pre_length = buffers.length;
+            if (buffers[pre_length - 1].hasRemaining())
             {
-                if (buffers[i].hasRemaining())
+                int now_length = 0;
+                for (int i = pre_length - 1; i >= 0; i--)
                 {
-                    socketChannel.write(buffers, i, length - i, 10, TimeUnit.SECONDS, buffers, this);
-                    return;
+                    if (buffers[i].hasRemaining())
+                    {
+                        now_length += 1;
+                        continue;
+                    }
+                    break;
                 }
+                ByteBuffer[] send = new ByteBuffer[now_length];
+                System.arraycopy(buffers, pre_length - now_length, send, 0, now_length);
+                socketChannel.write(send, 0, now_length, 100, TimeUnit.SECONDS, send, this);
+                return;
             }
             for (int i = 0; i < length; i++)
             {
                 batchBufs[i].release();
             }
+            comListener.on(length);
             writeNextBuf();
         }
         
@@ -243,4 +296,28 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
         
     }
     
+    class MergeWriteHandler implements CompletionHandler<Integer, ByteBuf<?>>
+    {
+        private int total = 0;
+        
+        @Override
+        public void completed(Integer result, ByteBuf<?> buf)
+        {
+            ByteBuffer buffer = buf.cachedNioBuffer();
+            if (buffer.hasRemaining())
+            {
+                socketChannel.write(buffer, buf, this);
+                return;
+            }
+            comListener.on(total);
+            buf.release();
+            writeNextBuf();
+        }
+        
+        @Override
+        public void failed(Throwable exc, ByteBuf<?> attachment)
+        {
+            exc.printStackTrace();
+        }
+    }
 }

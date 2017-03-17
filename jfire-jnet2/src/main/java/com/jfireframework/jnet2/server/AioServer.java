@@ -2,6 +2,7 @@ package com.jfireframework.jnet2.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.Queue;
@@ -87,7 +88,10 @@ public class AioServer
             }
             else
             {
-                serverSocketChannel = AsynchronousServerSocketChannel.open(channelGroup).bind(new InetSocketAddress(serverConfig.getPort()));
+                serverSocketChannel = AsynchronousServerSocketChannel.open(channelGroup)//
+                        .setOption(StandardSocketOptions.SO_REUSEADDR, true)//
+                        .setOption(StandardSocketOptions.SO_RCVBUF, 64 * 1024)//
+                        .bind(new InetSocketAddress(serverConfig.getPort()));
             }
             logger.info("监听启动");
             switch (serverConfig.getAcceptMode())

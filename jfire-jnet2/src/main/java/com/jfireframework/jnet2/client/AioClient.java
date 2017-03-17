@@ -109,7 +109,7 @@ public class AioClient
                     initListener.channelInit(clientChannel);
                     Verify.notNull(clientChannel.getFrameDecodec(), "没有设置framedecodec");
                     Verify.notNull(clientChannel.getHandlers(), "没有设置Datahandler");
-                    ClientReadCompleter clientReadCompleter = new ClientReadCompleter(this, clientChannel);
+                    ClientReadCompleter clientReadCompleter = new ClientReadCompleter(clientChannel);
                     clientReadCompleter.readAndWait();
                     return this;
                 }

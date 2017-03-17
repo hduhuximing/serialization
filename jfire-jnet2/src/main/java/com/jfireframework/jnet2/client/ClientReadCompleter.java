@@ -33,7 +33,7 @@ public class ClientReadCompleter implements CompletionHandler<Integer, ClientCha
     public int                                   total;
     private final ResourceCloseAgent<ByteBuf<?>> bufState       = new ResourceCloseAgent<ByteBuf<?>>(ioBuf, BytebufReleaseCallback.instance);
     
-    public ClientReadCompleter(AioClient aioClient, ClientChannel channelInfo)
+    public ClientReadCompleter(ClientChannel channelInfo)
     {
         this.channelInfo = channelInfo;
         readTimeout = channelInfo.getReadTimeout();
