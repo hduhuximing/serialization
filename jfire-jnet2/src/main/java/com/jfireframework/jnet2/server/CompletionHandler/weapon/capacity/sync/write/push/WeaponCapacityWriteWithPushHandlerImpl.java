@@ -6,7 +6,6 @@ import java.nio.channels.CompletionHandler;
 import java.util.concurrent.TimeUnit;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.concurrent.CpuCachePadingInt;
-import com.jfireframework.baseutil.concurrent.CpuCachePadingLong;
 import com.jfireframework.baseutil.concurrent.MPSCQueue;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
@@ -23,10 +22,6 @@ public final class WeaponCapacityWriteWithPushHandlerImpl implements WeaponCapac
     // 下一个要写出的buf的序号
     private volatile long                   cursor            = 0;
     private long                            wrap              = 0;
-    /**
-     * 代表着已经被写入的序号，所以使用的时候，wrap的值应该是该属性的值+1
-     */
-    private final CpuCachePadingLong        writeCursor       = new CpuCachePadingLong(-1);
     private final CapacityReadHandler       readHandler;
     private final int                       idle              = 0;
     private final int                       work              = 1;
@@ -62,7 +57,7 @@ public final class WeaponCapacityWriteWithPushHandlerImpl implements WeaponCapac
         return bufArray[(int) (cursor & lengthMask)].getBuf();
     }
     
-    private void setBuf(ByteBuf<?> buf, long cursor)
+    private void putBuf(ByteBuf<?> buf, long cursor)
     {
         bufArray[(int) (cursor & lengthMask)].setBuf(buf);
     }
@@ -107,7 +102,7 @@ public final class WeaponCapacityWriteWithPushHandlerImpl implements WeaponCapac
         }
         else
         {
-            wrap = writeCursor.value() + 1;
+            wrap = readHandler.cursor() + 1;
             do
             {
                 if (cursor < wrap)
@@ -126,12 +121,12 @@ public final class WeaponCapacityWriteWithPushHandlerImpl implements WeaponCapac
                     }
                     readHandler.notifyRead();
                     idleState.set(idle);
-                    long newestWrap = writeCursor.value() + 1;
+                    long newestWrap = readHandler.cursor() + 1;
                     if (cursor < newestWrap || asyncSendQueue.isEmpty() == false)
                     {
                         if (idleState.compareAndSwap(idle, work))
                         {
-                            wrap = writeCursor.value() + 1;
+                            wrap = readHandler.cursor() + 1;
                             continue;
                         }
                         else
@@ -170,18 +165,21 @@ public final class WeaponCapacityWriteWithPushHandlerImpl implements WeaponCapac
         buf.release();
     }
     
-    @Override
-    public void write(ByteBuf<?> buf, long index)
+    public void setBuf(ByteBuf<?> buf, long index)
     {
-        setBuf(buf, index);
-        writeCursor.set(index);
+        putBuf(buf, index);
+    }
+    
+    @Override
+    public void tryWrite()
+    {
         if (idleState.value() == idle && idleState.compareAndSwap(idle, work))
         {
             // 由于取得了所有权，所以可以更改。并且由于当前只有该写入者。所以wrap的最大值只可能是index+1
-            wrap = index + 1;
+            wrap = readHandler.cursor() + 1;
             if (cursor < wrap)
             {
-                buf = getBuf(cursor);
+                ByteBuf<?> buf = getBuf(cursor);
                 socketChannel.write(buf.cachedNioBuffer(), 10, TimeUnit.SECONDS, buf, this);
             }
             else

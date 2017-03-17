@@ -19,7 +19,6 @@ public class BufferedClientWriteHandler implements CompletionHandler<Integer, By
     private final Queue<ByteBuf<?>>         sendQueue = new ConcurrentLinkedQueue<>();
     private static final Logger             logger    = ConsoleLogFactory.getLogger();
     private final AsynchronousSocketChannel socketChannel;
-    private final ByteBuffer[]              batchBuffers;
     private final ByteBuf<?>[]              batchBufs;
     private final int                       IDLE      = 0;
     private final int                       WORKING   = 1;
@@ -30,7 +29,6 @@ public class BufferedClientWriteHandler implements CompletionHandler<Integer, By
     {
         this.maxCapacity = maxCapacity;
         socketChannel = clientChannel.getSocketChannel();
-        batchBuffers = new ByteBuffer[maxCapacity];
         batchBufs = new ByteBuf<?>[maxCapacity];
     }
     

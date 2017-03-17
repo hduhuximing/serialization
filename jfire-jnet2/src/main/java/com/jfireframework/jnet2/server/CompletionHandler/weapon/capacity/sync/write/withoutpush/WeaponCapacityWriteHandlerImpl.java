@@ -19,14 +19,15 @@ import com.jfireframework.jnet2.server.CompletionHandler.weapon.capacity.sync.We
 public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWriteHandler
 {
     
-    private final BufHolder[]               bufArray;
+    private final ByteBuf<?>[]              bufArray;
     private int                             lengthMask;
     private volatile long                   cursor            = 0;
     private long                            wrap              = 0;
-    /**
-     * 代表着已经被写入的序号，所以使用的时候，wrap的值应该是该属性的值+1
-     */
-    private final CpuCachePadingLong        writeCursor       = new CpuCachePadingLong(-1);
+    // /**
+    // * 代表着已经被写入的序号，所以使用的时候，wrap的值应该是该属性的值+1
+    // */
+    // private final CpuCachePadingLong writeCursor = new
+    // CpuCachePadingLong(-1);
     private final CapacityReadHandler       readHandler;
     private final int                       idle              = 0;
     private final int                       work              = 1;
@@ -35,33 +36,26 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
     private final BatchWriteHandler         batchWriteHandler = new BatchWriteHandler();
     private final MergeWriteHandler         mergeWriteHandler = new MergeWriteHandler();
     private final AsynchronousSocketChannel socketChannel;
-    private final ByteBuffer[]              batchBuffers;
     private final ByteBuf<?>[]              batchBufs;
     public static ComListener               comListener;
-    private final int                       batchMode         = 0;
     
     public WeaponCapacityWriteHandlerImpl(ServerChannel serverChannel, int capacity, CapacityReadHandler readHandler)
     {
         this.readHandler = readHandler;
         socketChannel = serverChannel.getSocketChannel();
-        bufArray = new BufHolder[capacity];
-        for (int i = 0; i < capacity; i++)
-        {
-            bufArray[i] = new BufHolder();
-        }
-        batchBuffers = new ByteBuffer[capacity];
-        batchBufs = new ByteBuf[capacity];
+        bufArray = new ByteBuf<?>[capacity];
+        batchBufs = new ByteBuf<?>[capacity];
         lengthMask = capacity - 1;
     }
     
     private ByteBuf<?> getBuf(long cursor)
     {
-        return bufArray[(int) (cursor & lengthMask)].getBuf();
+        return bufArray[(int) (cursor & lengthMask)];
     }
     
-    private void setBuf(ByteBuf<?> buf, long cursor)
+    private void putBuf(ByteBuf<?> buf, long cursor)
     {
-        bufArray[(int) (cursor & lengthMask)].setBuf(buf);
+        bufArray[(int) (cursor & lengthMask)] = buf;
     }
     
     @Override
@@ -81,50 +75,52 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
     
     private void writeNextBuf()
     {
-        if (cursor < wrap)
+        if (cursor < wrap || cursor < (wrap = readHandler.cursor() + 1))
         {
             batchWrite1();
             return;
         }
         else
         {
-            wrap = writeCursor.value() + 1;
-            do
-            {
-                if (cursor < wrap)
-                {
-                    batchWrite1();
-                    return;
-                }
-                else
-                {
-                    /*
-                     * 在进入idle状态前，一定要尝试唤醒读取一次。否则的话，由于读取已经处于休眠状态，写出也进入休眠状态，
-                     * 尝试之后仍然是休眠状态退出。这个通道就卡住了。 如果唤醒了读取线程，则会有新的数据进入，通道就能持续运作。
-                     * 对于唤醒读取的时机选择很重要。为了性能的最大化考虑，一个是在写出线程进入idle状态前唤醒，一个是在批量写出,
-                     * cursor前进的时候唤醒。 这些时候唤醒，都存在着可以让读取进程有空间写入的时机。
-                     */
-                    readHandler.notifyRead();
-                    idleState.set(idle);
-                    long newestWrap = writeCursor.value() + 1;
-                    if (cursor < newestWrap)
-                    {
-                        if (idleState.compareAndSwap(idle, work))
-                        {
-                            wrap = writeCursor.value() + 1;
-                            continue;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            } while (true);
+            idleState.set(idle);
+            readHandler.notifyRead();
+            // wrap = readHandler.cursor() + 1;
+            // do
+            // {
+            // if (cursor < wrap)
+            // {
+            // batchWrite1();
+            // return;
+            // }
+            // else
+            // {
+            // /*
+            // * 在进入idle状态前，一定要尝试唤醒读取一次。否则的话，由于读取已经处于休眠状态，写出也进入休眠状态，
+            // * 尝试之后仍然是休眠状态退出。这个通道就卡住了。 如果唤醒了读取线程，则会有新的数据进入，通道就能持续运作。
+            // * 对于唤醒读取的时机选择很重要。为了性能的最大化考虑，一个是在写出线程进入idle状态前唤醒，一个是在批量写出,
+            // * cursor前进的时候唤醒。 这些时候唤醒，都存在着可以让读取进程有空间写入的时机。
+            // */
+            // readHandler.notifyRead();
+            // idleState.set(idle);
+            // long newestWrap = writeCursor.value() + 1;
+            // if (cursor < newestWrap)
+            // {
+            // if (idleState.compareAndSwap(idle, work))
+            // {
+            // wrap = writeCursor.value() + 1;
+            // continue;
+            // }
+            // else
+            // {
+            // break;
+            // }
+            // }
+            // else
+            // {
+            // break;
+            // }
+            // }
+            // } while (true);
         }
     }
     
@@ -159,13 +155,8 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
     
     private void batchWrite1()
     {
-        int length = 0;
         ByteBuf<?> buf;
         int tmp_capacity = 0;
-        if (wrap - cursor < 100)
-        {
-            wrap = writeCursor.value() + 1;
-        }
         for (long i = cursor; i < wrap; i++)
         {
             tmp_capacity += getBuf(i).remainRead();
@@ -186,10 +177,7 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
         }
         catch (Exception e)
         {
-            for (int i = 0; i < length; i++)
-            {
-                batchBufs[i].release();
-            }
+            send.release();
             readHandler.catchThrowable(e);
         }
     }
@@ -202,14 +190,17 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
         buf.release();
     }
     
-    public void write(ByteBuf<?> buf, long index)
+    public void setBuf(ByteBuf<?> buf, long index)
     {
-        setBuf(buf, index);
-        writeCursor.set(index);
+        putBuf(buf, index);
+    }
+    
+    public void tryWrite()
+    {
         if (idleState.value() == idle && idleState.compareAndSwap(idle, work))
         {
             // 由于取得了所有权，所以可以更改。并且由于当前只有该写入者。所以wrap的最大值只可能是index+1
-            wrap = writeCursor.value() + 1;
+            wrap = readHandler.cursor() + 1;
             if (cursor < wrap)
             {
                 // buf = getBuf(cursor);
@@ -315,9 +306,11 @@ public final class WeaponCapacityWriteHandlerImpl implements WeaponCapacityWrite
         }
         
         @Override
-        public void failed(Throwable exc, ByteBuf<?> attachment)
+        public void failed(Throwable exc, ByteBuf<?> buf)
         {
+            buf.release();
             exc.printStackTrace();
         }
     }
+    
 }

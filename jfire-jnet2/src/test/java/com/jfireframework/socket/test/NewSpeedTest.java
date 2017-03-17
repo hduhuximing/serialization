@@ -35,9 +35,9 @@ import com.jfireframework.jnet2.server.util.WorkMode;
 public class NewSpeedTest
 {
     int                                port      = 8553;
-    int                                sendCount = 100000;
+    int                                sendCount = 200000;
     int                                index     = 100;
-    int                                capacity  = 1024;
+    int                                capacity  = 128;
     int                                sum       = sendCount * index;
     byte[]                             content   = "hello world".getBytes(Charset.forName("utf8"));
     private static final AtomicInteger count     = new AtomicInteger(0);
@@ -200,7 +200,6 @@ public class NewSpeedTest
         for (int i = 0; i < sendCount; i++)
         {
             client.write(content);
-            Thread.sleep(5);
         }
     }
 }

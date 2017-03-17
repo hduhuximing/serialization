@@ -130,12 +130,12 @@ public class ClientReadCompleter implements CompletionHandler<Integer, ClientCha
     
     public void continueRead()
     {
-        socketChannel.read(getReadBuffer(), readTimeout, TimeUnit.MILLISECONDS, channelInfo, this);
+        socketChannel.read(getReadBuffer(), channelInfo, this);
     }
     
     public void readAndWait()
     {
-        socketChannel.read(getReadBuffer(), waitTimeout, TimeUnit.MILLISECONDS, channelInfo, this);
+        socketChannel.read(getReadBuffer(), channelInfo, this);
     }
     
     private ByteBuffer getReadBuffer()

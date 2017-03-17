@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.collection.buffer.DirectByteBuf;
 import com.jfireframework.baseutil.concurrent.CpuCachePadingInt;
+import com.jfireframework.baseutil.concurrent.CpuCachePadingLong;
 import com.jfireframework.baseutil.resource.ResourceCloseAgent;
 import com.jfireframework.baseutil.simplelog.ConsoleLogFactory;
 import com.jfireframework.baseutil.simplelog.Logger;
@@ -47,6 +48,7 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
     private long                                 wrap              = 0;
     // 下一个要填充到通道的序号
     private long                                 cursor            = 0;
+    private CpuCachePadingLong                   array_cursor      = new CpuCachePadingLong(-1);
     private final ResourceCloseAgent<ByteBuf<?>> iobufReleaseState = new ResourceCloseAgent<ByteBuf<?>>(ioBuf, BytebufReleaseCallback.instance);
     private final ByteBuffer                     activeFlag        = ByteBuffer.allocateDirect(0);
     
@@ -143,7 +145,7 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
     {
         do
         {
-            if (cursor < wrap)
+            if (cursor < wrap || cursor < (wrap = writeHandler.cursor() + capacity))
             {
                 DecodeResult decodeResult = frameDecodec.decodec(ioBuf);
                 switch (decodeResult.getType())
@@ -178,7 +180,11 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
                         }
                         if (intermediateResult instanceof ByteBuf<?>)
                         {
-                            writeHandler.write((ByteBuf<?>) intermediateResult, cursor);
+                            // 在
+                            
+                            writeHandler.setBuf((ByteBuf<?>) intermediateResult, cursor);
+                            array_cursor.set(cursor);
+                            writeHandler.tryWrite();
                             cursor += 1;
                         }
                         break;
@@ -186,15 +192,10 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
             }
             else
             {
-                wrap = writeHandler.cursor() + capacity;
-                if (cursor < wrap)
-                {
-                    continue;
-                }
                 readState.set(IDLE);
                 // 假设在这边失去控制权，然后写线程得到了控制权，然后注册了读取，通道异常关闭，触发一个fail操作。这边再次获得控制权后尝试读取。又会再次触发fail操作。导致iobuf被释放两次
-                long _wrap = writeHandler.cursor() + capacity;
-                if (cursor >= _wrap)
+                wrap = writeHandler.cursor() + capacity;
+                if (cursor >= wrap)
                 {
                     return;
                 }
@@ -202,7 +203,6 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
                 {
                     if (readState.compareAndSwap(IDLE, WORK))
                     {
-                        wrap = writeHandler.cursor() + capacity;
                         continue;
                     }
                     else
@@ -222,7 +222,7 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
         startCountdown = false;
         try
         {
-            serverChannel.getSocketChannel().read(getWriteBuffer(), waitTimeout, TimeUnit.MILLISECONDS, serverChannel, this);
+            serverChannel.getSocketChannel().read(getWriteBuffer(), serverChannel, this);
         }
         catch (Exception e)
         {
@@ -248,14 +248,14 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
      */
     private void continueRead()
     {
-        if (startCountdown == false)
-        {
-            lastReadTime = System.currentTimeMillis();
-            endReadTime = lastReadTime + readTimeout;
-            startCountdown = true;
-        }
-        serverChannel.getSocketChannel().read(getWriteBuffer(), getRemainTime(), TimeUnit.MILLISECONDS, serverChannel, this);
-        lastReadTime = System.currentTimeMillis();
+        // if (startCountdown == false)
+        // {
+        // lastReadTime = System.currentTimeMillis();
+        // endReadTime = lastReadTime + readTimeout;
+        // startCountdown = true;
+        // }
+        serverChannel.getSocketChannel().read(getWriteBuffer(), serverChannel, this);
+        // lastReadTime = System.currentTimeMillis();
     }
     
     /**
@@ -289,7 +289,10 @@ public class CapacityReadHandlerImpl implements CapacityReadHandler
     @Override
     public long cursor()
     {
-        return cursor;
+        /**
+         * 这里使用这个值来避免伪共享。因为这个会在读写线程之间争用
+         */
+        return array_cursor.value();
     }
     
 }
