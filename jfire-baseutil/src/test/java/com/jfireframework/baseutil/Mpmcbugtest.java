@@ -117,6 +117,5 @@ public class Mpmcbugtest
         }
         latch.await();
         System.out.println("完成");
-        LockSupport.park();
     }
 }

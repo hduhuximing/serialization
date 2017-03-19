@@ -25,9 +25,9 @@ public class MpmcTest
         }
         timewatch.end();
         System.out.println("数据生产耗时:" + timewatch.getTotal());
-        Queue<Integer> queue = new ConcurrentLinkedQueue<Integer>();
+        Queue<Integer> queue = new MPMCQueue<Integer>();
         int preTimes = 5;
-        int testTime = 30;
+        int testTime = 10;
         for (int i = 0; i < preTimes; i++)
         {
             dotest(count, source, queue);
