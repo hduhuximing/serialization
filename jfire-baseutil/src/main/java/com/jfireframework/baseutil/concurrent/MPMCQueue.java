@@ -11,18 +11,20 @@ public class MPMCQueue<E> implements Queue<E>
 {
     private CpuCachePadingRefence<Node<E>> head;
     private CpuCachePadingRefence<Node<E>> tail;
-    private static final Unsafe            unsafe     = ReflectUtil.getUnsafe();
-//    private static final long              tailOffset = ReflectUtil.getFieldOffset("tail", MPMCQueue.class);
-//    private static final long              headOffset = ReflectUtil.getFieldOffset("head", MPMCQueue.class);
+    private static final Unsafe            unsafe = ReflectUtil.getUnsafe();
+    // private static final long tailOffset = ReflectUtil.getFieldOffset("tail",
+    // MPMCQueue.class);
+    // private static final long headOffset = ReflectUtil.getFieldOffset("head",
+    // MPMCQueue.class);
     private final boolean                  fair;
-    private Sync<E>                        sync       = new Sync<E>() {
-                                                          
-                                                          @Override
-                                                          protected E get()
-                                                          {
-                                                              return poll();
-                                                          }
-                                                      };
+    private Sync<E>                        sync   = new Sync<E>() {
+                                                      
+                                                      @Override
+                                                      protected E get()
+                                                      {
+                                                          return poll();
+                                                      }
+                                                  };
     
     public MPMCQueue()
     {
@@ -149,6 +151,15 @@ public class MPMCQueue<E> implements Queue<E>
     
     public E poll()
     {
+        {
+            Node<E> h = head.get();
+            Node<E> next = h.next;
+            if (next != null && head.compareAndSwap(h, next))
+            {
+                h.unlink();
+                return next.clear();
+            }
+        }
         startFromHead: //
         for (Node<E> h = head.get(), next = h.next, t = tail.get(); //
                 h != t || h != (t = tail.get()); //

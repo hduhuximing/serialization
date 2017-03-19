@@ -27,7 +27,7 @@ public class MpmcTest
         System.out.println("数据生产耗时:" + timewatch.getTotal());
         Queue<Integer> queue = new ConcurrentLinkedQueue<Integer>();
         int preTimes = 5;
-        int testTime = 10;
+        int testTime = 30;
         for (int i = 0; i < preTimes; i++)
         {
             dotest(count, source, queue);
@@ -44,44 +44,42 @@ public class MpmcTest
     private void dotest(final int count, Integer[] source, final Queue<Integer> queue) throws InterruptedException
     {
         final CountDownLatch latch = new CountDownLatch(1);
-        Thread thread = new Thread(
-                new Runnable() {
-                    @Override
-                    public void run()
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    Integer value;
+                    for (int i = 0; i < count; i++)
                     {
-                        try
+                        value = queue.poll();
+                        if (value != null)
                         {
-                            Integer value;
-                            for (int i = 0; i < count; i++)
+                            ;
+                        }
+                        else
+                        {
+                            while ((value = queue.poll()) == null)
                             {
-                                value = queue.poll();
-                                if (value != null)
-                                {
-                                    ;
-                                }
-                                else
-                                {
-                                    while ((value = queue.poll()) == null)
-                                    {
-                                        ;
-                                    }
-                                }
-                                if (i != value.intValue())
-                                {
-                                    System.err.println("数据异常");
-                                }
+                                ;
                             }
-                            latch.countDown();
                         }
-                        catch (Exception e)
+                        if (i != value.intValue())
                         {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            System.err.println("数据异常");
                         }
-                        
                     }
+                    latch.countDown();
                 }
-        );
+                catch (Exception e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+            }
+        });
         NanoTimeWatch watch = new NanoTimeWatch();
         watch.start();
         thread.start();
