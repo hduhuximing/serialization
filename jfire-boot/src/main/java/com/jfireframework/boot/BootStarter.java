@@ -4,16 +4,19 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.net.ssl.SSLContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebFilter;
 import com.jfireframework.baseutil.exception.JustThrowException;
+import com.jfireframework.jfire.bean.annotation.field.CanBeNull;
 import com.jfireframework.jfire.bean.annotation.field.PropertyRead;
 import com.jfireframework.mvc.core.EasyMvcDispathServlet;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.Undertow.Builder;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.servlet.Servlets;
@@ -46,6 +49,9 @@ public class BootStarter
     private String       mode            = "run_in_jar_mode";
     @Resource
     private List<Filter> filters         = new LinkedList<>();
+    @Resource
+    @CanBeNull
+    private SSLContext   ssLContext;
     
     @PostConstruct
     public void init()
@@ -102,7 +108,14 @@ public class BootStarter
             DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
             manager.deploy();
             PathHandler path = Handlers.path(Handlers.redirect(appName)).addPrefixPath(appName, manager.start());
-            Undertow server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(path).build();
+            Builder builder = Undertow.builder()//
+                    .addHttpListener(port, "0.0.0.0")//
+                    .setHandler(path);
+            if (ssLContext != null)
+            {
+                builder.addHttpsListener(8443, "0.0.0.0", ssLContext);
+            }
+            Undertow server = builder.build();
             server.start();
         }
         catch (Exception e)

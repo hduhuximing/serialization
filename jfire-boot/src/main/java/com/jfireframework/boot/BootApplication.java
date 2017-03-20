@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import javax.net.ssl.SSLContext;
 import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.jfire.Jfire;
 import com.jfireframework.jfire.JfireConfig;
@@ -12,10 +13,12 @@ public class BootApplication
 {
     private Properties outConfigProperties = new Properties();
     private Class<?>   configClass;
+    private SSLContext sslContext;
     
-    private void init(Class<?> configClass)
+    private void init(Class<?> configClass, SSLContext sslContext)
     {
         this.configClass = configClass;
+        this.sslContext = sslContext;
         if (new File("boot.properties").exists())
         {
             outConfigProperties = new Properties();
@@ -32,7 +35,12 @@ public class BootApplication
     
     public BootApplication(Class<?> configClass)
     {
-        init(configClass);
+        init(configClass, null);
+    }
+    
+    public BootApplication(Class<?> configClass, SSLContext sslContext)
+    {
+        init(configClass, sslContext);
     }
     
     public void start()
@@ -62,6 +70,10 @@ public class BootApplication
             }
             properties.putAll(outConfigProperties);
             jfireConfig.addProperties(properties);
+            if (sslContext != null)
+            {
+                jfireConfig.addSingletonEntity("sslContext", sslContext);
+            }
             jfireConfig.addBean("bootStarter", false, BootStarter.class);
             Jfire jfire = new Jfire(jfireConfig);
             BootStarter bootStarter = (BootStarter) jfire.getBean("bootStarter");
