@@ -12,10 +12,6 @@ public class MPMCQueue<E> implements Queue<E>
     private CpuCachePadingRefence<Node<E>> head;
     private CpuCachePadingRefence<Node<E>> tail;
     private static final Unsafe            unsafe = ReflectUtil.getUnsafe();
-    // private static final long tailOffset = ReflectUtil.getFieldOffset("tail",
-    // MPMCQueue.class);
-    // private static final long headOffset = ReflectUtil.getFieldOffset("head",
-    // MPMCQueue.class);
     private final boolean                  fair;
     private Sync<E>                        sync   = new Sync<E>() {
                                                       
@@ -69,10 +65,12 @@ public class MPMCQueue<E> implements Queue<E>
         }
     }
     
+    @Override
     public void clear()
     {
     }
     
+    @Override
     public boolean offer(E o)
     {
         if (o == null)
@@ -149,15 +147,23 @@ public class MPMCQueue<E> implements Queue<E>
         }
     }
     
+    @Override
     public E poll()
     {
         {
             Node<E> h = head.get();
             Node<E> next = h.next;
-            if (next != null && head.compareAndSwap(h, next))
+            if (next != null)
             {
-                h.unlink();
-                return next.clear();
+                if (head.compareAndSwap(h, next))
+                {
+                    h.unlink();
+                    return next.clear();
+                }
+            }
+            else if (h == tail.get())
+            {
+                return null;
             }
         }
         startFromHead: //
@@ -306,7 +312,7 @@ public class MPMCQueue<E> implements Queue<E>
     @Override
     public boolean isEmpty()
     {
-        return head == tail;
+        return head.value == tail.value;
     }
     
     @Override

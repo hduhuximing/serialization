@@ -32,6 +32,7 @@ public class RSAUtil implements EnDecrpt
     /**
      * 设置rsa加密所需要的公钥
      */
+    @Override
     public void setPublicKey(byte[] publicKeyBytes)
     {
         try
@@ -54,6 +55,7 @@ public class RSAUtil implements EnDecrpt
     /**
      * 设置rsa解密所需要的密钥
      */
+    @Override
     public void setPrivateKey(byte[] privateKeyBytes)
     {
         try

@@ -392,6 +392,7 @@ public class ByteCache
     /**
      * 返回一个字符串描述当前的cache状态
      */
+    @Override
     public String toString()
     {
         return new StringCache("start:").append(readIndex).appendComma().append("count:").append(writeIndex).appendComma().append("capacity:").append(size).toString();

@@ -33,7 +33,7 @@ public class BitMap
             tmp |= ((long) (src[i * 8 + 4] & 0xff)) << 24;
             tmp |= ((long) (src[i * 8 + 5] & 0xff)) << 16;
             tmp |= ((long) (src[i * 8 + 6] & 0xff)) << 8;
-            tmp |= ((long) (src[i * 8 + 7] & 0xff));
+            tmp |= (src[i * 8 + 7] & 0xff);
             array[i] = tmp;
         }
         if (preLength != wordLength)

@@ -107,11 +107,13 @@ public class SimpleHotswapClassLoader extends URLClassLoader
         }
     }
     
+    @Override
     public URL[] getURLs()
     {
         return ((URLClassLoader) parent).getURLs();
     }
     
+    @Override
     public Enumeration<URL> getResources(String name) throws IOException
     {
         return parent.getResources(name);

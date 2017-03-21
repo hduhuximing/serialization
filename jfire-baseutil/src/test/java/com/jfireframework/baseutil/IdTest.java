@@ -1,9 +1,5 @@
 package com.jfireframework.baseutil;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import org.junit.Test;
 import com.jfireframework.baseutil.uniqueid.AutumnId;
 import com.jfireframework.baseutil.uniqueid.SummerId;

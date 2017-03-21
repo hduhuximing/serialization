@@ -2,7 +2,6 @@ package com.jfireframework.baseutil;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 import org.junit.Test;
 import com.jfireframework.baseutil.concurrent.MPMCQueue;
 

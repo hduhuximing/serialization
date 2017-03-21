@@ -23,6 +23,7 @@ public class DesUtil implements EnDecrpt
      * 
      * @param key
      */
+    @Override
     public void setKey(byte[] key)
     {
         try
@@ -45,6 +46,7 @@ public class DesUtil implements EnDecrpt
      * @param src
      * @return
      */
+    @Override
     public byte[] encrypt(byte[] src)
     {
         try
@@ -64,6 +66,7 @@ public class DesUtil implements EnDecrpt
      * @param src
      * @return
      */
+    @Override
     public byte[] decrypt(byte[] src)
     {
         try

@@ -407,6 +407,7 @@ public class StringCache
     /**
      * 返回该缓存对象所对应的字符串
      */
+    @Override
     public String toString()
     {
         return new String(cache, 0, count);

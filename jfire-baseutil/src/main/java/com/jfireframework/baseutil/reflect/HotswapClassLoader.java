@@ -58,7 +58,7 @@ public class HotswapClassLoader extends ClassLoader
                 Enumeration<JarEntry> entries = jarFile.entries();
                 while (entries.hasMoreElements())
                 {
-                    JarEntry jarEntry = (JarEntry) entries.nextElement();
+                    JarEntry jarEntry = entries.nextElement();
                     String entryName = jarEntry.getName();
                     if (jarEntry.isDirectory() == false && entryName.endsWith(".class"))
                     {
@@ -119,6 +119,7 @@ public class HotswapClassLoader extends ClassLoader
         }
     }
     
+    @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException
     {
         Class<?> c = null;

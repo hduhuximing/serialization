@@ -11,7 +11,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 
 @Resource
-@WebFilter(value="/*")
+@WebFilter(value = "/*", asyncSupported = true)
 public class TestFilter implements Filter
 {
     

@@ -1,6 +1,5 @@
 package com.jfireframework.baseutil;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class Demo2
