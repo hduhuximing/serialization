@@ -63,8 +63,8 @@ public class MPMCQueueTest
     public void test() throws InterruptedException
     {
         final MPMCQueue<Integer> queue = new MPMCQueue<Integer>();
-        final int count = 10000;
-        final int threadSum = 3;
+        final int count = 1000000;
+        final int threadSum = 4;
         final int countThreadSum = 3;
         for (int i = 0; i < threadSum; i++)
         {
