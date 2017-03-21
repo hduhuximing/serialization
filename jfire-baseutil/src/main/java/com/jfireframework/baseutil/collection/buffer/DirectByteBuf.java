@@ -152,7 +152,8 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
     @Override
     public ByteBuffer nioBuffer()
     {
-        return changeToReadState().memory;
+        cachedNioBuffer = changeToReadState().memory;
+        return cachedNioBuffer;
     }
     
     @Override
