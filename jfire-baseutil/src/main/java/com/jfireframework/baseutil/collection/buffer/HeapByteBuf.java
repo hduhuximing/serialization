@@ -103,7 +103,8 @@ public class HeapByteBuf extends ByteBuf<byte[]>
     @Override
     public ByteBuffer nioBuffer()
     {
-        return ByteBuffer.wrap(memory, readIndex, remainRead());
+        cachedNioBuffer = ByteBuffer.wrap(memory, readIndex, remainRead());
+        return cachedNioBuffer;
     }
     
     @Override
