@@ -571,10 +571,8 @@ public class DynamicSqlTool
         while (start < sql.length())
         {
             char c = sql.charAt(start);
-            if (
-                c == '>' || c == '<' || c == '!' || c == '=' || c == ' ' || c == ',' //
-                        || c == '#' || c == '+' || c == '-' || c == '(' || c == ')' || c == ']' || c == '['
-            )
+            if (c == '>' || c == '<' || c == '!' || c == '=' || c == ' ' || c == ',' //
+                    || c == '#' || c == '+' || c == '-' || c == '(' || c == ')' || c == ']' || c == '[')
             {
                 break;
             }
@@ -830,7 +828,7 @@ public class DynamicSqlTool
             // 如果都不是上面的那些字符，就意味着可能是数字或者是布尔值。（在输入正确的情况下，故意输错不说。）
             else
             {
-                Verify.notNull(invokeNameAndType, "sql语句错误，请检查是否参数'{}'前面是否缺少了$", invokeNameAndType.getOrigin());
+                Verify.notNull(invokeNameAndType, "sql语句错误，请检查是否条件判断'{}'前面是否缺少了$", conditionStatment);
                 int paramStart = flag;
                 flag = getEndFlag(conditionStatment, flag);
                 param = conditionStatment.substring(paramStart, flag);

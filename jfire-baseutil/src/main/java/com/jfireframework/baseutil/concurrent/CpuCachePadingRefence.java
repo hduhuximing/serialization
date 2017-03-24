@@ -3,22 +3,22 @@ package com.jfireframework.baseutil.concurrent;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import sun.misc.Unsafe;
 
-class CpuCachePadingLeft
+abstract class CpuCachePadingLeft
 {
     public volatile long p1, p2, p3, p4, p5, p6, p7;
 }
 
-class CpuCacheValue<T> extends CpuCachePadingLeft
+abstract class CpuCacheValue<T> extends CpuCachePadingLeft
 {
-    public volatile int up;
+    public volatile int  up;
     // 前后都有7个元素填充，可以保证该核心变量独自在一个缓存行中
-    protected volatile T   value;
-    public volatile int down;
+    protected volatile T value;
+    public volatile int  down;
 }
 
 public class CpuCachePadingRefence<T> extends CpuCacheValue<T>
 {
-    public volatile long     p9, p10, p11, p12, p13, p14, p15;
+    public volatile long        p9, p10, p11, p12, p13, p14, p15;
     private static final Unsafe unsafe        = ReflectUtil.getUnsafe();
     private static final long   refenceOffset = ReflectUtil.getFieldOffset("value", CpuCacheValue.class);
     

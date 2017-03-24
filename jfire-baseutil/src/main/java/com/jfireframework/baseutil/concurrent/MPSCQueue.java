@@ -8,107 +8,71 @@ import sun.misc.Unsafe;
  */
 public class MPSCQueue<E>
 {
-    private volatile MPSCNode<E> head;
-    private volatile MPSCNode<E> tail;
-    private static final Unsafe  unsafe = ReflectUtil.getUnsafe();
-    private static final long    offset = ReflectUtil.getFieldOffset("tail", MPSCQueue.class);
+    private CpuCachePadingRefence<MPSCNode> head;
+    private CpuCachePadingRefence<MPSCNode> tail;
+    private static final Unsafe             unsafe = ReflectUtil.getUnsafe();
+    private static final long               offset = ReflectUtil.getFieldOffset("tail", MPSCQueue.class);
     
     public MPSCQueue()
     {
-        head = tail = new MPSCNode<E>(null);
+        MPSCNode initialize = new MPSCNode(null);
+        head = new CpuCachePadingRefence<MPSCQueue.MPSCNode>(initialize);
+        tail = new CpuCachePadingRefence<MPSCQueue.MPSCNode>(initialize);
     }
     
-    public E peek()
+    public void offer(E value)
     {
-        if (head != tail)
+        MPSCNode insert = new MPSCNode(value);
+        MPSCNode t, p, pn;
+        p = t = tail.get();
+        if ((pn = p.next) == null && p.casNext(pn, insert))
         {
-            MPSCNode<E> nextNode = head.next;
-            if (nextNode != null)
-            {
-                return nextNode.value;
-            }
-            while ((nextNode = head.next) == null)
-            {
-                ;
-            }
-            return nextNode.value;
+            return;
         }
-        else
+        retry: //
+        for (p = t = tail.get();;)
         {
-            return null;
-        }
-    }
-    
-    public E poll()
-    {
-        if (head != tail)
-        {
-            MPSCNode<E> nextNode = head.next;
-            if (nextNode != null)
+            if ((pn = p.next) == null && p.casNext(null, insert))
             {
-                unsafe.putObject(head, MPSCNode.nextOff, null);
-                head = nextNode;
-                return nextNode.value;
+                return;
             }
-            while ((nextNode = head.next) == null)
+            else if (pn != p && pn != null)
             {
-                ;
+                p = pn;
             }
-            unsafe.putObject(head, MPSCNode.nextOff, null);
-            head = nextNode;
-            return nextNode.value;
-        }
-        else
-        {
-            return null;
+            else
+            {
+                p = pn;
+            }
         }
     }
     
-    private final static class MPSCNode<E>
+    static class MPSCNode
     {
-        private final E              value;
-        private volatile MPSCNode<E> next;
-        private static final long    nextOff = ReflectUtil.getFieldOffset("next", MPSCNode.class);
+        private volatile Object   value;
+        private volatile MPSCNode next;
+        private static final long nextOff  = ReflectUtil.getFieldOffset("next", MPSCNode.class);
+        private static final long valueOff = ReflectUtil.getFieldOffset("value", MPSCNode.class);
         
-        public MPSCNode(E value)
+        public MPSCNode(Object value)
         {
-            this.value = value;
+            // 初始化的时候还不可见，可以使用松弛的写法
+            unsafe.putObject(this, valueOff, value);
         }
         
-    }
-    
-    public boolean isEmpty()
-    {
-        return head == tail;
-    }
-    
-    public void clear()
-    {
-        head = tail;
-    }
-    
-    public boolean offer(E o)
-    {
-        if (o == null)
+        public boolean casNext(MPSCNode originNext, MPSCNode nowNext)
         {
-            throw new NullPointerException();
+            return unsafe.compareAndSwapObject(this, nextOff, originNext, nowNext);
         }
         
-        MPSCNode<E> new_tail = new MPSCNode<E>(o);
-        MPSCNode<E> old_tail = tail;
-        if (unsafe.compareAndSwapObject(this, offset, old_tail, new_tail))
+        public void forgetValue()
         {
-            old_tail.next = new_tail;
-            return true;
+            unsafe.putObject(this, valueOff, this);
         }
-        while (true)
+        
+        public void forgetNext()
         {
-            old_tail = tail;
-            if (unsafe.compareAndSwapObject(this, offset, old_tail, new_tail))
-            {
-                old_tail.next = new_tail;
-                return true;
-            }
+            unsafe.putObject(this, nextOff, this);
         }
     }
     
