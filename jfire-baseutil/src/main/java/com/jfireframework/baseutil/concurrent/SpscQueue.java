@@ -1,73 +1,198 @@
 package com.jfireframework.baseutil.concurrent;
 
-public class SpscQueue<E>
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Queue;
+import com.jfireframework.baseutil.reflect.ReflectUtil;
+import sun.misc.Unsafe;
+
+public class SpscQueue<E> implements Queue<E>
 {
-    private final int          length;
-    private final int          mask;
-    private final Object[]     array;
-    private CpuCachePadingLong get     = new CpuCachePadingLong(0);
-    private CpuCachePadingLong put     = new CpuCachePadingLong(0);
-    private long               wrapPut = 0;
-    private long               wrapGet = 0;
+    private CpuCachePadingRefence<Node> head;
+    private CpuCachePadingRefence<Node> tail;
     
     public SpscQueue()
     {
-        this(1024);
+        Node init = new Node(null);
+        head = new CpuCachePadingRefence<SpscQueue.Node>(init);
+        tail = new CpuCachePadingRefence<SpscQueue.Node>(init);
     }
     
-    public SpscQueue(int length)
+    public boolean offer(E e)
     {
-        this.length = length;
-        mask = length - 1;
-        array = new Object[length];
+        Node t = tail.get();
+        Node insert = new Node(e);
+        t.next = insert;
+        tail.orderSet(insert);
+        return true;
     }
     
-    public void put(E e)
+    public E poll()
     {
-        long tmp = put.value();
-        if (tmp < wrapPut)
+        Node h = head.get();
+        Node hn = h.next;
+        if (hn != null)
         {
-            array[(int) (tmp & mask)] = e;
-            put.orderSet(tmp + 1);
+            @SuppressWarnings("unchecked")
+            E e = (E) hn.item;
+            head.orderSet(hn);
+            h.forget();
+            return e;
         }
-        else
-        {
-            do
-            {
-                wrapPut = get.value() + length;
-                if (tmp < wrapPut)
-                {
-                    array[(int) (tmp & mask)] = e;
-                    put.orderSet(tmp + 1);
-                    return;
-                }
-            } while (true);
-        }
+        return null;
     }
     
     @SuppressWarnings("unchecked")
-    public E get()
+    public int drain(E[] array, int limit)
     {
-        long tmp = get.value();
-        if (tmp < wrapGet)
+        Node h, hn;
+        int i = 0;
+        for (hn = (h = head.get()); i < limit; i++, hn = (h = hn).next)
         {
-            E result = (E) array[(int) (tmp & mask)];
-            get.orderSet(tmp + 1);
-            return result;
-        }
-        else
-        {
-            do
+            if (hn != null)
             {
-                wrapGet = put.value();
-                if (tmp < wrapGet)
-                {
-                    E result = (E) array[(int) (tmp & mask)];
-                    get.orderSet(tmp + 1);
-                    return result;
-                }
-            } while (true);
+                Object e = hn.item;
+                array[i] = (E) e;
+                head.orderSet(hn);
+                h.forget();
+            }
+            else
+            {
+                head.orderSet(h);
+                return i;
+            }
         }
+        return i;
+    }
+    
+    private static class Node
+    {
+        Object                      item;
+        volatile Node               next;
+        private static final long   offset = ReflectUtil.getFieldOffset("next", Node.class);
+        private static final Unsafe unsafe = ReflectUtil.getUnsafe();
+        
+        public Node(Object item)
+        {
+            this.item = item;
+        }
+        
+        public void forget()
+        {
+            item = this;
+            unsafe.putObject(this, offset, this);
+        }
+    }
+    
+    @Override
+    public int size()
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+    
+    @Override
+    public boolean isEmpty()
+    {
+        return head.get().next == null;
+    }
+    
+    @Override
+    public boolean contains(Object o)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public Iterator<E> iterator()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Object[] toArray()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public <T> T[] toArray(T[] a)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public boolean remove(Object o)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public boolean containsAll(Collection<?> c)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public boolean addAll(Collection<? extends E> c)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public boolean removeAll(Collection<?> c)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public boolean retainAll(Collection<?> c)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public void clear()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public boolean add(E e)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public E remove()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public E element()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public E peek()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
     
 }

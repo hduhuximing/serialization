@@ -42,6 +42,11 @@ public class CpuCachePadingRefence<T> extends CpuCacheValue<T>
         unsafe.putOrderedObject(this, refenceOffset, newValue);
     }
     
+    public void ordinarySet(T newValue)
+    {
+        unsafe.putObject(this, refenceOffset, newValue);
+    }
+    
     public T get()
     {
         return value;
