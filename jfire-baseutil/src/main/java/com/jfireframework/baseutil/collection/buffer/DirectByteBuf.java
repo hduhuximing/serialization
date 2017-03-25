@@ -2,7 +2,6 @@ package com.jfireframework.baseutil.collection.buffer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Queue;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
@@ -11,26 +10,23 @@ import sun.misc.Unsafe;
 
 public class DirectByteBuf extends ByteBuf<ByteBuffer>
 {
+    private static final long offset = ReflectUtil.getFieldOffset("cleaner", ByteBuffer.allocateDirect(0).getClass());;
+    private static Unsafe     unsafe = ReflectUtil.getUnsafe();
     
-    private static long   offset = ReflectUtil.getFieldOffset("cleaner", ByteBuffer.allocateDirect(0).getClass());
-    private static Unsafe unsafe = ReflectUtil.getUnsafe();
-    
-    public DirectByteBuf(ByteBuffer memory, Queue<ByteBuffer> host, Queue<ByteBuf<ByteBuffer>> bufHost)
+    public DirectByteBuf(ByteBuffer memory)
     {
-        init(memory, host, bufHost);
+        init(memory);
     }
     
-    public void init(ByteBuffer memory, Queue<ByteBuffer> host, Queue<ByteBuf<ByteBuffer>> bufHost)
+    public void init(ByteBuffer memory)
     {
         this.memory = memory;
-        this.bufHost = bufHost;
-        this.memHost = host;
         maskRead = maskWrite = readIndex = writeIndex = 0;
         capacity = memory.capacity();
     }
     
     @Override
-    protected void _release()
+    public void release()
     {
         // 执行对directBytebuffer的清理。否则由于该对象个头很小，可能导致堆外内存无法被回收。
         Object cleaner = unsafe.getObject(memory, offset);
@@ -51,10 +47,6 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
      */
     protected DirectByteBuf changeToReadState()
     {
-        if (memory == null)
-        {
-            throw new RuntimeException("数据已经被释放,方式信息:" + releaseInfo);
-        }
         // 先limit后postion，否则有些情况，会因为长度不一致，抛出错误
         memory.limit(writeIndex).position(readIndex);
         return this;
@@ -145,8 +137,13 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
     protected void _expend(int size)
     {
         cachedNioBuffer = null;
-        DirectByteBufPool.getInstance().expend(this, size);
-        this.capacity = memory.capacity();
+        int newSize;
+        newSize = (newSize = (capacity << 1)) > size ? newSize : size + newSize;
+        ByteBuffer tmp = ByteBuffer.allocateDirect(newSize);
+        tmp.put(nioBuffer());
+        capacity = newSize;
+        release();
+        memory = tmp;
     }
     
     @Override
@@ -437,14 +434,8 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
     
     public static DirectByteBuf allocate(int size)
     {
-        return DirectByteBufPool.getInstance().get(size);
-    }
-    
-    public static DirectByteBuf allocateWithTrace(int size)
-    {
-        DirectByteBuf buf = DirectByteBufPool.getInstance().get(size);
-        buf.setTraceFlag(true);
-        return buf;
+        ByteBuffer buffer = ByteBuffer.allocateDirect(size);
+        return new DirectByteBuf(buffer);
     }
     
     @Override

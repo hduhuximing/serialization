@@ -1,13 +1,10 @@
 package com.jfireframework.baseutil;
 
 import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
-
 import com.jfireframework.baseutil.collection.buffer.ByteBuf;
 import com.jfireframework.baseutil.collection.buffer.DirectByteBuf;
-import com.jfireframework.baseutil.collection.buffer.DirectByteBufPool;
-import com.jfireframework.baseutil.collection.buffer.HeapByteBufPool;
+import com.jfireframework.baseutil.collection.buffer.HeapByteBuf;
 
 public class BufferTest
 {
@@ -34,7 +31,7 @@ public class BufferTest
         assertEquals((short) 2312, buf.readShort());
         assertEquals("abc", buf.readString());
         // assertEquals(56, buf.readInt(40));
-        buf = DirectByteBufPool.getInstance().get(100);
+        buf = DirectByteBuf.allocate(100);
         buf.writeFloat(5.236f);
         buf.writeDouble(5.236659);
         buf.writeChar('d');
@@ -52,7 +49,7 @@ public class BufferTest
     @Test
     public void testLegnth()
     {
-        ByteBuf<?> buf = HeapByteBufPool.getInstance().get(100);
+        ByteBuf<?> buf = HeapByteBuf.allocate(100);
         buf.writePositive(12);
         buf.writePositive(256);
         buf.writePositive(512);
@@ -63,7 +60,7 @@ public class BufferTest
         assertEquals(512, buf.readPositive());
         assertEquals(456895, buf.readPositive());
         assertEquals(465868618, buf.readPositive());
-        buf = DirectByteBufPool.getInstance().get(100);
+        buf = DirectByteBuf.allocate(100);
         buf.writePositive(12);
         buf.writePositive(256);
         buf.writePositive(512);

@@ -8,35 +8,32 @@ import sun.misc.Unsafe;
 
 public class SpscQueue<E> implements Queue<E>
 {
-    private CpuCachePadingRefence<Node> head;
-    private CpuCachePadingRefence<Node> tail;
+    Node head;
+    Node tail;
     
     public SpscQueue()
     {
         Node init = new Node(null);
-        head = new CpuCachePadingRefence<SpscQueue.Node>(init);
-        tail = new CpuCachePadingRefence<SpscQueue.Node>(init);
+        head = tail = init;
     }
     
     public boolean offer(E e)
     {
-        Node t = tail.get();
         Node insert = new Node(e);
-        t.next = insert;
-        tail.orderSet(insert);
+        tail.next = insert;
+        tail = insert;
         return true;
     }
     
     public E poll()
     {
-        Node h = head.get();
-        Node hn = h.next;
+        Node hn = head.next;
         if (hn != null)
         {
             @SuppressWarnings("unchecked")
             E e = (E) hn.item;
-            head.orderSet(hn);
-            h.forget();
+            head.forget();
+            head = hn;
             return e;
         }
         return null;
@@ -45,23 +42,18 @@ public class SpscQueue<E> implements Queue<E>
     @SuppressWarnings("unchecked")
     public int drain(E[] array, int limit)
     {
-        Node h, hn;
+        Node h, hn, p;
         int i = 0;
-        for (hn = (h = head.get()); i < limit; i++, hn = (h = hn).next)
+        for (hn = (p = h = head).next; i < limit && hn != null; i++, p = h, hn = (h = hn).next)
         {
-            if (hn != null)
-            {
-                Object e = hn.item;
-                array[i] = (E) e;
-                head.orderSet(hn);
-                h.forget();
-            }
-            else
-            {
-                head.orderSet(h);
-                return i;
-            }
+            Object e = hn.item;
+            array[i] = (E) e;
         }
+        if (p != h)
+        {
+            p.forget();
+        }
+        head = h;
         return i;
     }
     
@@ -94,7 +86,7 @@ public class SpscQueue<E> implements Queue<E>
     @Override
     public boolean isEmpty()
     {
-        return head.get().next == null;
+        return head.next == null;
     }
     
     @Override

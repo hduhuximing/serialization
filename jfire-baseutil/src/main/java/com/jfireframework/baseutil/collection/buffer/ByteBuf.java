@@ -2,8 +2,6 @@ package com.jfireframework.baseutil.collection.buffer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Queue;
-import com.jfireframework.baseutil.code.CodeLocation;
 import com.jfireframework.baseutil.collection.ByteCache;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.verify.Verify;
@@ -18,11 +16,7 @@ public abstract class ByteBuf<T>
     protected int                 maskRead     = 0;
     protected int                 readIndex    = 0;
     protected T                   memory;
-    protected Queue<T>            memHost;
-    protected Queue<ByteBuf<T>>   bufHost;
     protected static final char[] DIGITS_LOWER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-    protected String              releaseInfo;
-    protected boolean             traceFlag    = false;
     protected ByteBuffer          cachedNioBuffer;
     
     public ByteBuf<T> maskRead()
@@ -83,36 +77,6 @@ public abstract class ByteBuf<T>
         this.writeIndex = writeIndex;
         return this;
     }
-    
-    public void releaseMemOnly()
-    {
-        maskRead = maskWrite = readIndex = writeIndex = capacity = 0;
-        cachedNioBuffer = null;
-        if (memHost == null)
-        {
-            _release();
-            memory = null;
-            return;
-        }
-        if (memory == null)
-        {
-            throw new NullPointerException("数据已经被释放，释放信息是:" + releaseInfo);
-        }
-        memHost.offer(memory);
-        memory = null;
-    }
-    
-    public void release()
-    {
-        releaseMemOnly();
-        if (traceFlag)
-        {
-            releaseInfo = CodeLocation.getCodeLocation(3);
-        }
-        bufHost.offer(this);
-    }
-    
-    protected abstract void _release();
     
     /**
      * 返回该ByteBuf的ByteBuffer视图。该视图的position为readIndex，limit为writeIndex。
@@ -782,6 +746,8 @@ public abstract class ByteBuf<T>
         return tmp;
     }
     
+    public abstract void release();
+    
     /**
      * 写入一个0或者正数
      * 
@@ -795,16 +761,6 @@ public abstract class ByteBuf<T>
      * @return
      */
     public abstract int readPositive();
-    
-    public boolean isTraceFlag()
-    {
-        return traceFlag;
-    }
-    
-    public void setTraceFlag(boolean traceFlag)
-    {
-        this.traceFlag = traceFlag;
-    }
     
     public abstract ByteBuf<T> writeVarint(int i);
     

@@ -2,7 +2,6 @@ package com.jfireframework.baseutil.collection.buffer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Queue;
 import com.jfireframework.baseutil.collection.StringCache;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.verify.Verify;
@@ -10,21 +9,19 @@ import com.jfireframework.baseutil.verify.Verify;
 public class HeapByteBuf extends ByteBuf<byte[]>
 {
     
-    public HeapByteBuf(byte[] array, Queue<byte[]> queue, Queue<ByteBuf<byte[]>> bufHost)
+    public HeapByteBuf(byte[] array)
     {
-        init(array, queue, bufHost);
+        init(array);
     }
     
-    public void init(byte[] array, Queue<byte[]> queue, Queue<ByteBuf<byte[]>> bufHost)
+    public void init(byte[] array)
     {
         this.memory = array;
-        this.bufHost = bufHost;
         maskRead = maskWrite = readIndex = writeIndex = 0;
-        this.memHost = queue;
     }
     
     @Override
-    protected void _release()
+    public void release()
     {
     }
     
@@ -32,8 +29,12 @@ public class HeapByteBuf extends ByteBuf<byte[]>
     protected void _expend(int size)
     {
         cachedNioBuffer = null;
-        HeapByteBufPool.getInstance().expend(this, size);
-        this.capacity = memory.length;
+        int newSize;
+        newSize = (newSize = (capacity << 1)) > size ? newSize : size + newSize;
+        byte[] des = new byte[newSize];
+        System.arraycopy(memory, 0, des, 0, capacity);
+        capacity = newSize;
+        memory = des;
     }
     
     @Override
@@ -388,14 +389,7 @@ public class HeapByteBuf extends ByteBuf<byte[]>
     
     public static HeapByteBuf allocate(int size)
     {
-        return HeapByteBufPool.getInstance().get(size);
-    }
-    
-    public static HeapByteBuf allocateWithTrace(int size)
-    {
-        HeapByteBuf buf = HeapByteBufPool.getInstance().get(size);
-        buf.setTraceFlag(true);
-        return buf;
+        return new HeapByteBuf(new byte[size]);
     }
     
     @Override
@@ -729,7 +723,7 @@ public class HeapByteBuf extends ByteBuf<byte[]>
     
     public static ByteBuf<byte[]> wrap(byte[] t)
     {
-        HeapByteBuf buf = new HeapByteBuf(t, null, null);
+        HeapByteBuf buf = new HeapByteBuf(t);
         buf.writeIndex(t.length);
         return buf;
     }
