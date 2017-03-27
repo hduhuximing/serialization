@@ -1,6 +1,5 @@
 package com.jfireframework.baseutil.collection.buffer;
 
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import com.jfireframework.baseutil.collection.StringCache;
@@ -8,13 +7,11 @@ import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.verify.Verify;
-import sun.misc.Unsafe;
 import sun.reflect.MethodAccessor;
 
 public class DirectByteBuf extends ByteBuf<ByteBuffer>
 {
     private static final MethodAccessor cleaner = ReflectUtil.fastMethod(ReflectUtil.getMethodWithoutParam("cleaner", ByteBuffer.allocateDirect(1).getClass()));;
-    private static Unsafe               unsafe  = ReflectUtil.getUnsafe();
     
     public DirectByteBuf(ByteBuffer memory)
     {
@@ -27,7 +24,6 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
         maskRead = maskWrite = readIndex = writeIndex = 0;
         capacity = memory.capacity();
     }
-    
     
     @Override
     public void release()

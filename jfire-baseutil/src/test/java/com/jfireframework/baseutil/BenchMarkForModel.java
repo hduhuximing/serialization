@@ -2,20 +2,52 @@ package com.jfireframework.baseutil;
 
 import java.util.Queue;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.LinkedTransferQueue;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
+import com.jfireframework.baseutil.concurrent.MPSCQueue;
 import com.jfireframework.baseutil.concurrent.MPSCQueue;
 import com.jfireframework.baseutil.time.Timewatch;
 
+@State(Scope.Benchmark)
 public class BenchMarkForModel
 {
     private int            offerThreadNum = 8;
     private CyclicBarrier  barrier        = new CyclicBarrier(offerThreadNum + 2);
     private CountDownLatch latch          = new CountDownLatch(1);
-    private Queue<String>  queue          = new MPSCQueue<String>();
+    private Queue<String>  queue          = new LinkedTransferQueue<String>();
     private int            sendCount      = 1000000;
     
+    public void bench()
+    {
+        Options opt = new OptionsBuilder().include(NewBenchmark.class.getSimpleName())//
+                .warmupIterations(3)//
+                .warmupTime(TimeValue.seconds(2))//
+                .measurementIterations(5)//
+                .measurementTime(TimeValue.seconds(2))//
+                .shouldDoGC(true)//
+                .forks(1).build();
+        try
+        {
+            new Runner(opt).run();
+        }
+        catch (RunnerException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    @Benchmark
     @Test
     public void test() throws InterruptedException, BrokenBarrierException
     {

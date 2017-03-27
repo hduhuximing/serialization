@@ -3,7 +3,7 @@ package com.jfireframework.baseutil.concurrent;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
-import com.jfireframework.baseutil.concurrent.MPSCQueue.MPSCNode;
+import com.jfireframework.baseutil.concurrent.MPSCQueue.Node;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import sun.misc.Unsafe;
 
@@ -19,9 +19,9 @@ abstract class HeadLeftPad
 
 abstract class Head extends HeadLeftPad
 {
-    public volatile int         leftP;
-    protected volatile MPSCNode head;
-    public volatile int         rightP;
+    public volatile int leftP;
+    protected Node      head;
+    public volatile int rightP;
     
     public int sumHead()
     {
@@ -41,9 +41,9 @@ abstract class HeadRightPad extends Head
 
 abstract class Tail extends HeadRightPad
 {
-    public volatile int         leftP1;
-    protected volatile MPSCNode tail;
-    public volatile int         rightP1;
+    public volatile int     leftP1;
+    protected volatile Node tail;
+    public volatile int     rightP1;
     
     public int sumTail()
     {
@@ -69,15 +69,15 @@ public class MPSCQueue<E> extends Tail implements Queue<E>
     
     public MPSCQueue()
     {
-        tail = head = new MPSCNode(null);
+        tail = head = new Node(null);
     }
     
-    private void slackSetHead(MPSCNode h)
+    private void slackSetHead(Node h)
     {
         unsafe.putObject(this, headOff, h);
     }
     
-    private boolean casTail(MPSCNode expect, MPSCNode now)
+    private boolean casTail(Node expect, Node now)
     {
         return unsafe.compareAndSwapObject(this, tailOff, expect, now);
     }
@@ -85,96 +85,138 @@ public class MPSCQueue<E> extends Tail implements Queue<E>
     @SuppressWarnings("unchecked")
     public int drain(E[] array, int limit)
     {
-        MPSCNode h, hn, p;
+        Node p = head, t = tail;
+        Node pn;
         int i = 0;
-        for (hn = (p = h = head).next; i < limit && hn != null; i++, p = h, hn = (h = hn).next)
+        for (pn = p; i < limit; i++)
         {
-            Object e = hn.value;
-            array[i] = (E) e;
+            if (pn != t)
+            {
+                p = pn;
+                pn = findNext(pn);
+                array[i] = (E) pn.value;
+            }
+            else
+            {
+                break;
+            }
         }
-        if (p != h)
-        {
-            p.forget();
-        }
-        slackSetHead(h);
+        p.forgetNext();
+        pn.forgetItem();
+        slackSetHead(pn);
         return i;
+    }
+    
+    private Node findNext(Node p)
+    {
+        Node pn = p.next;
+        if (pn != null)
+        {
+            return pn;
+        }
+        int spin = 0;
+        do
+        {
+            pn = p.next;
+            if (pn != null)
+            {
+                return pn;
+            }
+            else if ((spin += 1) > 32)
+            {
+                spin = 0;
+                Thread.yield();
+            }
+        } while (true);
     }
     
     @SuppressWarnings("unchecked")
     public E poll()
     {
-        MPSCNode h = head;
-        MPSCNode hn = h.next;
-        if (hn != null)
+        Node h = head;
+        if (h != tail)
         {
-            Object e = hn.value;
-            slackSetHead(hn);
-            h.forget();
-            return (E) e;
+            Node hn = h.next;
+            if (hn != null)
+            {
+                Object e = hn.value;
+                h.forgetNext();
+                hn.forgetItem();
+                slackSetHead(hn);
+                return (E) e;
+            }
+            int spin = 0;
+            do
+            {
+                hn = h.next;
+                if (hn != null)
+                {
+                    Object e = hn.value;
+                    h.forgetNext();
+                    hn.forgetItem();
+                    slackSetHead(hn);
+                    return (E) e;
+                    
+                }
+                else if ((spin += 1) > 32)
+                {
+                    spin = 0;
+                    Thread.yield();
+                }
+            } while (true);
+            
         }
-        return null;
+        else
+        {
+            return null;
+        }
     }
     
     public boolean offer(E value)
     {
-        MPSCNode insert = new MPSCNode(value);
-        MPSCNode p, t, pn;
-        for (p = t = tail;;)
+        Node insert = new Node(value);
+        Node t = tail;
+        if (casTail(t, insert))
         {
-            if ((pn = p.next) != null)
+            t.slackSetNext(insert);
+            return true;
+        }
+        do
+        {
+            t = tail;
+            if (casTail(t, insert))
             {
-                p = (pn != p) ? pn : (t = tail).next == t ? t = head : t;
-            }
-            else if (!p.casNext(null, insert))
-            {
-                p = p.next;
-            }
-            else
-            {
-                if (p != t)
-                {
-                    while ((t != tail || !casTail(t, insert)) && //
-                            (insert = (t = tail).next) != null && //
-                            (insert = insert.next) != null && insert != t)
-                        ;
-                }
+                t.slackSetNext(insert);
                 return true;
             }
-        }
+        } while (true);
     }
     
-    static class MPSCNode
+    static class Node
     {
         private Object            value;
-        private volatile MPSCNode next;
-        private static final long nextOff  = ReflectUtil.getFieldOffset("next", MPSCNode.class);
-        private static final long valueOff = ReflectUtil.getFieldOffset("value", MPSCNode.class);
+        private volatile Node     next;
+        private static final long nextOff  = ReflectUtil.getFieldOffset("next", Node.class);
+        private static final long valueOff = ReflectUtil.getFieldOffset("value", Node.class);
         
-        public MPSCNode(Object value)
+        public Node(Object value)
         {
             this.value = value;
         }
         
-        public boolean casNext(MPSCNode originNext, MPSCNode nowNext)
+        public void slackSetNext(Node n)
         {
-            return unsafe.compareAndSwapObject(this, nextOff, originNext, nowNext);
-        }
-        
-        public void forget()
-        {
-            unsafe.putObject(this, valueOff, this);
-            unsafe.putObject(this, nextOff, this);
-            
-        }
-        
-        public void forgetValue()
-        {
-            unsafe.putObject(this, valueOff, this);
+            unsafe.putOrderedObject(this, nextOff, n);
         }
         
         public void forgetNext()
         {
-            unsafe.putObject(this, nextOff, this);
+            unsafe.putObject(this, valueOff, this);
+        }
+        
+        public void forgetItem()
+        {
+            unsafe.putObject(this, valueOff, this);
         }
     }
     
@@ -182,10 +224,10 @@ public class MPSCQueue<E> extends Tail implements Queue<E>
     public int size()
     {
         int count = 0;
-        MPSCNode h = head;
+        Node h = head;
         do
         {
-            MPSCNode hn = h.next;
+            Node hn = h.next;
             if (hn != null)
             {
                 count += 1;
@@ -202,112 +244,100 @@ public class MPSCQueue<E> extends Tail implements Queue<E>
     @Override
     public boolean isEmpty()
     {
-        return head.next == null;
+        return head == tail;
     }
     
     @Override
     public boolean contains(Object o)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public Iterator<E> iterator()
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public Object[] toArray()
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public <T> T[] toArray(T[] a)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public boolean remove(Object o)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public boolean containsAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public boolean addAll(Collection<? extends E> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public boolean removeAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public boolean retainAll(Collection<?> c)
     {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public void clear()
     {
-        // TODO Auto-generated method stub
-        
+        Node h = head, hn = h, t = tail;
+        for (; hn != t;)
+        {
+            h = hn;
+            hn = findNext(hn);
+        }
+        h.forgetNext();
+        hn.forgetItem();
+        slackSetHead(hn);
     }
     
     @Override
     public boolean add(E e)
     {
-        // TODO Auto-generated method stub
-        return false;
+        offer(e);
+        return true;
     }
     
     @Override
     public E remove()
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     @Override
     public E element()
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public E peek()
     {
-        MPSCNode h = head;
-        MPSCNode hn = h.next;
-        if (hn != null)
-        {
-            Object e = hn.value;
-            return (E) e;
-        }
-        return null;
+        throw new UnsupportedOperationException();
     }
     
 }
