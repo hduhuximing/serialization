@@ -1,17 +1,20 @@
 package com.jfireframework.baseutil.collection.buffer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import com.jfireframework.baseutil.collection.StringCache;
+import com.jfireframework.baseutil.exception.JustThrowException;
 import com.jfireframework.baseutil.exception.UnSupportException;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import com.jfireframework.baseutil.verify.Verify;
 import sun.misc.Unsafe;
+import sun.reflect.MethodAccessor;
 
 public class DirectByteBuf extends ByteBuf<ByteBuffer>
 {
-    private static final long offset = ReflectUtil.getFieldOffset("cleaner", ByteBuffer.allocateDirect(0).getClass());;
-    private static Unsafe     unsafe = ReflectUtil.getUnsafe();
+    private static final MethodAccessor cleaner = ReflectUtil.fastMethod(ReflectUtil.getMethodWithoutParam("cleaner", ByteBuffer.allocateDirect(1).getClass()));;
+    private static Unsafe               unsafe  = ReflectUtil.getUnsafe();
     
     public DirectByteBuf(ByteBuffer memory)
     {
@@ -25,12 +28,20 @@ public class DirectByteBuf extends ByteBuf<ByteBuffer>
         capacity = memory.capacity();
     }
     
+    
     @Override
     public void release()
     {
+        
         // 执行对directBytebuffer的清理。否则由于该对象个头很小，可能导致堆外内存无法被回收。
-        Object cleaner = unsafe.getObject(memory, offset);
-        ((sun.misc.Cleaner) cleaner).clean();
+        try
+        {
+            ((sun.misc.Cleaner) cleaner.invoke(memory, null)).clean();
+        }
+        catch (Exception e)
+        {
+            throw new JustThrowException(e);
+        }
     }
     
     /**
