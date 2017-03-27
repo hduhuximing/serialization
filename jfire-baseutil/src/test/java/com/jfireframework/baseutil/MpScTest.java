@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.jfireframework.baseutil.concurrent.MPSCQueue;
+import com.jfireframework.baseutil.concurrent.SpscQueue;
 
 public class MpScTest
 {

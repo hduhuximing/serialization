@@ -3,13 +3,62 @@ package com.jfireframework.baseutil.concurrent;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
+import com.jfireframework.baseutil.concurrent.SpscQueue.Node;
 import com.jfireframework.baseutil.reflect.ReflectUtil;
 import sun.misc.Unsafe;
 
-public class SpscQueue<E> implements Queue<E>
+abstract class HeadLeftPad_spsc
 {
-    Node head;
-    Node tail;
+    public volatile long p1, p2, p3, p4, p5, p6, p7;
+    
+    public long sumHeadLeftPad()
+    {
+        return p1 + p2 + p3 + p4 + p5 + p6 + p7;
+    }
+}
+
+abstract class Head_spsc extends HeadLeftPad_spsc
+{
+    public volatile int leftP;
+    protected Node      head;
+    public volatile int rightP;
+    
+    public int sumHead()
+    {
+        return leftP + rightP;
+    }
+}
+
+abstract class HeadRightPad_spsc extends Head_spsc
+{
+    public volatile long p11, p21, p31, p41, p51, p61, p71;
+    
+    public long sumHeadRightPad()
+    {
+        return p11 + p21 + p31 + p41 + p51 + p61 + p71;
+    }
+}
+
+abstract class Tail_spsc extends HeadRightPad_spsc
+{
+    public volatile int leftP1;
+    protected Node      tail;
+    public volatile int rightP1;
+    
+    public int sumTail()
+    {
+        return leftP1 + rightP1;
+    }
+}
+
+public class SpscQueue<E> extends Tail_spsc implements Queue<E>
+{
+    public volatile long p01, p02, p03, p04, p05, p06, p07;
+    
+    public long fill()
+    {
+        return p01 + p02 + p03 + p04 + p05 + p06 + p07;
+    }
     
     public SpscQueue()
     {
@@ -19,20 +68,21 @@ public class SpscQueue<E> implements Queue<E>
     
     public boolean offer(E e)
     {
-        Node insert = new Node(e);
-        tail.next = insert;
+        Node insert = new Node(e), t = tail;
+        t.next = insert;
         tail = insert;
         return true;
     }
     
     public E poll()
     {
-        Node hn = head.next;
+        Node h = head, hn = h.next;
         if (hn != null)
         {
             @SuppressWarnings("unchecked")
             E e = (E) hn.item;
-            head.forget();
+            h.forgetNext();
+            hn.forgetItem();
             head = hn;
             return e;
         }
@@ -42,22 +92,22 @@ public class SpscQueue<E> implements Queue<E>
     @SuppressWarnings("unchecked")
     public int drain(E[] array, int limit)
     {
-        Node h, hn, p;
+        Node p = head, pn = p.next;
         int i = 0;
-        for (hn = (p = h = head).next; i < limit && hn != null; i++, p = h, hn = (h = hn).next)
+        for (; i < limit && (pn = p.next) != null; i++)
         {
-            Object e = hn.item;
-            array[i] = (E) e;
+            array[i] = (E) pn.item;
+            p = pn;
         }
-        if (p != h)
+        if (i > 0)
         {
-            p.forget();
+            p.forgetItem();
+            head = p;
         }
-        head = h;
         return i;
     }
     
-    private static class Node
+    static class Node
     {
         Object                      item;
         volatile Node               next;
@@ -69,10 +119,14 @@ public class SpscQueue<E> implements Queue<E>
             this.item = item;
         }
         
-        public void forget()
+        public void forgetNext()
+        {
+            unsafe.putObject(this, offset, this);
+        }
+        
+        public void forgetItem()
         {
             item = this;
-            unsafe.putObject(this, offset, this);
         }
     }
     

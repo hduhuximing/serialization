@@ -85,25 +85,20 @@ public class MPSCQueue<E> extends Tail implements Queue<E>
     @SuppressWarnings("unchecked")
     public int drain(E[] array, int limit)
     {
-        Node p = head, t = tail;
-        Node pn;
+        Node p = head, t = tail, pn = p;
         int i = 0;
-        for (pn = p; i < limit; i++)
+        for (; pn != t && i < limit; i++)
         {
-            if (pn != t)
-            {
-                p = pn;
-                pn = findNext(pn);
-                array[i] = (E) pn.value;
-            }
-            else
-            {
-                break;
-            }
+            p = pn;
+            pn = findNext(pn);
+            array[i] = (E) pn.value;
         }
-        p.forgetNext();
-        pn.forgetItem();
-        slackSetHead(pn);
+        if (i > 0)
+        {
+            p.forgetNext();
+            pn.forgetItem();
+            slackSetHead(pn);
+        }
         return i;
     }
     
@@ -211,7 +206,7 @@ public class MPSCQueue<E> extends Tail implements Queue<E>
         
         public void forgetNext()
         {
-            unsafe.putObject(this, valueOff, this);
+            unsafe.putObject(this, nextOff, this);
         }
         
         public void forgetItem()
