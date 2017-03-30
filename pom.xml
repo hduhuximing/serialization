@@ -6,6 +6,24 @@
 	<artifactId>parent</artifactId>
 	<version>1.0</version>
 	<packaging>pom</packaging>
+	<description>Jfireframework is a framework that is help for building a WebApp faster.</description>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>linbin</name>
+			<email>eric@jfire.cn</email>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:http://git.oschina.net/eric_ds/jfireframework</connection>
+		<developerConnection>scm:git:http://git.oschina.net/eric_ds/jfireframework</developerConnection>
+		<url>http://git.oschina.net/eric_ds</url>
+	</scm>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
@@ -73,21 +91,6 @@
 			<id>release</id>
 			<build>
 				<plugins>
-					<!-- Source -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>2.4</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>jar-no-fork</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<!-- Javadoc -->
 					<!-- Gpg Signature -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
