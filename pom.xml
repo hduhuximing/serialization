@@ -6,6 +6,8 @@
 	<artifactId>parent</artifactId>
 	<version>1.0</version>
 	<packaging>pom</packaging>
+	<url>http://git.oschina.net/eric_ds</url>
+	<name>jfireframework</name>
 	<description>Jfireframework is a framework that is help for building a WebApp faster.</description>
 	<licenses>
 		<license>
