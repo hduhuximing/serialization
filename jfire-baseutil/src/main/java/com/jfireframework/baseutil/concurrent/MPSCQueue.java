@@ -85,6 +85,7 @@ public class MPSCQueue<E> extends Tail implements Queue<E>
     @SuppressWarnings("unchecked")
     public int drain(E[] array, int limit)
     {
+        limit = limit > array.length ? array.length : limit;
         Node p = head, t = tail, pn = p;
         int i = 0;
         for (; pn != t && i < limit; i++)
