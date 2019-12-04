@@ -7,25 +7,11 @@
 	<version>1.0.1</version>
 	<packaging>pom</packaging>
 	<url>http://git.oschina.net/eric_ds</url>
-	<name>jfireframework</name>
-	<description>Jfireframework is a framework that is help for building a WebApp faster.</description>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-		</license>
-	</licenses>
-	<developers>
-		<developer>
-			<name>linbin</name>
-			<email>eric@jfire.cn</email>
-		</developer>
-	</developers>
-	<scm>
-		<connection>scm:git:http://git.oschina.net/eric_ds/jfireframework</connection>
-		<developerConnection>scm:git:http://git.oschina.net/eric_ds/jfireframework</developerConnection>
-		<url>http://git.oschina.net/eric_ds</url>
-	</scm>
+	<name>jsonframework</name>
+	<modules>
+		<module>baseutil</module>
+		<module>jfire-codejson</module>
+	</modules>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
@@ -40,86 +26,5 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.3</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<charset>UTF-8</charset>
-							<docencoding>UTF-8</docencoding>
-							<encoding>UTF-8</encoding>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	<distributionManagement>
-		<repository>
-			<id>releases</id>
-			<name>Nexus Releases Repository</name>
-			<url>${releasesurl}</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>Nexus Snapshots Repository</name>
-			<url>${snapshoturl}</url>
-		</snapshotRepository>
-	</distributionManagement>
-	<profiles>
-		<profile>
-			<id>release</id>
-			<build>
-				<plugins>
-					<!-- Gpg Signature -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>oss</id>
-					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-				</snapshotRepository>
-				<repository>
-					<id>oss</id>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-	</profiles>
+
 </project>
